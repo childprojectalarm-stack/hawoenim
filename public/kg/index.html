@@ -1786,8 +1786,7 @@ tbody td {
                   <div class="log-title">박하준 하원 준비 방송</div>
                   <div class="log-sub">해바라기반 · 자동 방송</div>
                 </div>
-              </div>
-              <div class="log-item">
+             <div class="log-item">
                 <div class="log-dot" style="background:var(--green);margin-top:5px;flex-shrink:0;"></div>
                 <div class="log-time">13:20</div>
                 <div class="log-info">
@@ -2832,7 +2831,7 @@ async function doLogin() {
 
     Token.set(data.token);
     if (document.getElementById('l-remember').checked) {
-      localStorage.setItem('admin_user', JSON.stringify(data.admin));
+      localStorage.setItem('admin_user', JSON.stringify(data.user));
     }
 
     btn.innerHTML = '<span>✅</span> 로그인 성공';
