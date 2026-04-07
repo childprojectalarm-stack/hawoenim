@@ -1,0 +1,3688 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>하원알림 관리자</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #0F1117;
+  --surface:   #181C27;
+  --surface2:  #1E2333;
+  --surface3:  #252A3A;
+  --border:    rgba(255,255,255,0.07);
+  --border2:   rgba(255,255,255,0.12);
+  --text:      #EEF0F6;
+  --text-sub:  #8B91A8;
+  --text-hint: #4E5470;
+  --primary:   #4F8EF7;
+  --primary-d: #3A6FD4;
+  --primary-pale: rgba(79,142,247,0.12);
+  --green:     #34D399;
+  --green-pale:rgba(52,211,153,0.12);
+  --amber:     #FBBF24;
+  --amber-pale:rgba(251,191,36,0.12);
+  --red:       #F87171;
+  --red-pale:  rgba(248,113,113,0.12);
+  --purple:    #A78BFA;
+  --purple-pale:rgba(167,139,250,0.12);
+  --radius:    14px;
+  --radius-sm: 9px;
+  --shadow:    0 4px 24px rgba(0,0,0,0.35);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+}
+
+/* ── 사이드바 ── */
+.sidebar {
+  width: 240px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: fixed;
+  height: 100vh;
+  z-index: 10;
+}
+
+.logo {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  width: 36px; height: 36px;
+  background: var(--primary);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+
+.logo-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+
+.logo-sub {
+  font-size: 11px;
+  color: var(--text-hint);
+  margin-top: 2px;
+}
+
+.nav {
+  padding: 16px 12px;
+  flex: 1;
+}
+
+.nav-section {
+  margin-bottom: 24px;
+}
+
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-hint);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  padding: 0 12px;
+  margin-bottom: 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+  font-size: 14px;
+  color: var(--text-sub);
+  font-weight: 500;
+  margin-bottom: 2px;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.nav-item:hover { background: var(--surface3); color: var(--text); }
+.nav-item.active {
+  background: var(--primary-pale);
+  color: var(--primary);
+}
+.nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+.nav-badge {
+  margin-left: auto;
+  background: var(--primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-family: 'DM Mono', monospace;
+}
+
+.sidebar-footer {
+  padding: 16px 12px 24px;
+  border-top: 1px solid var(--border);
+}
+
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.user-row:hover { background: var(--surface3); }
+
+.user-avatar {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--primary), var(--purple));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.user-name { font-size: 13px; font-weight: 500; }
+.user-role { font-size: 11px; color: var(--text-hint); }
+
+/* ── 메인 ── */
+.main {
+  margin-left: 240px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.topbar {
+  height: 64px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.page-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.live-dot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--green);
+  font-weight: 500;
+}
+
+.live-dot::before {
+  content: '';
+  width: 8px; height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 2s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-time {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  color: var(--text-sub);
+  background: var(--surface2);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.btn-icon {
+  width: 36px; height: 36px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+}
+.btn-icon:hover { background: var(--surface3); }
+
+.notif-dot {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 7px; height: 7px;
+  background: var(--red);
+  border-radius: 50%;
+  border: 1.5px solid var(--surface);
+}
+
+/* ── 콘텐츠 ── */
+.content {
+  padding: 28px 32px;
+  display: none;
+  flex-direction: column;
+  gap: 24px;
+  animation: fadeIn 0.25s ease forwards;
+}
+.content.active { display: flex; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── 통계 카드 ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.stat-card:hover { border-color: var(--border2); }
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.stat-card.c-blue::before  { background: var(--primary); }
+.stat-card.c-green::before { background: var(--green); }
+.stat-card.c-amber::before { background: var(--amber); }
+.stat-card.c-red::before   { background: var(--red); }
+
+.stat-icon {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  margin-bottom: 14px;
+}
+.c-blue  .stat-icon { background: var(--primary-pale); }
+.c-green .stat-icon { background: var(--green-pale); }
+.c-amber .stat-icon { background: var(--amber-pale); }
+.c-red   .stat-icon { background: var(--red-pale); }
+
+.stat-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.c-blue  .stat-num { color: var(--primary); }
+.c-green .stat-num { color: var(--green); }
+.c-amber .stat-num { color: var(--amber); }
+.c-red   .stat-num { color: var(--red); }
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-sub);
+  font-weight: 500;
+}
+
+.stat-sub {
+  font-size: 11px;
+  color: var(--text-hint);
+  margin-top: 4px;
+}
+
+/* ── 섹션 타이틀 ── */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title .dot {
+  width: 6px; height: 6px;
+  background: var(--primary);
+  border-radius: 50%;
+}
+
+/* ── 예약 테이블 ── */
+.table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.table-toolbar {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-input {
+  flex: 1;
+  height: 36px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0 12px 0 34px;
+  font-size: 13px;
+  color: var(--text);
+  font-family: 'DM Sans', 'Noto Sans KR', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%234E5470' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+}
+.search-input:focus { border-color: var(--primary); }
+.search-input::placeholder { color: var(--text-hint); }
+
+.filter-select {
+  height: 36px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0 10px;
+  font-size: 13px;
+  color: var(--text-sub);
+  font-family: 'DM Sans', 'Noto Sans KR', sans-serif;
+  outline: none;
+  cursor: pointer;
+  min-width: 100px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead th {
+  padding: 12px 20px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-hint);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+  cursor: pointer;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--surface2); }
+
+tbody td {
+  padding: 14px 20px;
+  font-size: 13px;
+  color: var(--text-sub);
+  white-space: nowrap;
+}
+
+.td-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.child-ava {
+  width: 32px; height: 32px;
+  background: var(--surface3);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.td-child-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+.td-class { font-size: 12px; color: var(--text-hint); margin-top: 1px; }
+
+.time-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--primary);
+  background: var(--primary-pale);
+  padding: 4px 10px;
+  border-radius: 7px;
+  display: inline-block;
+}
+
+.status-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.s-pending   { background: var(--amber-pale); color: var(--amber); }
+.s-announced { background: var(--primary-pale); color: var(--primary); }
+.s-done      { background: var(--green-pale);  color: var(--green); }
+.s-cancelled { background: var(--red-pale);    color: var(--red); }
+
+.status-pill::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.btn-announce {
+  height: 30px;
+  padding: 0 12px;
+  background: var(--primary-pale);
+  border: 1px solid rgba(79,142,247,0.25);
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+  font-family: 'DM Sans', 'Noto Sans KR', sans-serif;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-announce:hover { background: var(--primary); color: #fff; }
+.btn-announce:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn-stop {
+  height: 30px;
+  padding: 0 10px;
+  background: var(--red-pale);
+  border: 1px solid rgba(248,113,113,0.25);
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--red);
+  cursor: pointer;
+  font-family: 'DM Sans', 'Noto Sans KR', sans-serif;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-stop:hover { background: var(--red); color: #fff; }
+.btn-stop:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ── 2단 레이아웃 ── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ── 교실 카드 ── */
+.classroom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.classroom-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.classroom-card:hover { border-color: var(--border2); background: var(--surface3); }
+
+.cls-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.cls-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cls-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text-hint);
+  background: var(--surface3);
+  padding: 2px 7px;
+  border-radius: 5px;
+}
+
+.cls-bar-wrap {
+  height: 5px;
+  background: var(--surface3);
+  border-radius: 3px;
+  margin-bottom: 6px;
+  overflow: hidden;
+}
+
+.cls-bar {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--primary);
+  transition: width 0.6s ease;
+}
+
+.cls-detail {
+  font-size: 11px;
+  color: var(--text-hint);
+}
+
+/* ── 수동 방송 패널 ── */
+.broadcast-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+}
+
+.broadcast-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-hint);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.form-select, .form-input {
+  height: 40px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  font-size: 13px;
+  color: var(--text);
+  font-family: 'DM Sans', 'Noto Sans KR', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-select:focus, .form-input:focus { border-color: var(--primary); }
+
+.preview-box {
+  background: var(--surface2);
+  border: 1px dashed var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--text-sub);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.5;
+}
+
+.preview-icon { font-size: 20px; flex-shrink: 0; }
+
+.btn-broadcast {
+  height: 44px;
+  background: linear-gradient(135deg, var(--primary), #6B66F0);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  font-family: 'DM Sans', 'Noto Sans KR', sans-serif;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 20px rgba(79,142,247,0.30);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  letter-spacing: 0.2px;
+}
+.btn-broadcast:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(79,142,247,0.40); }
+.btn-broadcast:active { transform: scale(0.98); }
+
+/* ── 방송 로그 ── */
+.log-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.log-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.log-item:last-child { border-bottom: none; }
+
+.log-dot-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding-top: 4px;
+}
+
+.log-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.log-time {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text-hint);
+  white-space: nowrap;
+  margin-top: 2px;
+  flex-shrink: 0;
+  width: 50px;
+}
+
+.log-info { flex: 1; }
+
+.log-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.log-sub {
+  font-size: 11px;
+  color: var(--text-hint);
+}
+
+/* ── 타임라인 ── */
+.timeline {
+  padding: 6px 0;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 10px 8px;
+  margin: 0 -8px;
+}
+.timeline-item:hover { background: var(--surface2); }
+.timeline-item:last-child { border-bottom: none; }
+
+.tl-time {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--text-hint);
+  width: 52px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.tl-line {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.tl-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid;
+}
+
+.tl-info { flex: 1; }
+
+.tl-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+.tl-detail { font-size: 11px; color: var(--text-hint); margin-top: 2px; }
+
+.tl-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* ── 토스트 ── */
+.toast-container {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow);
+  animation: toastIn 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  min-width: 280px;
+  pointer-events: auto;
+}
+
+@keyframes toastIn {
+  from { transform: translateX(40px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+.toast-icon { font-size: 20px; }
+.toast-body { flex: 1; }
+.toast-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.toast-sub   { font-size: 11px; color: var(--text-hint); margin-top: 2px; }
+
+.toast-prog {
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 2px;
+  background: var(--primary);
+  border-radius: 0 0 var(--radius) var(--radius);
+  animation: progress 3s linear forwards;
+}
+
+@keyframes progress {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
+/* ── 교실 화면 ── */
+.classroom-big-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.cls-big-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: border-color 0.15s;
+  cursor: pointer;
+}
+.cls-big-card:hover { border-color: var(--border2); }
+
+.cls-big-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.cls-big-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cls-big-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cls-child-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--surface2);
+  border-radius: var(--radius-sm);
+}
+
+.cls-child-ava {
+  width: 28px; height: 28px;
+  background: var(--surface3);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.cls-child-name { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; }
+
+.cls-child-time {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text-hint);
+}
+
+.cls-empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-hint);
+  font-size: 13px;
+}
+
+/* ── 반응형 스크롤바 ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+
+/* ── 로그인 ── */
+#login-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+#login-screen.hiding {
+  animation: loginOut 0.45s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes loginOut {
+  0%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.04); }
+}
+
+.login-bg-deco {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.login-bg-deco span {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.18;
+}
+.login-bg-deco span:nth-child(1) { width:500px;height:500px;background:var(--primary);top:-120px;left:-120px; }
+.login-bg-deco span:nth-child(2) { width:400px;height:400px;background:var(--purple);bottom:-80px;right:-80px; }
+.login-bg-deco span:nth-child(3) { width:260px;height:260px;background:var(--green);bottom:20%;left:30%; }
+
+.login-card {
+  position: relative;
+  z-index: 1;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 24px;
+  padding: 44px 44px 40px;
+  width: 420px;
+  max-width: calc(100vw - 40px);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+  animation: loginCardIn 0.5s cubic-bezier(0.34,1.2,0.64,1) both;
+}
+@keyframes loginCardIn {
+  from { opacity:0; transform: translateY(28px) scale(0.97); }
+  to   { opacity:1; transform: translateY(0)    scale(1); }
+}
+
+.login-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.login-logo-icon {
+  width: 46px; height: 46px;
+  background: linear-gradient(135deg, var(--primary), var(--purple));
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 6px 20px rgba(79,142,247,0.35);
+}
+.login-logo-text { font-size: 20px; font-weight: 600; color: var(--text); letter-spacing:-0.3px; }
+.login-logo-sub  { font-size: 12px; color: var(--text-hint); margin-top:2px; }
+
+.login-heading {
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+.login-subheading {
+  font-size: 14px;
+  color: var(--text-hint);
+  margin-bottom: 32px;
+}
+
+.login-form { display: flex; flex-direction: column; gap: 14px; }
+
+.login-input-group { display: flex; flex-direction: column; gap: 6px; }
+.login-input-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-hint);
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+.login-input-wrap { position: relative; }
+.login-input-wrap .l-icon {
+  position: absolute;
+  left: 13px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  pointer-events: none;
+}
+.login-input {
+  width: 100%;
+  height: 46px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0 14px 0 40px;
+  font-size: 14px;
+  color: var(--text);
+  font-family: 'DM Sans','Noto Sans KR',sans-serif;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.login-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79,142,247,0.15);
+}
+.login-input::placeholder { color: var(--text-hint); }
+
+.login-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-hint);
+}
+.login-options label { display:flex; align-items:center; gap:5px; cursor:pointer; }
+.login-options label input { accent-color: var(--primary); }
+.login-options a { color: var(--primary); cursor: pointer; text-decoration: none; }
+.login-options a:hover { text-decoration: underline; }
+
+.btn-login {
+  height: 48px;
+  background: linear-gradient(135deg, var(--primary) 0%, #6B66F0 100%);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  font-family: 'DM Sans','Noto Sans KR',sans-serif;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 6px 24px rgba(79,142,247,0.35);
+  letter-spacing: 0.2px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-login:hover  { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(79,142,247,0.45); }
+.btn-login:active { transform: scale(0.98); }
+.btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.login-error {
+  background: var(--red-pale);
+  border: 1px solid rgba(248,113,113,0.2);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--red);
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+.login-error.show { display: flex; animation: fadeIn 0.2s ease; }
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--text-hint);
+  margin: 4px 0;
+}
+.login-divider::before, .login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.login-demo-accounts {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--text-hint);
+}
+.login-demo-accounts .demo-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-hint);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.demo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.demo-row:last-child { border-bottom: none; padding-bottom: 0; }
+.demo-row:hover { color: var(--text); }
+.demo-row:hover .demo-fill { color: var(--primary); }
+.demo-name { font-weight: 500; color: var(--text-sub); font-size: 12px; }
+.demo-cred { font-family:'DM Mono',monospace; font-size:11px; }
+.demo-fill { font-size: 11px; color: var(--text-hint); }
+
+/* 로그인 완료 후 대시보드 wrap */
+#app-wrap { display: none; }
+#app-wrap.visible { display: contents; }
+
+/* ── 환경설정 ── */
+.settings-layout {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  min-height: 600px;
+}
+
+.settings-tabs {
+  border-right: 1px solid var(--border);
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--surface2);
+}
+
+.stab {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-sub);
+  border: none;
+  background: none;
+  text-align: left;
+  width: 100%;
+  transition: all 0.15s;
+  font-family: 'DM Sans','Noto Sans KR',sans-serif;
+}
+.stab:hover { background: var(--surface3); color: var(--text); }
+.stab.active { background: var(--primary-pale); color: var(--primary); }
+.stab .sicon { font-size: 15px; width: 18px; text-align: center; }
+
+.settings-body {
+  padding: 28px 32px;
+  overflow-y: auto;
+}
+
+.stab-panel { display: none; }
+.stab-panel.active { display: block; animation: fadeIn 0.2s ease; }
+
+.settings-section {
+  margin-bottom: 32px;
+}
+
+.settings-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-hint);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* 인라인 폼 */
+.inline-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.inline-form .form-input { flex: 1; }
+
+.btn-add {
+  height: 40px;
+  padding: 0 16px;
+  background: var(--primary);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  font-family: 'DM Sans','Noto Sans KR',sans-serif;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+.btn-add:hover { opacity: 0.85; }
+
+.btn-sm {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans','Noto Sans KR',sans-serif;
+  border: none;
+  transition: opacity 0.15s;
+}
+.btn-sm:hover { opacity: 0.8; }
+.btn-sm-primary { background: var(--primary-pale); color: var(--primary); }
+.btn-sm-red     { background: var(--red-pale);     color: var(--red); }
+.btn-sm-green   { background: var(--green-pale);   color: var(--green); }
+
+/* 카드 목록 */
+.item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: border-color 0.15s;
+}
+.item-card:hover { border-color: var(--border2); }
+
+.item-card-icon {
+  width: 34px; height: 34px;
+  border-radius: 9px;
+  background: var(--surface3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.item-card-info { flex: 1; min-width: 0; }
+.item-card-name { font-size: 14px; font-weight: 500; color: var(--text); }
+.item-card-sub  { font-size: 11px; color: var(--text-hint); margin-top: 2px; }
+
+.item-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+/* 확장 패널 (원아·가족) */
+.expand-panel {
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-top: 4px;
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease, padding 0.3s;
+}
+.expand-panel.open {
+  max-height: 1200px;
+  padding: 14px 16px;
+}
+
+.expand-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-hint);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  margin-top: 4px;
+}
+
+/* 가족 카드 */
+.family-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.family-card:last-child { margin-bottom: 0; }
+
+.family-rel-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 5px;
+  background: var(--purple-pale);
+  color: var(--purple);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.family-info { flex: 1; min-width: 0; }
+.family-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.family-phone { font-size: 11px; color: var(--text-hint); font-family: 'DM Mono',monospace; }
+
+/* 모달 */
+.modal-bg {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(3px);
+}
+.modal-bg.show { display: flex; }
+
+.modal-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 28px;
+  width: 460px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: fadeIn 0.2s ease;
+  box-shadow: var(--shadow);
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-close-btn {
+  width: 28px; height: 28px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-sub);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.modal-form { display: flex; flex-direction: column; gap: 14px; }
+.modal-form .form-group { gap: 6px; }
+.modal-form .form-label { font-size: 11px; }
+.modal-form .form-input,
+.modal-form .form-select { width: 100%; }
+
+.modal-footer {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  justify-content: flex-end;
+}
+
+.btn-cancel {
+  height: 38px; padding: 0 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600;
+  color: var(--text-sub);
+  cursor: pointer;
+  font-family: 'DM Sans','Noto Sans KR',sans-serif;
+}
+
+.btn-save {
+  height: 38px; padding: 0 20px;
+  background: var(--primary);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  font-family: 'DM Sans','Noto Sans KR',sans-serif;
+  transition: opacity 0.15s;
+}
+.btn-save:hover { opacity: 0.85; }
+
+/* 방송 설정 슬라이더 */
+.broadcast-setting-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+}
+.bsr-label { flex: 1; font-size: 13px; font-weight: 500; color: var(--text); }
+.bsr-sub { font-size: 11px; color: var(--text-hint); margin-top: 2px; }
+.bsr-control { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.bsr-val {
+  font-family: 'DM Mono',monospace;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--primary);
+  min-width: 48px;
+  text-align: center;
+}
+.bsr-btn {
+  width: 30px; height: 30px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--text);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.bsr-btn:hover { background: var(--primary-pale); color: var(--primary); }
+
+.empty-hint {
+  text-align: center;
+  padding: 24px;
+  color: var(--text-hint);
+  font-size: 13px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* 선택 셀렉트 강조 */
+.select-tree {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.select-tree .form-select { flex: 1; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ 로그인 화면 ══════════ -->
+<div id="login-screen">
+  <div class="login-bg-deco">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="login-card">
+
+    <div class="login-logo-row">
+      <div class="login-logo-icon">🏫</div>
+      <div>
+        <div class="login-logo-text">하원알림</div>
+        <div class="login-logo-sub">관리자 콘솔</div>
+      </div>
+    </div>
+
+    <div class="login-heading">로그인</div>
+    <div class="login-subheading">관리자 계정으로 로그인하세요</div>
+
+    <div class="login-form">
+      <div class="login-error" id="login-error">
+        <span>⚠️</span>
+        <span id="login-error-msg">아이디 또는 비밀번호가 올바르지 않습니다.</span>
+      </div>
+
+      <div class="login-input-group">
+        <div class="login-input-label">아이디</div>
+        <div class="login-input-wrap">
+          <span class="l-icon">👤</span>
+          <input class="login-input" id="l-id" type="text" placeholder="아이디를 입력하세요" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('l-pw').focus()">
+        </div>
+      </div>
+
+      <div class="login-input-group">
+        <div class="login-input-label">비밀번호</div>
+        <div class="login-input-wrap">
+          <span class="l-icon">🔒</span>
+          <input class="login-input" id="l-pw" type="password" placeholder="비밀번호를 입력하세요" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+      </div>
+
+      <div class="login-options">
+        <label><input type="checkbox" id="l-remember"> 로그인 상태 유지</label>
+        <a onclick="openFindPwModal()">비밀번호 찾기</a>
+      </div>
+
+      <button class="btn-login" id="btn-login" onclick="doLogin()">
+        <span>🔐</span> 로그인
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════ 앱 본체 ══════════ -->
+<div id="app-wrap">
+
+<!-- 사이드바 -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-badge">
+      <div class="logo-icon">🏫</div>
+      <div>
+        <div class="logo-text">하원알림</div>
+        <div class="logo-sub">관리자 콘솔</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-section">
+      <div class="nav-section-label">메인</div>
+      <button class="nav-item active" onclick="showPage('dashboard')">
+        <span class="icon">📊</span> 대시보드
+      </button>
+      <button class="nav-item" onclick="showPage('reservations')">
+        <span class="icon">📋</span> 예약 관리
+        <span class="nav-badge" id="nav-badge">7</span>
+      </button>
+      <button class="nav-item" onclick="showPage('broadcast')">
+        <span class="icon">📢</span> 수동 방송
+      </button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">현황</div>
+      <button class="nav-item" onclick="showPage('classrooms')">
+        <span class="icon">🏠</span> 교실 현황
+      </button>
+      <button class="nav-item" onclick="showPage('log')">
+        <span class="icon">📝</span> 방송 로그
+      </button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">설정</div>
+      <button class="nav-item" onclick="showPage('settings')">
+        <span class="icon">⚙️</span> 환경 설정
+      </button>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="user-avatar">👩‍🏫</div>
+      <div>
+        <div class="user-name">박지현 선생님</div>
+        <div class="user-role">해바라기반 담임</div>
+      </div>
+    </div>
+    <button onclick="doLogout()" style="width:100%;height:34px;margin-top:6px;background:var(--red-pale);border:1px solid rgba(248,113,113,0.2);border-radius:var(--radius-sm);font-size:12px;font-weight:600;color:var(--red);cursor:pointer;font-family:'DM Sans','Noto Sans KR',sans-serif;transition:background 0.15s;display:flex;align-items:center;justify-content:center;gap:6px;" onmouseover="this.style.background='var(--red)';this.style.color='#fff'" onmouseout="this.style.background='var(--red-pale)';this.style.color='var(--red)'">
+      <span>🚪</span> 로그아웃
+    </button>
+  </div>
+</aside>
+
+<!-- 메인 -->
+<main class="main">
+
+  <!-- 탑바 -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="page-title" id="page-title">대시보드</div>
+      <div class="live-dot">실시간</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-time" id="topbar-time">--:--:--</div>
+      <div class="btn-icon" onclick="showToast('새 예약 알림이 3건 있습니다', '🔔', '김민준, 이서연, 박하준')">
+        🔔
+        <div class="notif-dot"></div>
+      </div>
+      <div class="btn-icon" onclick="showToast('새로고침되었습니다', '🔄', '데이터가 최신 상태입니다')">🔄</div>
+    </div>
+  </div>
+
+  <!-- ========== 대시보드 ========== -->
+  <div class="content active" id="page-dashboard">
+
+    <!-- 통계 -->
+    <div class="stats-grid">
+      <div class="stat-card c-blue">
+        <div class="stat-icon">📅</div>
+        <div class="stat-num">7</div>
+        <div class="stat-label">오늘 예약</div>
+        <div class="stat-sub">전일 대비 +2</div>
+      </div>
+      <div class="stat-card c-green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-num">3</div>
+        <div class="stat-label">방송 완료</div>
+        <div class="stat-sub">오늘 처리됨</div>
+      </div>
+      <div class="stat-card c-amber">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-num">4</div>
+        <div class="stat-label">대기 중</div>
+        <div class="stat-sub">오후 예약 대기</div>
+      </div>
+      <div class="stat-card c-red">
+        <div class="stat-icon">🧒</div>
+        <div class="stat-num">23</div>
+        <div class="stat-label">원아 수</div>
+        <div class="stat-sub">4개 반 운영 중</div>
+      </div>
+    </div>
+
+    <!-- 타임라인 + 교실 -->
+    <div class="two-col">
+
+      <div>
+        <div class="section-header">
+          <div class="section-title"><span class="dot"></span>오늘 하원 타임라인</div>
+        </div>
+        <div class="table-wrap" style="padding: 8px 16px;">
+          <div class="timeline">
+
+            <div class="timeline-item">
+              <div class="tl-time">13:00</div>
+              <div class="tl-dot" style="border-color:var(--green);background:var(--green);"></div>
+              <div class="tl-info">
+                <div class="tl-name">이서연 · 민들레반</div>
+                <div class="tl-detail">12:50 방송 완료</div>
+              </div>
+              <div class="tl-badge" style="background:var(--green-pale);color:var(--green)">완료</div>
+            </div>
+
+            <div class="timeline-item">
+              <div class="tl-time">13:30</div>
+              <div class="tl-dot" style="border-color:var(--green);background:var(--green);"></div>
+              <div class="tl-info">
+                <div class="tl-name">최준호 · 별빛반</div>
+                <div class="tl-detail">13:20 방송 완료</div>
+              </div>
+              <div class="tl-badge" style="background:var(--green-pale);color:var(--green)">완료</div>
+            </div>
+
+            <div class="timeline-item">
+              <div class="tl-time">14:00</div>
+              <div class="tl-dot" style="border-color:var(--green);background:var(--green);"></div>
+              <div class="tl-info">
+                <div class="tl-name">박하준 · 해바라기반</div>
+                <div class="tl-detail">13:50 방송 완료</div>
+              </div>
+              <div class="tl-badge" style="background:var(--green-pale);color:var(--green)">완료</div>
+            </div>
+
+            <div class="timeline-item">
+              <div class="tl-time">14:30</div>
+              <div class="tl-dot" style="border-color:var(--primary);background:var(--primary-pale);"></div>
+              <div class="tl-info">
+                <div class="tl-name">김민준 · 해바라기반</div>
+                <div class="tl-detail">14:20 방송 예정</div>
+              </div>
+              <div class="tl-badge" style="background:var(--primary-pale);color:var(--primary)">대기</div>
+            </div>
+
+            <div class="timeline-item">
+              <div class="tl-time">15:00</div>
+              <div class="tl-dot" style="border-color:var(--text-hint);background:transparent;"></div>
+              <div class="tl-info">
+                <div class="tl-name">윤소율 · 무지개반</div>
+                <div class="tl-detail">14:50 방송 예정</div>
+              </div>
+              <div class="tl-badge" style="background:var(--amber-pale);color:var(--amber)">대기</div>
+            </div>
+
+            <div class="timeline-item">
+              <div class="tl-time">15:30</div>
+              <div class="tl-dot" style="border-color:var(--text-hint);background:transparent;"></div>
+              <div class="tl-info">
+                <div class="tl-name">정다은 · 별빛반</div>
+                <div class="tl-detail">15:20 방송 예정</div>
+              </div>
+              <div class="tl-badge" style="background:var(--amber-pale);color:var(--amber)">대기</div>
+            </div>
+
+            <div class="timeline-item">
+              <div class="tl-time">16:00</div>
+              <div class="tl-dot" style="border-color:var(--text-hint);background:transparent;"></div>
+              <div class="tl-info">
+                <div class="tl-name">한지우 · 민들레반</div>
+                <div class="tl-detail">15:50 방송 예정</div>
+              </div>
+              <div class="tl-badge" style="background:var(--amber-pale);color:var(--amber)">대기</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-header">
+          <div class="section-title"><span class="dot"></span>교실별 하원 현황</div>
+        </div>
+        <div class="classroom-grid">
+          <div class="classroom-card">
+            <div class="cls-header">
+              <div class="cls-name">🌻 해바라기반</div>
+              <div class="cls-count">2 / 6명</div>
+            </div>
+            <div class="cls-bar-wrap">
+              <div class="cls-bar" style="width:33%;background:var(--green)"></div>
+            </div>
+            <div class="cls-detail">1명 완료 · 1명 대기</div>
+          </div>
+          <div class="classroom-card">
+            <div class="cls-header">
+              <div class="cls-name">🌈 무지개반</div>
+              <div class="cls-count">1 / 5명</div>
+            </div>
+            <div class="cls-bar-wrap">
+              <div class="cls-bar" style="width:20%;background:var(--amber)"></div>
+            </div>
+            <div class="cls-detail">0명 완료 · 1명 대기</div>
+          </div>
+          <div class="classroom-card">
+            <div class="cls-header">
+              <div class="cls-name">⭐ 별빛반</div>
+              <div class="cls-count">3 / 7명</div>
+            </div>
+            <div class="cls-bar-wrap">
+              <div class="cls-bar" style="width:43%;background:var(--primary)"></div>
+            </div>
+            <div class="cls-detail">1명 완료 · 2명 대기</div>
+          </div>
+          <div class="classroom-card">
+            <div class="cls-header">
+              <div class="cls-name">🌼 민들레반</div>
+              <div class="cls-count">2 / 5명</div>
+            </div>
+            <div class="cls-bar-wrap">
+              <div class="cls-bar" style="width:40%;background:var(--purple)"></div>
+            </div>
+            <div class="cls-detail">1명 완료 · 1명 대기</div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <div class="section-header" style="margin-bottom:12px;">
+            <div class="section-title"><span class="dot"></span>최근 방송 로그</div>
+          </div>
+          <div class="table-wrap" style="padding: 4px 16px;">
+            <div class="log-list">
+              <div class="log-item">
+                <div class="log-dot" style="background:var(--green);margin-top:5px;flex-shrink:0;"></div>
+                <div class="log-time">13:50</div>
+                <div class="log-info">
+                  <div class="log-title">박하준 하원 준비 방송</div>
+                  <div class="log-sub">해바라기반 · 자동 방송</div>
+                </div>
+              </div>
+              <div class="log-item">
+                <div class="log-dot" style="background:var(--green);margin-top:5px;flex-shrink:0;"></div>
+                <div class="log-time">13:20</div>
+                <div class="log-info">
+                  <div class="log-title">최준호 하원 준비 방송</div>
+                  <div class="log-sub">별빛반 · 자동 방송</div>
+                </div>
+              </div>
+              <div class="log-item">
+                <div class="log-dot" style="background:var(--green);margin-top:5px;flex-shrink:0;"></div>
+                <div class="log-time">12:50</div>
+                <div class="log-info">
+                  <div class="log-title">이서연 하원 준비 방송</div>
+                  <div class="log-sub">민들레반 · 자동 방송</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========== 예약 관리 ========== -->
+  <div class="content" id="page-reservations">
+    <div class="section-header">
+      <div class="section-title"><span class="dot"></span>오늘 예약 목록</div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <input class="search-input" placeholder="원아 이름 검색..." oninput="filterTable(this.value)">
+        <select class="filter-select" onchange="filterStatus(this.value)">
+          <option value="all">전체 상태</option>
+          <option value="pending">대기 중</option>
+          <option value="announced">방송됨</option>
+          <option value="done">완료</option>
+          <option value="cancelled">취소</option>
+        </select>
+        <select class="filter-select">
+          <option>전체 교실</option>
+          <option>🌻 해바라기반</option>
+          <option>🌈 무지개반</option>
+          <option>⭐ 별빛반</option>
+          <option>🌼 민들레반</option>
+        </select>
+      </div>
+      <table id="reservation-table">
+        <thead>
+          <tr>
+            <th>원아</th>
+            <th>교실</th>
+            <th>하원 시간</th>
+            <th>방송 예정</th>
+            <th>학부모</th>
+            <th>상태</th>
+            <th>액션</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-status="done">
+            <td><div class="td-name"><div class="child-ava">🧒</div><div><div class="td-child-name">이서연</div><div class="td-class">만 4세</div></div></div></td>
+            <td style="color:var(--text)">🌼 민들레반</td>
+            <td><span class="time-badge">13:00</span></td>
+            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">12:50</td>
+            <td style="color:var(--text-sub)">이지수 학부모</td>
+            <td><span class="status-pill s-done">완료</span></td>
+            <td><button class="btn-announce" disabled>방송완료</button></td>
+          </tr>
+          <tr data-status="done">
+            <td><div class="td-name"><div class="child-ava">👦</div><div><div class="td-child-name">최준호</div><div class="td-class">만 5세</div></div></div></td>
+            <td style="color:var(--text)">⭐ 별빛반</td>
+            <td><span class="time-badge">13:30</span></td>
+            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">13:20</td>
+            <td style="color:var(--text-sub)">최현우 학부모</td>
+            <td><span class="status-pill s-done">완료</span></td>
+            <td><button class="btn-announce" disabled>방송완료</button></td>
+          </tr>
+          <tr data-status="done">
+            <td><div class="td-name"><div class="child-ava">🧒</div><div><div class="td-child-name">박하준</div><div class="td-class">만 5세</div></div></div></td>
+            <td style="color:var(--text)">🌻 해바라기반</td>
+            <td><span class="time-badge">14:00</span></td>
+            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">13:50</td>
+            <td style="color:var(--text-sub)">박민서 학부모</td>
+            <td><span class="status-pill s-done">완료</span></td>
+            <td><button class="btn-announce" disabled>방송완료</button></td>
+          </tr>
+          <tr data-status="pending">
+            <td><div class="td-name"><div class="child-ava">👦</div><div><div class="td-child-name">김민준</div><div class="td-class">만 5세</div></div></div></td>
+            <td style="color:var(--text)">🌻 해바라기반</td>
+            <td><span class="time-badge">14:30</span></td>
+            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">14:20</td>
+            <td style="color:var(--text-sub)">김수연 학부모</td>
+            <td><span class="status-pill s-pending">대기 중</span></td>
+            <td><div style="display:flex;gap:5px;">
+              <button class="btn-announce" onclick="triggerAnnounce(this, '김민준', '해바라기반')">📢 방송</button>
+              <button class="btn-stop" onclick="openStopModal(this, '김민준', '해바라기반', '14:30')">🚫 중지</button>
+            </div></td>
+          </tr>
+          <tr data-status="pending">
+            <td><div class="td-name"><div class="child-ava">👧</div><div><div class="td-child-name">윤소율</div><div class="td-class">만 4세</div></div></div></td>
+            <td style="color:var(--text)">🌈 무지개반</td>
+            <td><span class="time-badge">15:00</span></td>
+            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">14:50</td>
+            <td style="color:var(--text-sub)">윤태양 학부모</td>
+            <td><span class="status-pill s-pending">대기 중</span></td>
+            <td><div style="display:flex;gap:5px;">
+              <button class="btn-announce" onclick="triggerAnnounce(this, '윤소율', '무지개반')">📢 방송</button>
+              <button class="btn-stop" onclick="openStopModal(this, '윤소율', '무지개반', '15:00')">🚫 중지</button>
+            </div></td>
+          </tr>
+          <tr data-status="pending">
+            <td><div class="td-name"><div class="child-ava">👧</div><div><div class="td-child-name">정다은</div><div class="td-class">만 5세</div></div></div></td>
+            <td style="color:var(--text)">⭐ 별빛반</td>
+            <td><span class="time-badge">15:30</span></td>
+            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">15:20</td>
+            <td style="color:var(--text-sub)">정은희 학부모</td>
+            <td><span class="status-pill s-pending">대기 중</span></td>
+            <td><div style="display:flex;gap:5px;">
+              <button class="btn-announce" onclick="triggerAnnounce(this, '정다은', '별빛반')">📢 방송</button>
+              <button class="btn-stop" onclick="openStopModal(this, '정다은', '별빛반', '15:30')">🚫 중지</button>
+            </div></td>
+          </tr>
+          <tr data-status="pending">
+            <td><div class="td-name"><div class="child-ava">👦</div><div><div class="td-child-name">한지우</div><div class="td-class">만 4세</div></div></div></td>
+            <td style="color:var(--text)">🌼 민들레반</td>
+            <td><span class="time-badge">16:00</span></td>
+            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">15:50</td>
+            <td style="color:var(--text-sub)">한승민 학부모</td>
+            <td><span class="status-pill s-pending">대기 중</span></td>
+            <td><div style="display:flex;gap:5px;">
+              <button class="btn-announce" onclick="triggerAnnounce(this, '한지우', '민들레반')">📢 방송</button>
+              <button class="btn-stop" onclick="openStopModal(this, '한지우', '민들레반', '16:00')">🚫 중지</button>
+            </div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========== 수동 방송 ========== -->
+  <div class="content" id="page-broadcast">
+    <div class="two-col" style="align-items:start;">
+
+      <div>
+        <div class="section-header">
+          <div class="section-title"><span class="dot"></span>수동 방송 설정</div>
+        </div>
+        <div class="broadcast-panel">
+          <div class="broadcast-form">
+            <div class="form-row">
+              <div class="form-group">
+                <div class="form-label">원아 선택</div>
+                <select class="form-select" id="bc-child" onchange="updatePreview()">
+                  <option value="">원아를 선택하세요</option>
+                  <option>김민준 (해바라기반)</option>
+                  <option>윤소율 (무지개반)</option>
+                  <option>정다은 (별빛반)</option>
+                  <option>한지우 (민들레반)</option>
+                  <option>이서연 (민들레반)</option>
+                  <option>최준호 (별빛반)</option>
+                  <option>박하준 (해바라기반)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <div class="form-label">대상 교실</div>
+                <select class="form-select" id="bc-class" onchange="updatePreview()">
+                  <option>🌻 해바라기반</option>
+                  <option>🌈 무지개반</option>
+                  <option>⭐ 별빛반</option>
+                  <option>🌼 민들레반</option>
+                  <option>📢 전체 방송</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="form-label">방송 멘트</div>
+              <input class="form-input" id="bc-msg" value="하원 준비해 주세요" oninput="updatePreview()">
+            </div>
+            <div class="form-group">
+              <div class="form-label">미리보기</div>
+              <div class="preview-box">
+                <div class="preview-icon">📢</div>
+                <div id="bc-preview">원아를 선택하면 방송 내용이 미리보기에 표시됩니다.</div>
+              </div>
+            </div>
+            <button class="btn-broadcast" onclick="sendBroadcast()">
+              📢 지금 방송하기
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-header">
+          <div class="section-title"><span class="dot"></span>방송 로그</div>
+        </div>
+        <div class="table-wrap" style="padding: 8px 16px;">
+          <div class="log-list" id="broadcast-log">
+            <div class="log-item">
+              <div class="log-dot" style="background:var(--green);margin-top:5px;flex-shrink:0;width:8px;height:8px;border-radius:50%;"></div>
+              <div class="log-time">13:50</div>
+              <div class="log-info">
+                <div class="log-title">박하준 하원 준비 방송</div>
+                <div class="log-sub">🌻 해바라기반 · 자동</div>
+              </div>
+            </div>
+            <div class="log-item">
+              <div class="log-dot" style="background:var(--green);margin-top:5px;flex-shrink:0;width:8px;height:8px;border-radius:50%;"></div>
+              <div class="log-time">13:20</div>
+              <div class="log-info">
+                <div class="log-title">최준호 하원 준비 방송</div>
+                <div class="log-sub">⭐ 별빛반 · 자동</div>
+              </div>
+            </div>
+            <div class="log-item">
+              <div class="log-dot" style="background:var(--green);margin-top:5px;flex-shrink:0;width:8px;height:8px;border-radius:50%;"></div>
+              <div class="log-time">12:50</div>
+              <div class="log-info">
+                <div class="log-title">이서연 하원 준비 방송</div>
+                <div class="log-sub">🌼 민들레반 · 자동</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <div class="section-header" style="margin-bottom:12px;">
+            <div class="section-title"><span class="dot"></span>오늘 방송 통계</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center;">
+              <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--green)" id="stat-done">3</div>
+              <div style="font-size:11px;color:var(--text-hint);margin-top:4px;">완료</div>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center;">
+              <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--amber)" id="stat-pending">4</div>
+              <div style="font-size:11px;color:var(--text-hint);margin-top:4px;">대기</div>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center;">
+              <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--primary)" id="stat-manual">0</div>
+              <div style="font-size:11px;color:var(--text-hint);margin-top:4px;">수동</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========== 교실 현황 ========== -->
+  <div class="content" id="page-classrooms">
+    <div class="section-header">
+      <div class="section-title"><span class="dot"></span>교실별 하원 현황</div>
+    </div>
+    <div class="classroom-big-grid">
+
+      <div class="cls-big-card">
+        <div class="cls-big-header">
+          <div class="cls-big-name">🌻 해바라기반</div>
+          <span class="status-pill s-pending">2명 대기</span>
+        </div>
+        <div class="cls-big-list">
+          <div class="cls-child-row">
+            <div class="cls-child-ava">🧒</div>
+            <div class="cls-child-name">박하준</div>
+            <span class="status-pill s-done" style="font-size:10px;padding:2px 7px;">완료</span>
+            <div class="cls-child-time">14:00</div>
+          </div>
+          <div class="cls-child-row">
+            <div class="cls-child-ava">👦</div>
+            <div class="cls-child-name">김민준</div>
+            <span class="status-pill s-pending" style="font-size:10px;padding:2px 7px;">대기</span>
+            <div class="cls-child-time">14:30</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cls-big-card">
+        <div class="cls-big-header">
+          <div class="cls-big-name">🌈 무지개반</div>
+          <span class="status-pill s-pending">1명 대기</span>
+        </div>
+        <div class="cls-big-list">
+          <div class="cls-child-row">
+            <div class="cls-child-ava">👧</div>
+            <div class="cls-child-name">윤소율</div>
+            <span class="status-pill s-pending" style="font-size:10px;padding:2px 7px;">대기</span>
+            <div class="cls-child-time">15:00</div>
+          </div>
+          <div class="cls-empty">나머지 4명 하원 예약 없음</div>
+        </div>
+      </div>
+
+      <div class="cls-big-card">
+        <div class="cls-big-header">
+          <div class="cls-big-name">⭐ 별빛반</div>
+          <span class="status-pill s-pending">2명 대기</span>
+        </div>
+        <div class="cls-big-list">
+          <div class="cls-child-row">
+            <div class="cls-child-ava">👦</div>
+            <div class="cls-child-name">최준호</div>
+            <span class="status-pill s-done" style="font-size:10px;padding:2px 7px;">완료</span>
+            <div class="cls-child-time">13:30</div>
+          </div>
+          <div class="cls-child-row">
+            <div class="cls-child-ava">👧</div>
+            <div class="cls-child-name">정다은</div>
+            <span class="status-pill s-pending" style="font-size:10px;padding:2px 7px;">대기</span>
+            <div class="cls-child-time">15:30</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cls-big-card">
+        <div class="cls-big-header">
+          <div class="cls-big-name">🌼 민들레반</div>
+          <span class="status-pill s-pending">1명 대기</span>
+        </div>
+        <div class="cls-big-list">
+          <div class="cls-child-row">
+            <div class="cls-child-ava">👧</div>
+            <div class="cls-child-name">이서연</div>
+            <span class="status-pill s-done" style="font-size:10px;padding:2px 7px;">완료</span>
+            <div class="cls-child-time">13:00</div>
+          </div>
+          <div class="cls-child-row">
+            <div class="cls-child-ava">👦</div>
+            <div class="cls-child-name">한지우</div>
+            <span class="status-pill s-pending" style="font-size:10px;padding:2px 7px;">대기</span>
+            <div class="cls-child-time">16:00</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========== 방송 로그 ========== -->
+  <div class="content" id="page-log">
+    <div class="section-header">
+      <div class="section-title"><span class="dot"></span>전체 방송 로그</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>시간</th>
+            <th>원아</th>
+            <th>교실</th>
+            <th>방송 내용</th>
+            <th>방송 유형</th>
+            <th>결과</th>
+          </tr>
+        </thead>
+        <tbody id="log-tbody">
+          <tr>
+            <td style="font-family:'DM Mono',monospace;color:var(--text-hint)">13:50:02</td>
+            <td><div class="td-name"><div class="child-ava">🧒</div><div><div class="td-child-name">박하준</div></div></div></td>
+            <td style="color:var(--text)">🌻 해바라기반</td>
+            <td style="color:var(--text)">박하준 하원 준비해 주세요</td>
+            <td><span class="status-pill" style="background:var(--green-pale);color:var(--green)">자동</span></td>
+            <td><span class="status-pill s-done">성공</span></td>
+          </tr>
+          <tr>
+            <td style="font-family:'DM Mono',monospace;color:var(--text-hint)">13:20:01</td>
+            <td><div class="td-name"><div class="child-ava">👦</div><div><div class="td-child-name">최준호</div></div></div></td>
+            <td style="color:var(--text)">⭐ 별빛반</td>
+            <td style="color:var(--text)">최준호 하원 준비해 주세요</td>
+            <td><span class="status-pill" style="background:var(--green-pale);color:var(--green)">자동</span></td>
+            <td><span class="status-pill s-done">성공</span></td>
+          </tr>
+          <tr>
+            <td style="font-family:'DM Mono',monospace;color:var(--text-hint)">12:50:04</td>
+            <td><div class="td-name"><div class="child-ava">👧</div><div><div class="td-child-name">이서연</div></div></div></td>
+            <td style="color:var(--text)">🌼 민들레반</td>
+            <td style="color:var(--text)">이서연 하원 준비해 주세요</td>
+            <td><span class="status-pill" style="background:var(--green-pale);color:var(--green)">자동</span></td>
+            <td><span class="status-pill s-done">성공</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+  <!-- ========== 환경 설정 ========== -->
+  <div class="content" id="page-settings">
+    <div class="settings-layout">
+
+      <!-- 좌측 탭 -->
+      <div class="settings-tabs">
+        <button class="stab active" onclick="showStab('kindergarten')"><span class="sicon">🏫</span>유치원 정보</button>
+        <button class="stab" onclick="showStab('classrooms-mgmt')"><span class="sicon">🏠</span>반 관리</button>
+        <button class="stab" onclick="showStab('students')"><span class="sicon">🧒</span>원생 관리</button>
+        <button class="stab" onclick="showStab('broadcast-cfg')"><span class="sicon">📢</span>방송 설정</button>
+        <button class="stab" onclick="showStab('account')"><span class="sicon">🔑</span>계정 관리</button>
+      </div>
+
+      <!-- 우측 본문 -->
+      <div class="settings-body">
+
+        <!-- ① 유치원 정보 -->
+        <div class="stab-panel active" id="stab-kindergarten">
+          <div class="settings-section">
+            <div class="settings-section-title">유치원 기본 정보</div>
+            <div class="modal-form" style="max-width:480px;">
+              <div class="form-group">
+                <div class="form-label">유치원 이름</div>
+                <input class="form-input" id="kg-name" value="햇살 유치원" oninput="updateKgPreview()">
+              </div>
+              <div class="form-group">
+                <div class="form-label">원장 이름</div>
+                <input class="form-input" id="kg-director" value="김영희 원장">
+              </div>
+              <div class="form-group">
+                <div class="form-label">전화번호</div>
+                <input class="form-input" id="kg-phone" value="051-123-4567">
+              </div>
+              <div class="form-group">
+                <div class="form-label">주소</div>
+                <input class="form-input" id="kg-addr" value="부산시 해운대구 햇살로 123">
+              </div>
+              <button class="btn-save" style="align-self:flex-start;padding:0 24px;" onclick="saveKgInfo()">저장</button>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section-title">현재 등록된 유치원</div>
+            <div class="item-list" id="kg-list">
+              <div class="item-card">
+                <div class="item-card-icon">🏫</div>
+                <div class="item-card-info">
+                  <div class="item-card-name">햇살 유치원</div>
+                  <div class="item-card-sub">부산시 해운대구 · 051-123-4567 · 4개 반</div>
+                </div>
+                <div class="item-card-actions">
+                  <button class="btn-sm btn-sm-primary" onclick="editKg(this)">수정</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ② 반 관리 -->
+        <div class="stab-panel" id="stab-classrooms-mgmt">
+          <div class="settings-section">
+            <div class="settings-section-title">반 등록</div>
+            <div class="inline-form">
+              <input class="form-input" id="cls-name-input" placeholder="반 이름 (예: 해바라기반)">
+              <input class="form-input" id="cls-emoji-input" placeholder="이모지 (예: 🌻)" style="max-width:100px;">
+              <input class="form-input" id="cls-teacher-input" placeholder="담임 선생님">
+              <button class="btn-add" onclick="addClass()">+ 추가</button>
+            </div>
+            <div class="item-list" id="cls-list">
+              <div class="item-card" data-cls="해바라기반">
+                <div class="item-card-icon">🌻</div>
+                <div class="item-card-info">
+                  <div class="item-card-name">🌻 해바라기반</div>
+                  <div class="item-card-sub">담임: 박지현 · 원생 6명</div>
+                </div>
+                <div class="item-card-actions">
+                  <button class="btn-sm btn-sm-primary" onclick="showPage('students');setTimeout(()=>filterStudentsByCls('해바라기반'),100)">원생보기</button>
+                  <button class="btn-sm btn-sm-red" onclick="removeItem(this)">삭제</button>
+                </div>
+              </div>
+              <div class="item-card" data-cls="무지개반">
+                <div class="item-card-icon">🌈</div>
+                <div class="item-card-info">
+                  <div class="item-card-name">🌈 무지개반</div>
+                  <div class="item-card-sub">담임: 이미래 · 원생 5명</div>
+                </div>
+                <div class="item-card-actions">
+                  <button class="btn-sm btn-sm-primary" onclick="showPage('students')">원생보기</button>
+                  <button class="btn-sm btn-sm-red" onclick="removeItem(this)">삭제</button>
+                </div>
+              </div>
+              <div class="item-card" data-cls="별빛반">
+                <div class="item-card-icon">⭐</div>
+                <div class="item-card-info">
+                  <div class="item-card-name">⭐ 별빛반</div>
+                  <div class="item-card-sub">담임: 최수진 · 원생 7명</div>
+                </div>
+                <div class="item-card-actions">
+                  <button class="btn-sm btn-sm-primary" onclick="showPage('students')">원생보기</button>
+                  <button class="btn-sm btn-sm-red" onclick="removeItem(this)">삭제</button>
+                </div>
+              </div>
+              <div class="item-card" data-cls="민들레반">
+                <div class="item-card-icon">🌼</div>
+                <div class="item-card-info">
+                  <div class="item-card-name">🌼 민들레반</div>
+                  <div class="item-card-sub">담임: 한소희 · 원생 5명</div>
+                </div>
+                <div class="item-card-actions">
+                  <button class="btn-sm btn-sm-primary" onclick="showPage('students')">원생보기</button>
+                  <button class="btn-sm btn-sm-red" onclick="removeItem(this)">삭제</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ③ 원생 관리 -->
+        <div class="stab-panel" id="stab-students">
+          <div class="settings-section">
+            <div class="settings-section-title">원생 등록</div>
+
+            <!-- 반 선택 -->
+            <div class="select-tree">
+              <select class="form-select" id="stu-cls-filter" onchange="renderStudents()">
+                <option value="all">전체 반</option>
+                <option value="해바라기반">🌻 해바라기반</option>
+                <option value="무지개반">🌈 무지개반</option>
+                <option value="별빛반">⭐ 별빛반</option>
+                <option value="민들레반">🌼 민들레반</option>
+              </select>
+              <button class="btn-add" onclick="openAddStudentModal()">+ 원생 추가</button>
+            </div>
+
+            <!-- 원생 목록 -->
+            <div class="item-list" id="stu-list"></div>
+          </div>
+        </div>
+
+        <!-- ④ 방송 설정 -->
+        <div class="stab-panel" id="stab-broadcast-cfg">
+          <div class="settings-section">
+            <div class="settings-section-title">하원 방송 시간 설정</div>
+            <p style="font-size:13px;color:var(--text-hint);margin-bottom:16px;">예약 시간보다 몇 분 전에 교실 방송을 내보낼지 설정합니다.</p>
+
+            <div class="broadcast-setting-row">
+              <div>
+                <div class="bsr-label">기본 방송 시간</div>
+                <div class="bsr-sub">전체 반에 적용되는 기본값</div>
+              </div>
+              <div class="bsr-control">
+                <button class="bsr-btn" onclick="adjustBsr('default',-1)">−</button>
+                <div class="bsr-val" id="bsr-default">10</div>
+                <span style="font-size:12px;color:var(--text-hint)">분 전</span>
+                <button class="bsr-btn" onclick="adjustBsr('default',1)">+</button>
+              </div>
+            </div>
+
+            <div style="margin: 20px 0 10px;">
+              <div class="settings-section-title" style="margin-bottom:12px;">반별 개별 설정</div>
+              <p style="font-size:12px;color:var(--text-hint);margin-bottom:12px;">설정하지 않은 반은 기본값이 적용됩니다.</p>
+
+              <div class="broadcast-setting-row">
+                <div>
+                  <div class="bsr-label">🌻 해바라기반</div>
+                  <div class="bsr-sub" id="bsr-sub-cls1">기본값 적용 중</div>
+                </div>
+                <div class="bsr-control">
+                  <button class="bsr-btn" onclick="adjustBsr('cls1',-1)">−</button>
+                  <div class="bsr-val" id="bsr-cls1">10</div>
+                  <span style="font-size:12px;color:var(--text-hint)">분 전</span>
+                  <button class="bsr-btn" onclick="adjustBsr('cls1',1)">+</button>
+                </div>
+              </div>
+              <div class="broadcast-setting-row">
+                <div>
+                  <div class="bsr-label">🌈 무지개반</div>
+                  <div class="bsr-sub" id="bsr-sub-cls2">기본값 적용 중</div>
+                </div>
+                <div class="bsr-control">
+                  <button class="bsr-btn" onclick="adjustBsr('cls2',-1)">−</button>
+                  <div class="bsr-val" id="bsr-cls2">10</div>
+                  <span style="font-size:12px;color:var(--text-hint)">분 전</span>
+                  <button class="bsr-btn" onclick="adjustBsr('cls2',1)">+</button>
+                </div>
+              </div>
+              <div class="broadcast-setting-row">
+                <div>
+                  <div class="bsr-label">⭐ 별빛반</div>
+                  <div class="bsr-sub" id="bsr-sub-cls3">기본값 적용 중</div>
+                </div>
+                <div class="bsr-control">
+                  <button class="bsr-btn" onclick="adjustBsr('cls3',-1)">−</button>
+                  <div class="bsr-val" id="bsr-cls3">10</div>
+                  <span style="font-size:12px;color:var(--text-hint)">분 전</span>
+                  <button class="bsr-btn" onclick="adjustBsr('cls3',1)">+</button>
+                </div>
+              </div>
+              <div class="broadcast-setting-row">
+                <div>
+                  <div class="bsr-label">🌼 민들레반</div>
+                  <div class="bsr-sub" id="bsr-sub-cls4">기본값 적용 중</div>
+                </div>
+                <div class="bsr-control">
+                  <button class="bsr-btn" onclick="adjustBsr('cls4',-1)">−</button>
+                  <div class="bsr-val" id="bsr-cls4">10</div>
+                  <span style="font-size:12px;color:var(--text-hint)">분 전</span>
+                  <button class="bsr-btn" onclick="adjustBsr('cls4',1)">+</button>
+                </div>
+              </div>
+            </div>
+
+            <button class="btn-save" style="margin-top:8px;" onclick="saveBroadcastSettings()">설정 저장</button>
+          </div>
+
+          <!-- 방송 멘트 설정 -->
+          <div class="settings-section">
+            <div class="settings-section-title">방송 멘트 설정</div>
+            <p style="font-size:13px;color:var(--text-hint);margin-bottom:10px;">변수를 입력하면 실제 방송 시 자동으로 치환됩니다.</p>
+            <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+              <span style="background:var(--surface3);padding:4px 10px;border-radius:6px;font-family:'DM Mono',monospace;font-size:12px;color:var(--primary);cursor:pointer;border:1px solid var(--border2);" onclick="insertVar('{이름}')">{이름} <span style="color:var(--text-hint);font-family:'Noto Sans KR',sans-serif;">원생 이름</span></span>
+              <span style="background:var(--surface3);padding:4px 10px;border-radius:6px;font-family:'DM Mono',monospace;font-size:12px;color:var(--green);cursor:pointer;border:1px solid var(--border2);" onclick="insertVar('{반}')">{반} <span style="color:var(--text-hint);font-family:'Noto Sans KR',sans-serif;">반 이름</span></span>
+            </div>
+
+            <!-- 기본 멘트 -->
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 18px;margin-bottom:10px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                <div>
+                  <div class="bsr-label">기본 방송 멘트</div>
+                  <div class="bsr-sub">전체 반에 공통 적용</div>
+                </div>
+                <button class="btn-sm btn-sm-primary" onclick="resetDefaultMent()">초기화</button>
+              </div>
+              <input class="form-input" id="ment-default" value="{반} {이름} 학부모님, 하원 준비해 주세요" style="width:100%;margin-bottom:8px;" oninput="refreshMentPreviews()">
+              <div class="preview-box" id="ment-default-preview" style="margin-top:0;">
+                <span style="font-size:16px;">📢</span>
+                <span id="ment-default-preview-text" style="font-size:13px;color:var(--text);">해바라기반 김민준 학부모님, 하원 준비해 주세요</span>
+              </div>
+            </div>
+
+            <!-- 반별 멘트 -->
+            <div style="margin-bottom:12px;">
+              <div style="font-size:11px;font-weight:600;color:var(--text-hint);letter-spacing:0.6px;text-transform:uppercase;margin-bottom:10px;">반별 개별 멘트 <span style="font-weight:400;color:var(--text-hint);font-size:10px;margin-left:4px;">비워두면 기본 멘트 적용</span></div>
+
+              <div id="cls-ment-list">
+                <!-- 해바라기반 -->
+                <div class="cls-ment-row" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <div style="font-size:13px;font-weight:600;color:var(--text);">🌻 해바라기반</div>
+                    <div style="display:flex;gap:6px;align-items:center;">
+                      <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-hint);cursor:pointer;">
+                        <input type="checkbox" id="ment-use-cls1" onchange="toggleClsMent('cls1')" style="accent-color:var(--primary);">
+                        개별 설정
+                      </label>
+                    </div>
+                  </div>
+                  <input class="form-input" id="ment-cls1" placeholder="기본 멘트 사용 중" disabled style="width:100%;margin-bottom:8px;opacity:0.45;" oninput="refreshMentPreviews()">
+                  <div class="preview-box" id="ment-cls1-preview" style="opacity:0.45;">
+                    <span style="font-size:16px;">📢</span>
+                    <span id="ment-cls1-preview-text" style="font-size:13px;color:var(--text-sub);">기본 멘트가 적용됩니다</span>
+                  </div>
+                </div>
+
+                <!-- 무지개반 -->
+                <div class="cls-ment-row" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <div style="font-size:13px;font-weight:600;color:var(--text);">🌈 무지개반</div>
+                    <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-hint);cursor:pointer;">
+                      <input type="checkbox" id="ment-use-cls2" onchange="toggleClsMent('cls2')" style="accent-color:var(--primary);">
+                      개별 설정
+                    </label>
+                  </div>
+                  <input class="form-input" id="ment-cls2" placeholder="기본 멘트 사용 중" disabled style="width:100%;margin-bottom:8px;opacity:0.45;" oninput="refreshMentPreviews()">
+                  <div class="preview-box" id="ment-cls2-preview" style="opacity:0.45;">
+                    <span style="font-size:16px;">📢</span>
+                    <span id="ment-cls2-preview-text" style="font-size:13px;color:var(--text-sub);">기본 멘트가 적용됩니다</span>
+                  </div>
+                </div>
+
+                <!-- 별빛반 -->
+                <div class="cls-ment-row" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <div style="font-size:13px;font-weight:600;color:var(--text);">⭐ 별빛반</div>
+                    <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-hint);cursor:pointer;">
+                      <input type="checkbox" id="ment-use-cls3" onchange="toggleClsMent('cls3')" style="accent-color:var(--primary);">
+                      개별 설정
+                    </label>
+                  </div>
+                  <input class="form-input" id="ment-cls3" placeholder="기본 멘트 사용 중" disabled style="width:100%;margin-bottom:8px;opacity:0.45;" oninput="refreshMentPreviews()">
+                  <div class="preview-box" id="ment-cls3-preview" style="opacity:0.45;">
+                    <span style="font-size:16px;">📢</span>
+                    <span id="ment-cls3-preview-text" style="font-size:13px;color:var(--text-sub);">기본 멘트가 적용됩니다</span>
+                  </div>
+                </div>
+
+                <!-- 민들레반 -->
+                <div class="cls-ment-row" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <div style="font-size:13px;font-weight:600;color:var(--text);">🌼 민들레반</div>
+                    <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-hint);cursor:pointer;">
+                      <input type="checkbox" id="ment-use-cls4" onchange="toggleClsMent('cls4')" style="accent-color:var(--primary);">
+                      개별 설정
+                    </label>
+                  </div>
+                  <input class="form-input" id="ment-cls4" placeholder="기본 멘트 사용 중" disabled style="width:100%;margin-bottom:8px;opacity:0.45;" oninput="refreshMentPreviews()">
+                  <div class="preview-box" id="ment-cls4-preview" style="opacity:0.45;">
+                    <span style="font-size:16px;">📢</span>
+                    <span id="ment-cls4-preview-text" style="font-size:13px;color:var(--text-sub);">기본 멘트가 적용됩니다</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 멘트 빠른 템플릿 -->
+            <div style="margin-bottom:16px;">
+              <div style="font-size:11px;font-weight:600;color:var(--text-hint);letter-spacing:0.6px;text-transform:uppercase;margin-bottom:8px;">빠른 템플릿</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                <button class="btn-sm btn-sm-primary" style="height:30px;" onclick="applyTemplate('{반} {이름} 학부모님, 하원 준비해 주세요')">기본형</button>
+                <button class="btn-sm btn-sm-primary" style="height:30px;" onclick="applyTemplate('{반} {이름} 어린이, 부모님이 기다리고 있어요. 하원 준비해 주세요')">친근형</button>
+                <button class="btn-sm btn-sm-primary" style="height:30px;" onclick="applyTemplate('{반} {이름} 하원 시간입니다. 선생님께 말씀드리고 현관으로 나와 주세요')">안내형</button>
+                <button class="btn-sm btn-sm-primary" style="height:30px;" onclick="applyTemplate('{반} {이름} 학부모님께서 도착하셨습니다. {이름} 어린이는 하원 준비해 주세요')">도착알림형</button>
+              </div>
+            </div>
+
+            <button class="btn-save" onclick="saveMentSettings()">멘트 저장</button>
+          </div>
+        </div>
+
+        <!-- ⑤ 계정 관리 -->
+        <div class="stab-panel" id="stab-account">
+
+          <!-- 아이디 변경 -->
+          <div class="settings-section">
+            <div class="settings-section-title">아이디 변경</div>
+            <div class="modal-form" style="max-width:440px;">
+              <div class="form-group">
+                <div class="form-label">현재 아이디</div>
+                <input class="form-input" id="cur-id-display" disabled style="opacity:0.5;">
+              </div>
+              <div class="form-group">
+                <div class="form-label">새 아이디</div>
+                <input class="form-input" id="new-id" placeholder="새 아이디 입력 (4자 이상)">
+              </div>
+              <div class="form-group">
+                <div class="form-label">현재 비밀번호 확인</div>
+                <input class="form-input" type="password" id="confirm-pw-for-id" placeholder="현재 비밀번호">
+              </div>
+              <div id="id-change-error" style="font-size:12px;color:var(--red);display:none;"></div>
+              <button class="btn-save" style="align-self:flex-start;" onclick="changeId()">아이디 변경</button>
+            </div>
+          </div>
+
+          <!-- 비밀번호 변경 -->
+          <div class="settings-section">
+            <div class="settings-section-title">비밀번호 변경</div>
+            <div class="modal-form" style="max-width:440px;">
+              <div class="form-group">
+                <div class="form-label">현재 비밀번호</div>
+                <input class="form-input" type="password" id="cur-pw" placeholder="현재 비밀번호">
+              </div>
+              <div class="form-group">
+                <div class="form-label">새 비밀번호</div>
+                <input class="form-input" type="password" id="new-pw" placeholder="8자 이상 권장" oninput="checkPwStrength()">
+                <!-- 비밀번호 강도 -->
+                <div style="margin-top:6px;">
+                  <div style="height:4px;background:var(--surface3);border-radius:2px;overflow:hidden;">
+                    <div id="pw-strength-bar" style="height:100%;width:0;border-radius:2px;transition:width 0.3s,background 0.3s;"></div>
+                  </div>
+                  <div id="pw-strength-label" style="font-size:11px;color:var(--text-hint);margin-top:4px;"></div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="form-label">새 비밀번호 확인</div>
+                <input class="form-input" type="password" id="new-pw-confirm" placeholder="동일하게 입력">
+              </div>
+              <div id="pw-change-error" style="font-size:12px;color:var(--red);display:none;"></div>
+              <button class="btn-save" style="align-self:flex-start;" onclick="changePw()">비밀번호 변경</button>
+            </div>
+          </div>
+
+          <!-- 이메일 등록 -->
+          <div class="settings-section">
+            <div class="settings-section-title">이메일 등록 (비밀번호 찾기용)</div>
+            <p style="font-size:13px;color:var(--text-hint);margin-bottom:14px;">비밀번호 분실 시 등록된 이메일로 임시 비밀번호가 발송됩니다.</p>
+            <div class="modal-form" style="max-width:440px;">
+              <div class="form-group">
+                <div class="form-label">이메일 주소</div>
+                <div style="display:flex;gap:8px;">
+                  <input class="form-input" type="email" id="admin-email" placeholder="example@email.com" style="flex:1;">
+                  <button class="btn-add" style="width:90px;font-size:12px;" onclick="saveEmail()">저장</button>
+                </div>
+              </div>
+              <div id="email-status" style="font-size:12px;color:var(--text-hint);display:none;align-items:center;gap:6px;">
+                <span style="color:var(--green);">✅</span>
+                <span id="email-status-text"></span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div><!-- /settings-body -->
+    </div><!-- /settings-layout -->
+  </div>
+
+  <!-- ── 원생 추가 모달 ── -->
+  <div class="modal-bg" id="modal-add-student">
+    <div class="modal-box">
+      <div class="modal-title">
+        원생 추가
+        <button class="modal-close-btn" onclick="closeModal('modal-add-student')">✕</button>
+      </div>
+      <div class="modal-form">
+        <div class="form-group">
+          <div class="form-label">원생 이름</div>
+          <input class="form-input" id="new-stu-name" placeholder="예: 김민준">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <div class="form-label">소속 반</div>
+            <select class="form-select" id="new-stu-cls">
+              <option>🌻 해바라기반</option>
+              <option>🌈 무지개반</option>
+              <option>⭐ 별빛반</option>
+              <option>🌼 민들레반</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <div class="form-label">나이</div>
+            <select class="form-select" id="new-stu-age">
+              <option>만 3세</option>
+              <option>만 4세</option>
+              <option>만 5세</option>
+              <option>만 6세</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal('modal-add-student')">취소</button>
+        <button class="btn-save" onclick="addStudent()">원생 추가</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 가족 추가 모달 ── -->
+  <div class="modal-bg" id="modal-add-family">
+    <div class="modal-box">
+      <div class="modal-title">
+        가족 등록
+        <button class="modal-close-btn" onclick="closeModal('modal-add-family')">✕</button>
+      </div>
+      <div id="modal-family-target" style="font-size:13px;color:var(--text-hint);margin-bottom:16px;"></div>
+      <div class="modal-form">
+        <div class="form-group">
+          <div class="form-label">이름</div>
+          <input class="form-input" id="fam-name" placeholder="예: 김수연">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <div class="form-label">관계</div>
+            <select class="form-select" id="fam-rel">
+              <option>부(아버지)</option>
+              <option>모(어머니)</option>
+              <option>조부(할아버지)</option>
+              <option>조모(할머니)</option>
+              <option>형/오빠</option>
+              <option>언니/누나</option>
+              <option>기타</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <div class="form-label">휴대폰</div>
+            <input class="form-input" id="fam-phone" placeholder="010-0000-0000">
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">알림 수신</div>
+          <select class="form-select" id="fam-notify">
+            <option>예약 알림 수신</option>
+            <option>방송 완료 알림만</option>
+            <option>알림 비활성화</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal('modal-add-family')">취소</button>
+        <button class="btn-save" onclick="addFamilyMember()">가족 추가</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ── 방송 중지 확인 모달 ── -->
+  <div class="modal-bg" id="modal-stop-confirm">
+    <div class="modal-box" style="width:400px;">
+      <div class="modal-title">
+        <span>📵 예약 방송 중지</span>
+        <button class="modal-close-btn" onclick="closeModal('modal-stop-confirm')">✕</button>
+      </div>
+      <div style="background:var(--red-pale);border:1px solid rgba(248,113,113,0.2);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:18px;display:flex;align-items:flex-start;gap:10px;">
+        <span style="font-size:18px;flex-shrink:0;">⚠️</span>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--red);margin-bottom:4px;">방송 예약을 취소하시겠습니까?</div>
+          <div id="stop-modal-desc" style="font-size:12px;color:var(--text-sub);line-height:1.6;"></div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text-hint);margin-bottom:20px;line-height:1.7;">
+        중지 후에는 해당 예약의 자동 방송이 실행되지 않습니다.<br>
+        필요 시 수동 방송 또는 재예약을 이용해 주세요.
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal('modal-stop-confirm')">취소</button>
+        <button id="btn-confirm-stop" class="btn-save" style="background:var(--red);box-shadow:0 4px 14px rgba(248,113,113,0.3);" onclick="confirmStop()">방송 중지</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 비밀번호 찾기 모달 ── -->
+  <div class="modal-bg" id="modal-find-pw">
+    <div class="modal-box" style="width:420px;">
+      <div class="modal-title">
+        <span>🔑 비밀번호 찾기</span>
+        <button class="modal-close-btn" onclick="closeModal('modal-find-pw')">✕</button>
+      </div>
+
+      <!-- step 1: 이메일 입력 -->
+      <div id="find-pw-step1">
+        <p style="font-size:13px;color:var(--text-hint);margin-bottom:20px;line-height:1.7;">
+          등록된 이메일 주소를 입력하면 임시 비밀번호를 발송해 드립니다.
+        </p>
+        <div class="modal-form">
+          <div class="form-group">
+            <div class="form-label">아이디</div>
+            <input class="form-input" id="find-id-input" placeholder="관리자 아이디">
+          </div>
+          <div class="form-group">
+            <div class="form-label">등록된 이메일</div>
+            <input class="form-input" type="email" id="find-email-input" placeholder="example@email.com">
+          </div>
+          <div id="find-pw-error" style="font-size:12px;color:var(--red);display:none;padding:8px 12px;background:var(--red-pale);border-radius:6px;"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" onclick="closeModal('modal-find-pw')">취소</button>
+          <button class="btn-save" id="btn-send-temp-pw" onclick="sendTempPw()">임시 비밀번호 발송</button>
+        </div>
+      </div>
+
+      <!-- step 2: 발송 완료 -->
+      <div id="find-pw-step2" style="display:none;text-align:center;padding:10px 0 6px;">
+        <div style="font-size:48px;margin-bottom:16px;">📧</div>
+        <div style="font-size:17px;font-weight:600;color:var(--text);margin-bottom:8px;">이메일이 발송되었습니다!</div>
+        <div id="find-pw-sent-desc" style="font-size:13px;color:var(--text-hint);line-height:1.7;margin-bottom:8px;"></div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;margin:16px 0;text-align:left;">
+          <div style="font-size:11px;color:var(--text-hint);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">임시 비밀번호 (시뮬레이션)</div>
+          <div id="temp-pw-display" style="font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--primary);letter-spacing:2px;"></div>
+          <div style="font-size:11px;color:var(--text-hint);margin-top:6px;">⚠️ 로그인 후 즉시 비밀번호를 변경해 주세요.</div>
+        </div>
+        <div class="modal-footer" style="justify-content:center;">
+          <button class="btn-save" onclick="closeModal('modal-find-pw');resetFindPw()">확인</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ══════════════════════════════════════
+// ══════════════════════════════════════
+// API 연동 레이어
+// ══════════════════════════════════════
+
+// 서버 URL — 같은 서버에서 서빙될 경우 '' (빈 문자열), 분리 서버면 'http://서버IP:3000' 입력
+const API_BASE = '';
+
+// JWT 토큰 관리
+const Token = {
+  get:    ()      => localStorage.getItem('admin_token'),
+  set:    (t)     => localStorage.setItem('admin_token', t),
+  remove: ()      => localStorage.removeItem('admin_token'),
+};
+
+// fetch 래퍼 — 인증 헤더 자동 첨부, 401시 자동 로그아웃
+async function api(method, path, body) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+  };
+  const token = Token.get();
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+  if (body)  opts.body = JSON.stringify(body);
+
+  const res  = await fetch(API_BASE + path, opts);
+  const data = await res.json().catch(() => ({}));
+
+  if (res.status === 401 || res.status === 403) {
+    Token.remove();
+    showLoginScreen();
+    return null;
+  }
+  if (!res.ok) {
+    throw new Error(data.message || `HTTP ${res.status}`);
+  }
+  return data;
+}
+
+// 로그인 화면 전환
+function showLoginScreen() {
+  Token.remove();
+  const screen = document.getElementById('login-screen');
+  screen.style.display = 'flex';
+  screen.classList.remove('hiding');
+  screen.style.animation = 'fadeIn 0.3s ease';
+  document.getElementById('app-wrap').classList.remove('visible');
+  document.getElementById('l-id').value = '';
+  document.getElementById('l-pw').value = '';
+  document.getElementById('btn-login').disabled = false;
+  document.getElementById('btn-login').innerHTML = '<span>🔐</span> 로그인';
+}
+
+// 대시보드 진입 후 유저 정보 반영
+function applyUserInfo(admin) {
+  document.querySelector('.user-name').textContent = admin.name || admin.username;
+  document.querySelector('.user-role').textContent = '관리자 · 전체 권한';
+  document.querySelector('.user-avatar').textContent = '👩‍💼';
+  const curIdEl = document.getElementById('cur-id-display');
+  if (curIdEl) curIdEl.value = admin.username;
+  const emailEl = document.getElementById('admin-email');
+  if (emailEl && admin.email) emailEl.value = admin.email;
+  // 로고 유치원명 반영 (선택)
+  if (admin.kindergartenName) document.querySelector('.logo-text').textContent = admin.kindergartenName;
+}
+
+// ── 로그인 ──
+async function doLogin() {
+  const id  = document.getElementById('l-id').value.trim();
+  const pw  = document.getElementById('l-pw').value;
+  const err = document.getElementById('login-error');
+  const btn = document.getElementById('btn-login');
+
+  if (!id || !pw) {
+    document.getElementById('login-error-msg').textContent = '아이디와 비밀번호를 모두 입력해주세요.';
+    err.classList.add('show'); return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span style="display:inline-block;animation:spin 0.7s linear infinite">⏳</span> 확인 중...';
+  err.classList.remove('show');
+
+  try {
+    const data = await api('POST', '/api/auth/login', { username: id, password: pw });
+    if (!data) return; // 401 처리됨
+
+    Token.set(data.token);
+    if (document.getElementById('l-remember').checked) {
+      localStorage.setItem('admin_user', JSON.stringify(data.admin));
+    }
+
+    btn.innerHTML = '<span>✅</span> 로그인 성공';
+    applyUserInfo(data.admin);
+
+    const screen = document.getElementById('login-screen');
+    screen.classList.add('hiding');
+    setTimeout(() => {
+      screen.style.display = 'none';
+      document.getElementById('app-wrap').classList.add('visible');
+      loadDashboardData();
+    }, 420);
+
+  } catch (e) {
+    document.getElementById('login-error-msg').textContent = e.message || '아이디 또는 비밀번호가 올바르지 않습니다.';
+    err.classList.add('show');
+    btn.disabled = false;
+    btn.innerHTML = '<span>🔐</span> 로그인';
+    const card = document.querySelector('.login-card');
+    card.style.animation = 'shake 0.4s ease';
+    setTimeout(() => card.style.animation = '', 400);
+  }
+}
+
+// ── 로그아웃 ──
+function doLogout() {
+  showLoginScreen();
+  showToast('로그아웃되었습니다', '👋');
+}
+
+// ── 토큰 유효성 확인 후 자동 복원 ──
+(async function checkSession() {
+  const token = Token.get();
+  const saved = localStorage.getItem('admin_user');
+  if (!token || !saved) return;
+
+  try {
+    // 헬스체크 겸 토큰 검증
+    const data = await api('GET', '/api/health');
+    if (data) {
+      const user = JSON.parse(saved);
+      applyUserInfo(user);
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-wrap').classList.add('visible');
+      loadDashboardData();
+    }
+  } catch {
+    Token.remove();
+  }
+})();
+
+// ── 대시보드 초기 데이터 로드 ──
+async function loadDashboardData() {
+  try {
+    const today = new Date().toISOString().slice(0,10);
+    const [resData, logData] = await Promise.all([
+      api('GET', `/api/reservations?date=${today}`),
+      api('GET', '/api/kg/reservations/logs'),
+    ]);
+    if (resData?.data) renderReservationTable(resData.data);
+    if (logData?.data) renderBroadcastLogs(logData.data);
+  } catch (e) {
+    console.warn('대시보드 데이터 로드 실패:', e.message);
+  }
+}
+
+// 예약 테이블 동적 렌더링
+function renderReservationTable(rows) {
+  const tbody = document.querySelector('#reservation-table tbody');
+  if (!tbody || rows.length === 0) return;
+  // 서버 데이터가 있을 때만 덮어씀
+  tbody.innerHTML = rows.map(r => {
+    const statusMap = {
+      pending:    '<span class="status-pill s-pending">대기 중</span>',
+      announced:  '<span class="status-pill s-announced">방송됨</span>',
+      done:       '<span class="status-pill s-done">완료</span>',
+      cancelled:  '<span class="status-pill s-cancelled">취소됨</span>',
+    };
+    const actionBtn = (r.status === 'pending')
+      ? `<div style="display:flex;gap:5px;">
+           <button class="btn-announce" onclick="apiAnnounce(${r.id},this)">📢 방송</button>
+           <button class="btn-stop" onclick="apiCancelRes(${r.id},this)">🚫 중지</button>
+         </div>`
+      : `<button class="btn-announce" disabled>${r.status === 'cancelled' ? '취소됨' : '방송완료'}</button>`;
+    return `
+      <tr data-id="${r.id}" data-status="${r.status}">
+        <td><div class="td-name">
+          <div class="child-ava">${r.student_emoji||'🧒'}</div>
+          <div><div class="td-child-name">${r.student_name}</div></div>
+        </div></td>
+        <td style="color:var(--text)">${r.classroom_emoji||''} ${r.classroom_name}</td>
+        <td><span class="time-badge">${r.pickup_time}</span></td>
+        <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">-</td>
+        <td style="color:var(--text-sub)">-</td>
+        <td>${statusMap[r.status]||''}</td>
+        <td>${actionBtn}</td>
+      </tr>`;
+  }).join('');
+}
+
+// 방송 로그 테이블 렌더링
+function renderBroadcastLogs(rows) {
+  const tbody = document.getElementById('log-tbody');
+  if (!tbody || rows.length === 0) return;
+  tbody.innerHTML = rows.slice(0,20).map(r => `
+    <tr>
+      <td style="font-family:'DM Mono',monospace;color:var(--text-hint)">${r.created_at?.slice(11,19)||'-'}</td>
+      <td><div class="td-name"><div class="child-ava">🧒</div><div><div class="td-child-name">${r.student_name}</div></div></div></td>
+      <td style="color:var(--text)">${r.classroom_name}</td>
+      <td style="color:var(--text)">${r.ment}</td>
+      <td><span class="status-pill" style="background:${r.type==='manual'?'var(--primary-pale)':'var(--green-pale)'};color:${r.type==='manual'?'var(--primary)':'var(--green)'}">${r.type==='manual'?'수동':'자동'}</span></td>
+      <td><span class="status-pill s-done">성공</span></td>
+    </tr>`).join('');
+}
+
+// API 방송 트리거
+async function apiAnnounce(resId, btn) {
+  try {
+    btn.disabled = true; btn.textContent = '방송중...';
+    const data = await api('POST', `/api/reservations/${resId}/announce`);
+    if (data?.success) {
+      const row = btn.closest('tr');
+      row.querySelector('.status-pill').className = 'status-pill s-done';
+      row.querySelector('.status-pill').innerHTML = '<span></span>완료';
+      btn.closest('td').innerHTML = '<button class="btn-announce" disabled>방송완료</button>';
+      showToast('방송이 전송되었습니다', '📢', data.ment);
+    }
+  } catch(e) {
+    btn.disabled = false; btn.textContent = '📢 방송';
+    showToast(e.message, '⚠️');
+  }
+}
+
+// API 예약 취소
+async function apiCancelRes(resId, btn) {
+  if (!confirm('예약을 취소하시겠습니까?')) return;
+  try {
+    await api('PUT', `/api/reservations/${resId}/cancel`);
+    const row = btn.closest('tr');
+    row.dataset.status = 'cancelled';
+    row.querySelector('.status-pill').className = 'status-pill s-cancelled';
+    row.querySelector('.status-pill').innerHTML = '<span></span>취소됨';
+    btn.closest('td').innerHTML = '<button class="btn-announce" disabled style="opacity:0.4">취소됨</button>';
+    showToast('예약이 취소되었습니다', '🚫');
+  } catch(e) { showToast(e.message, '⚠️'); }
+}
+
+// 흔들기 키프레임
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = `
+@keyframes shake {
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-8px)}
+  40%{transform:translateX(8px)}
+  60%{transform:translateX(-5px)}
+  80%{transform:translateX(5px)}
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+`;
+document.head.appendChild(shakeStyle);
+
+// ── 시계 ──
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('topbar-time').textContent = `${h}:${m}:${s}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── 페이지 전환 ──
+const pageTitles = {
+  dashboard: '대시보드',
+  reservations: '예약 관리',
+  broadcast: '수동 방송',
+  classrooms: '교실 현황',
+  log: '방송 로그',
+  settings: '환경 설정'
+};
+
+function showPage(id) {
+  document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.getElementById('page-title').textContent = pageTitles[id];
+  // 해당 nav 활성화
+  const navs = document.querySelectorAll('.nav-item');
+  navs.forEach(n => {
+    if (n.textContent.trim().startsWith(pageTitles[id]?.charAt(0)) || n.onclick?.toString().includes(id)) {
+      n.classList.add('active');
+    }
+  });
+}
+
+// nav-item active 정확히 설정
+document.querySelectorAll('.nav-item').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// ── 방송 예약 관리 트리거 ──
+function triggerAnnounce(btn, name, cls) {
+  const row = btn.closest('tr');
+  row.querySelector('.status-pill').className = 'status-pill s-announced';
+  row.querySelector('.status-pill').innerHTML = '<span></span>방송됨';
+  // 방송·중지 버튼 모두 비활성화
+  row.querySelectorAll('.btn-announce, .btn-stop').forEach(b => { b.disabled = true; });
+  btn.textContent = '방송중...';
+  setTimeout(() => {
+    row.querySelector('.status-pill').className = 'status-pill s-done';
+    row.querySelector('.status-pill').innerHTML = '<span></span>완료';
+    btn.textContent = '방송완료';
+    addLogEntry(name, cls, '수동');
+  }, 1500);
+  showToast(`📢 ${name} 하원 방송 전송`, '📢', `${cls} 스피커로 방송 중...`);
+}
+
+// ── 방송 중지 ──
+let stopTarget = null; // { row, name, cls, time }
+
+function openStopModal(btn, name, cls, time) {
+  stopTarget = { row: btn.closest('tr'), name, cls, time };
+  document.getElementById('stop-modal-desc').innerHTML =
+    `원아: <strong style="color:var(--text)">${name}</strong> &nbsp;|&nbsp; 반: <strong style="color:var(--text)">${cls}</strong><br>
+     예약 하원 시간: <strong style="color:var(--text)">${time}</strong>`;
+  document.getElementById('modal-stop-confirm').classList.add('show');
+}
+
+function confirmStop() {
+  if (!stopTarget) return;
+  const { row, name, cls } = stopTarget;
+  // 상태 변경
+  row.dataset.status = 'cancelled';
+  row.querySelector('.status-pill').className = 'status-pill s-cancelled';
+  row.querySelector('.status-pill').innerHTML = '<span></span>중지됨';
+  // 버튼 교체 → 재예약 버튼만 남김
+  const td = row.querySelector('.btn-announce').closest('td');
+  td.innerHTML = `<button class="btn-announce" style="background:var(--amber-pale);border-color:rgba(251,191,36,0.25);color:var(--amber);" onclick="reSchedule(this,'${name}','${cls}')">↺ 재예약</button>`;
+  closeModal('modal-stop-confirm');
+  showToast(`${name} 방송 예약이 중지되었습니다`, '🚫', `${cls} · 수동으로 재예약하실 수 있습니다`);
+  stopTarget = null;
+}
+
+function reSchedule(btn, name, cls) {
+  const row = btn.closest('tr');
+  row.dataset.status = 'pending';
+  row.querySelector('.status-pill').className = 'status-pill s-pending';
+  row.querySelector('.status-pill').innerHTML = '<span></span>대기 중';
+  btn.closest('td').innerHTML = `
+    <div style="display:flex;gap:5px;">
+      <button class="btn-announce" onclick="triggerAnnounce(this,'${name}','${cls}')">📢 방송</button>
+      <button class="btn-stop" onclick="openStopModal(this,'${name}','${cls}','')">🚫 중지</button>
+    </div>`;
+  showToast(`${name} 방송 예약이 복구되었습니다`, '✅', `${cls}`);
+}
+
+// ── 수동 방송 미리보기 ──
+function updatePreview() {
+  const child = document.getElementById('bc-child').value;
+  const msg = document.getElementById('bc-msg').value;
+  const cls = document.getElementById('bc-class').value;
+  if (!child) {
+    document.getElementById('bc-preview').textContent = '원아를 선택하면 방송 내용이 미리보기에 표시됩니다.';
+    return;
+  }
+  const name = child.split(' ')[0];
+  document.getElementById('bc-preview').innerHTML =
+    `<strong style="color:var(--text)">"${name} ${msg}"</strong><br>
+     <span style="font-size:11px;color:var(--text-hint)">▶ ${cls} 스피커로 송출</span>`;
+}
+
+let manualCount = 0;
+
+function sendBroadcast() {
+  const child = document.getElementById('bc-child').value;
+  const msg = document.getElementById('bc-msg').value;
+  const cls = document.getElementById('bc-class').value;
+  if (!child) { showToast('원아를 선택해주세요', '⚠️', '방송할 원아를 먼저 선택하세요'); return; }
+  const name = child.split(' ')[0];
+  showToast(`방송 전송 완료`, '📢', `"${name} ${msg}" → ${cls}`);
+  addLogEntry(name, cls, '수동');
+  manualCount++;
+  document.getElementById('stat-manual').textContent = manualCount;
+  document.getElementById('stat-done').textContent = parseInt(document.getElementById('stat-done').textContent) + 1;
+}
+
+function addLogEntry(name, cls, type) {
+  const now = new Date();
+  const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const color = type === '수동' ? 'var(--primary)' : 'var(--green)';
+  const bgColor = type === '수동' ? 'var(--primary-pale)' : 'var(--green-pale)';
+
+  // 방송 로그 패널
+  const logList = document.getElementById('broadcast-log');
+  const item = document.createElement('div');
+  item.className = 'log-item';
+  item.style.cssText = 'animation: fadeIn 0.3s ease forwards';
+  item.innerHTML = `
+    <div class="log-dot" style="background:${color};margin-top:5px;flex-shrink:0;width:8px;height:8px;border-radius:50%;"></div>
+    <div class="log-time">${timeStr}</div>
+    <div class="log-info">
+      <div class="log-title">${name} 하원 준비 방송</div>
+      <div class="log-sub">${cls} · ${type}</div>
+    </div>`;
+  logList.insertBefore(item, logList.firstChild);
+
+  // 방송 로그 테이블
+  const tbody = document.getElementById('log-tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td style="font-family:'DM Mono',monospace;color:var(--text-hint)">${timeStr}:00</td>
+    <td><div class="td-name"><div class="child-ava">🧒</div><div><div class="td-child-name">${name}</div></div></div></td>
+    <td style="color:var(--text)">${cls}</td>
+    <td style="color:var(--text)">${name} 하원 준비해 주세요</td>
+    <td><span class="status-pill" style="background:${bgColor};color:${color}">${type}</span></td>
+    <td><span class="status-pill s-done">성공</span></td>`;
+  tbody.insertBefore(tr, tbody.firstChild);
+}
+
+// ── 테이블 필터 ──
+function filterTable(q) {
+  document.querySelectorAll('#reservation-table tbody tr').forEach(tr => {
+    tr.style.display = tr.textContent.includes(q) ? '' : 'none';
+  });
+}
+
+function filterStatus(val) {
+  document.querySelectorAll('#reservation-table tbody tr').forEach(tr => {
+    tr.style.display = (val === 'all' || tr.dataset.status === val) ? '' : 'none';
+  });
+}
+
+// ══════════════════════════════════════
+// 환경설정 JS
+// ══════════════════════════════════════
+
+// ── 설정 탭 전환 ──
+function showStab(id) {
+  document.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.stab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('stab-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ── 유치원 정보 저장 ──
+function saveKgInfo() {
+  const name = document.getElementById('kg-name').value.trim();
+  const phone = document.getElementById('kg-phone').value.trim();
+  if (!name) { showToast('유치원 이름을 입력해주세요', '⚠️'); return; }
+  const list = document.getElementById('kg-list');
+  const existing = list.querySelector('.item-card');
+  if (existing) {
+    existing.querySelector('.item-card-name').textContent = name;
+    existing.querySelector('.item-card-sub').textContent = `부산시 해운대구 · ${phone} · 4개 반`;
+  }
+  // 로고도 업데이트
+  document.querySelector('.logo-text').textContent = name;
+  showToast('유치원 정보가 저장되었습니다', '✅', name);
+}
+
+// ── 반 추가 ──
+function addClass() {
+  const name = document.getElementById('cls-name-input').value.trim();
+  const emoji = document.getElementById('cls-emoji-input').value.trim() || '🏫';
+  const teacher = document.getElementById('cls-teacher-input').value.trim();
+  if (!name) { showToast('반 이름을 입력해주세요', '⚠️'); return; }
+  const list = document.getElementById('cls-list');
+  const card = document.createElement('div');
+  card.className = 'item-card';
+  card.dataset.cls = name;
+  card.innerHTML = `
+    <div class="item-card-icon">${emoji}</div>
+    <div class="item-card-info">
+      <div class="item-card-name">${emoji} ${name}</div>
+      <div class="item-card-sub">담임: ${teacher || '미지정'} · 원생 0명</div>
+    </div>
+    <div class="item-card-actions">
+      <button class="btn-sm btn-sm-primary" onclick="showPage('settings')">원생보기</button>
+      <button class="btn-sm btn-sm-red" onclick="removeItem(this)">삭제</button>
+    </div>`;
+  list.appendChild(card);
+  // 원생 선택 셀렉트에도 추가
+  const sel = document.getElementById('stu-cls-filter');
+  const opt = document.createElement('option');
+  opt.value = name; opt.textContent = `${emoji} ${name}`;
+  sel.appendChild(opt);
+  document.getElementById('cls-name-input').value = '';
+  document.getElementById('cls-emoji-input').value = '';
+  document.getElementById('cls-teacher-input').value = '';
+  showToast(`${emoji} ${name} 등록 완료`, '✅');
+}
+
+// ── 항목 삭제 ──
+function removeItem(btn) {
+  const card = btn.closest('.item-card, .family-card');
+  card.style.transition = 'opacity 0.2s, transform 0.2s';
+  card.style.opacity = '0';
+  card.style.transform = 'translateX(10px)';
+  setTimeout(() => card.remove(), 200);
+}
+
+// ── 원생 데이터 ──
+let students = [
+  { id:1, name:'김민준', cls:'해바라기반', age:'만 5세', emoji:'👦', family:[
+    {name:'김수연', rel:'모(어머니)', phone:'010-1234-5678', notify:'예약 알림 수신'},
+    {name:'김태현', rel:'부(아버지)', phone:'010-9876-5432', notify:'방송 완료 알림만'},
+  ]},
+  { id:2, name:'박하준', cls:'해바라기반', age:'만 5세', emoji:'🧒', family:[
+    {name:'박민서', rel:'모(어머니)', phone:'010-2222-3333', notify:'예약 알림 수신'},
+  ]},
+  { id:3, name:'이서연', cls:'민들레반', age:'만 4세', emoji:'👧', family:[
+    {name:'이지수', rel:'모(어머니)', phone:'010-4444-5555', notify:'예약 알림 수신'},
+    {name:'이재훈', rel:'부(아버지)', phone:'010-6666-7777', notify:'알림 비활성화'},
+  ]},
+  { id:4, name:'윤소율', cls:'무지개반', age:'만 4세', emoji:'👧', family:[
+    {name:'윤태양', rel:'부(아버지)', phone:'010-8888-9999', notify:'예약 알림 수신'},
+  ]},
+  { id:5, name:'최준호', cls:'별빛반', age:'만 5세', emoji:'👦', family:[
+    {name:'최현우', rel:'부(아버지)', phone:'010-1111-2222', notify:'예약 알림 수신'},
+    {name:'김미경', rel:'모(어머니)', phone:'010-3333-4444', notify:'예약 알림 수신'},
+  ]},
+  { id:6, name:'정다은', cls:'별빛반', age:'만 5세', emoji:'👧', family:[
+    {name:'정은희', rel:'모(어머니)', phone:'010-5555-6666', notify:'예약 알림 수신'},
+  ]},
+  { id:7, name:'한지우', cls:'민들레반', age:'만 4세', emoji:'👦', family:[
+    {name:'한승민', rel:'부(아버지)', phone:'010-7777-8888', notify:'예약 알림 수신'},
+  ]},
+];
+let nextStudentId = 8;
+let currentStudentId = null;
+
+function renderStudents() {
+  const filter = document.getElementById('stu-cls-filter').value;
+  const list = document.getElementById('stu-list');
+  const filtered = filter === 'all' ? students : students.filter(s => s.cls === filter);
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty-hint">등록된 원생이 없습니다. 위에서 원생을 추가해주세요.</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(s => `
+    <div class="item-card" id="stu-card-${s.id}">
+      <div class="item-card-icon">${s.emoji}</div>
+      <div class="item-card-info">
+        <div class="item-card-name">${s.name}</div>
+        <div class="item-card-sub">${s.cls} · ${s.age} · 가족 ${s.family.length}명</div>
+      </div>
+      <div class="item-card-actions">
+        <button class="btn-sm btn-sm-green" onclick="toggleFamilyPanel(${s.id})">가족관리</button>
+        <button class="btn-sm btn-sm-red" onclick="removeStudent(${s.id})">삭제</button>
+      </div>
+    </div>
+    <div class="expand-panel" id="family-panel-${s.id}">
+      <div class="expand-title">가족 목록</div>
+      <div id="family-list-${s.id}">
+        ${s.family.map((f,fi) => familyCardHTML(s.id, fi, f)).join('')}
+      </div>
+      ${s.family.length === 0 ? '<div class="empty-hint" style="margin-bottom:10px;">등록된 가족이 없습니다</div>' : ''}
+      <button class="btn-sm btn-sm-primary" style="margin-top:8px;height:32px;padding:0 14px;font-size:12px;" onclick="openAddFamilyModal(${s.id})">+ 가족 추가</button>
+    </div>
+  `).join('');
+}
+
+function familyCardHTML(stuId, fi, f) {
+  const notifyColor = f.notify === '알림 비활성화' ? 'var(--red)' : 'var(--green)';
+  const notifyBg   = f.notify === '알림 비활성화' ? 'var(--red-pale)' : 'var(--green-pale)';
+  return `
+    <div class="family-card" id="fam-${stuId}-${fi}">
+      <div class="family-rel-badge">${f.rel}</div>
+      <div class="family-info">
+        <div class="family-name">${f.name}</div>
+        <div class="family-phone">${f.phone}</div>
+      </div>
+      <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;background:${notifyBg};color:${notifyColor};white-space:nowrap;flex-shrink:0;">${f.notify}</span>
+      <button class="btn-sm btn-sm-red" style="flex-shrink:0;" onclick="removeFamily(${stuId},${fi})">삭제</button>
+    </div>`;
+}
+
+function toggleFamilyPanel(stuId) {
+  const panel = document.getElementById('family-panel-' + stuId);
+  panel.classList.toggle('open');
+}
+
+function removeStudent(stuId) {
+  students = students.filter(s => s.id !== stuId);
+  renderStudents();
+  showToast('원생이 삭제되었습니다', '🗑️');
+}
+
+function removeFamily(stuId, fi) {
+  students.find(s => s.id === stuId).family.splice(fi, 1);
+  renderStudents();
+  // 패널 다시 열기
+  setTimeout(() => {
+    const panel = document.getElementById('family-panel-' + stuId);
+    if (panel) panel.classList.add('open');
+  }, 50);
+}
+
+function filterStudentsByCls(cls) {
+  const sel = document.getElementById('stu-cls-filter');
+  sel.value = cls;
+  showStab('students');
+  renderStudents();
+}
+
+// ── 원생 추가 모달 ──
+function openAddStudentModal() {
+  document.getElementById('new-stu-name').value = '';
+  document.getElementById('modal-add-student').classList.add('show');
+}
+
+function addStudent() {
+  const name = document.getElementById('new-stu-name').value.trim();
+  const cls  = document.getElementById('new-stu-cls').value.replace(/^[^\s]+ /, '');
+  const age  = document.getElementById('new-stu-age').value;
+  if (!name) { showToast('원생 이름을 입력해주세요', '⚠️'); return; }
+  const emojis = ['🧒','👦','👧'];
+  students.push({ id: nextStudentId++, name, cls: cls.replace(/^[🌻🌈⭐🌼] /, '').trim(), age, emoji: emojis[Math.floor(Math.random()*3)], family:[] });
+  closeModal('modal-add-student');
+  renderStudents();
+  showToast(`${name} 원생이 등록되었습니다`, '✅', cls);
+}
+
+// ── 가족 추가 모달 ──
+function openAddFamilyModal(stuId) {
+  currentStudentId = stuId;
+  const stu = students.find(s => s.id === stuId);
+  document.getElementById('modal-family-target').textContent = `대상 원생: ${stu.name} (${stu.cls})`;
+  document.getElementById('fam-name').value = '';
+  document.getElementById('fam-phone').value = '';
+  document.getElementById('modal-add-family').classList.add('show');
+}
+
+function addFamilyMember() {
+  const name   = document.getElementById('fam-name').value.trim();
+  const rel    = document.getElementById('fam-rel').value;
+  const phone  = document.getElementById('fam-phone').value.trim();
+  const notify = document.getElementById('fam-notify').value;
+  if (!name || !phone) { showToast('이름과 연락처를 입력해주세요', '⚠️'); return; }
+  const stu = students.find(s => s.id === currentStudentId);
+  stu.family.push({ name, rel, phone, notify });
+  closeModal('modal-add-family');
+  renderStudents();
+  setTimeout(() => {
+    const panel = document.getElementById('family-panel-' + currentStudentId);
+    if (panel) panel.classList.add('open');
+  }, 50);
+  showToast(`${name} 가족 등록 완료`, '✅', `${stu.name}의 ${rel}`);
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+// 모달 배경 클릭 닫기
+document.querySelectorAll('.modal-bg').forEach(bg => {
+  bg.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('show');
+  });
+});
+
+// ── 방송 시간 설정 ──
+const bsrValues = { default: 10, cls1: 10, cls2: 10, cls3: 10, cls4: 10 };
+const bsrDefault = 10;
+
+function adjustBsr(key, delta) {
+  bsrValues[key] = Math.max(1, Math.min(30, bsrValues[key] + delta));
+  document.getElementById('bsr-' + key).textContent = bsrValues[key];
+  if (key !== 'default') {
+    const sub = document.getElementById('bsr-sub-' + key);
+    if (sub) sub.textContent = bsrValues[key] === bsrValues.default ? '기본값 적용 중' : `개별 설정: ${bsrValues[key]}분 전`;
+  } else {
+    // 기본값 변경 시 서브 텍스트 전체 갱신
+    ['cls1','cls2','cls3','cls4'].forEach(k => {
+      const sub = document.getElementById('bsr-sub-' + k);
+      if (sub && bsrValues[k] === bsrValues.default) sub.textContent = '기본값 적용 중';
+    });
+  }
+}
+
+function saveBroadcastSettings() {
+  showToast('방송 설정이 저장되었습니다', '✅', `기본값 ${bsrValues.default}분 전`);
+}
+
+// ══════════════════════════════════════
+// 계정 관리 (API 연동)
+// ══════════════════════════════════════
+
+async function changeId() {
+  const newId  = document.getElementById('new-id').value.trim();
+  const confPw = document.getElementById('confirm-pw-for-id').value;
+  const errEl  = document.getElementById('id-change-error');
+  errEl.style.display = 'none';
+
+  if (!newId || newId.length < 4) {
+    errEl.textContent = '아이디는 4자 이상이어야 합니다.'; errEl.style.display = 'block'; return;
+  }
+  try {
+    await api('PUT', '/api/auth/change-id', { newUsername: newId, currentPassword: confPw });
+    // 로컬 저장 갱신
+    const saved = JSON.parse(localStorage.getItem('admin_user') || '{}');
+    saved.username = newId;
+    localStorage.setItem('admin_user', JSON.stringify(saved));
+    document.getElementById('cur-id-display').value = newId;
+    document.getElementById('new-id').value = '';
+    document.getElementById('confirm-pw-for-id').value = '';
+    showToast('아이디가 변경되었습니다', '✅', `새 아이디: ${newId}`);
+  } catch(e) {
+    errEl.textContent = e.message; errEl.style.display = 'block';
+  }
+}
+
+async function changePw() {
+  const curPw  = document.getElementById('cur-pw').value;
+  const newPw  = document.getElementById('new-pw').value;
+  const confPw = document.getElementById('new-pw-confirm').value;
+  const errEl  = document.getElementById('pw-change-error');
+  errEl.style.display = 'none';
+
+  if (newPw.length < 6) {
+    errEl.textContent = '새 비밀번호는 6자 이상이어야 합니다.'; errEl.style.display = 'block'; return;
+  }
+  if (newPw !== confPw) {
+    errEl.textContent = '새 비밀번호가 일치하지 않습니다.'; errEl.style.display = 'block'; return;
+  }
+  try {
+    await api('PUT', '/api/auth/change-pw', { currentPassword: curPw, newPassword: newPw });
+    document.getElementById('cur-pw').value = '';
+    document.getElementById('new-pw').value = '';
+    document.getElementById('new-pw-confirm').value = '';
+    document.getElementById('pw-strength-bar').style.width = '0';
+    document.getElementById('pw-strength-label').textContent = '';
+    showToast('비밀번호가 변경되었습니다', '✅', '다음 로그인부터 새 비밀번호를 사용하세요');
+    // 재로그인 유도 (토큰 만료 전이지만 보안상 로그아웃)
+    setTimeout(() => { showToast('보안을 위해 다시 로그인해 주세요', '🔐'); setTimeout(doLogout, 1500); }, 1200);
+  } catch(e) {
+    errEl.textContent = e.message; errEl.style.display = 'block';
+  }
+}
+
+function checkPwStrength() {
+  const pw  = document.getElementById('new-pw').value;
+  const bar = document.getElementById('pw-strength-bar');
+  const lbl = document.getElementById('pw-strength-label');
+  let score = 0;
+  if (pw.length >= 6)  score++;
+  if (pw.length >= 10) score++;
+  if (/[A-Z]/.test(pw) || /[a-z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  const levels = [
+    { w:'0%',   bg:'transparent',    txt:'' },
+    { w:'25%',  bg:'var(--red)',      txt:'약함' },
+    { w:'50%',  bg:'var(--amber)',    txt:'보통' },
+    { w:'75%',  bg:'var(--primary)',  txt:'강함' },
+    { w:'100%', bg:'var(--green)',    txt:'매우 강함' },
+  ];
+  const l = levels[Math.min(score, 4)];
+  bar.style.width = l.w; bar.style.background = l.bg;
+  lbl.textContent = l.txt; lbl.style.color = l.bg;
+}
+
+async function saveEmail() {
+  const email = document.getElementById('admin-email').value.trim();
+  if (!email || !email.includes('@')) {
+    showToast('올바른 이메일 주소를 입력해주세요', '⚠️'); return;
+  }
+  try {
+    await api('PUT', '/api/auth/email', { email });
+    const saved = JSON.parse(localStorage.getItem('admin_user') || '{}');
+    saved.email = email;
+    localStorage.setItem('admin_user', JSON.stringify(saved));
+    const st = document.getElementById('email-status');
+    document.getElementById('email-status-text').textContent = `${email} 으로 등록되었습니다`;
+    st.style.display = 'flex';
+    showToast('이메일이 등록되었습니다', '✅', email);
+  } catch(e) { showToast(e.message, '⚠️'); }
+}
+
+// ── 비밀번호 찾기 (실제 이메일 발송) ──
+function openFindPwModal() {
+  document.getElementById('find-pw-step1').style.display = 'block';
+  document.getElementById('find-pw-step2').style.display = 'none';
+  document.getElementById('find-id-input').value = '';
+  document.getElementById('find-email-input').value = '';
+  document.getElementById('find-pw-error').style.display = 'none';
+  document.getElementById('modal-find-pw').classList.add('show');
+}
+
+async function sendTempPw() {
+  const inputId    = document.getElementById('find-id-input').value.trim();
+  const inputEmail = document.getElementById('find-email-input').value.trim();
+  const errEl      = document.getElementById('find-pw-error');
+  const btn        = document.getElementById('btn-send-temp-pw');
+  errEl.style.display = 'none';
+
+  if (!inputId || !inputEmail) {
+    errEl.textContent = '아이디와 이메일을 모두 입력해주세요.';
+    errEl.style.display = 'block'; return;
+  }
+
+  btn.disabled = true; btn.textContent = '발송 중...';
+  try {
+    await api('POST', '/api/auth/find-pw', { username: inputId, email: inputEmail });
+    document.getElementById('find-pw-sent-desc').innerHTML =
+      `<strong style="color:var(--text)">${inputEmail}</strong>로<br>임시 비밀번호가 발송되었습니다.`;
+    // 실제 서비스에서는 임시 비번을 화면에 표시하지 않음
+    document.getElementById('temp-pw-display').textContent = '(이메일을 확인해 주세요)';
+    document.getElementById('temp-pw-display').style.fontSize = '14px';
+    document.getElementById('temp-pw-display').style.letterSpacing = '0';
+    document.getElementById('find-pw-step1').style.display = 'none';
+    document.getElementById('find-pw-step2').style.display = 'block';
+  } catch(e) {
+    errEl.textContent = e.message || '발송 실패. 아이디와 이메일을 확인해주세요.';
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = '임시 비밀번호 발송';
+  }
+}
+
+function resetFindPw() {
+  document.getElementById('find-pw-step1').style.display = 'block';
+  document.getElementById('find-pw-step2').style.display = 'none';
+}
+
+// ── 방송 멘트 설정 ──
+const SAMPLE_NAME = '김민준';
+const SAMPLE_CLS  = '해바라기반';
+
+// {반}별 샘플 클래스 매핑
+const CLS_SAMPLES = { cls1:'해바라기반', cls2:'무지개반', cls3:'별빛반', cls4:'민들레반' };
+
+function getMentText(clsKey) {
+  const chk = document.getElementById('ment-use-' + clsKey);
+  const inp = document.getElementById('ment-' + clsKey);
+  const def = document.getElementById('ment-default').value || '{반} {이름} 학부모님, 하원 준비해 주세요';
+  if (chk && chk.checked && inp && inp.value.trim()) return inp.value.trim();
+  return def;
+}
+
+function applyMent(text, name = SAMPLE_NAME, cls = SAMPLE_CLS) {
+  return text.replace(/\{이름\}/g, name).replace(/\{반\}/g, cls);
+}
+
+function refreshMentPreviews() {
+  // 기본 미리보기
+  const defVal = document.getElementById('ment-default').value || '{반} {이름} 학부모님, 하원 준비해 주세요';
+  document.getElementById('ment-default-preview-text').textContent = applyMent(defVal);
+
+  // 반별 미리보기
+  ['cls1','cls2','cls3','cls4'].forEach(k => {
+    const chk = document.getElementById('ment-use-' + k);
+    const inp = document.getElementById('ment-' + k);
+    const prev = document.getElementById('ment-' + k + '-preview-text');
+    const prevBox = document.getElementById('ment-' + k + '-preview');
+    const sampleCls = CLS_SAMPLES[k];
+    if (chk && chk.checked) {
+      const val = inp.value.trim() || defVal;
+      prev.textContent = applyMent(val, SAMPLE_NAME, sampleCls);
+      prev.style.color = 'var(--text)';
+      prevBox.style.opacity = '1';
+    } else {
+      prev.textContent = applyMent(defVal, SAMPLE_NAME, sampleCls);
+      prev.style.color = 'var(--text-sub)';
+      prevBox.style.opacity = '0.55';
+    }
+  });
+}
+
+// 커서 위치에 변수 삽입
+function insertVar(varStr) {
+  const inp = document.getElementById('ment-default');
+  const start = inp.selectionStart;
+  const end   = inp.selectionEnd;
+  const val   = inp.value;
+  inp.value = val.slice(0, start) + varStr + val.slice(end);
+  inp.selectionStart = inp.selectionEnd = start + varStr.length;
+  inp.focus();
+  refreshMentPreviews();
+}
+
+function toggleClsMent(clsKey) {
+  const chk = document.getElementById('ment-use-' + clsKey);
+  const inp = document.getElementById('ment-' + clsKey);
+  const prevBox = document.getElementById('ment-' + clsKey + '-preview');
+  if (chk.checked) {
+    inp.disabled = false;
+    inp.style.opacity = '1';
+    inp.focus();
+  } else {
+    inp.disabled = true;
+    inp.style.opacity = '0.45';
+    prevBox.style.opacity = '0.45';
+  }
+  refreshMentPreviews();
+}
+
+function resetDefaultMent() {
+  document.getElementById('ment-default').value = '{반} {이름} 학부모님, 하원 준비해 주세요';
+  refreshMentPreviews();
+}
+
+function applyTemplate(tpl) {
+  document.getElementById('ment-default').value = tpl;
+  refreshMentPreviews();
+  showToast('템플릿이 적용되었습니다', '📝', applyMent(tpl));
+}
+
+function saveMentSettings() {
+  const defVal = document.getElementById('ment-default').value.trim();
+  if (!defVal) { showToast('기본 멘트를 입력해주세요', '⚠️'); return; }
+  showToast('방송 멘트가 저장되었습니다', '✅', applyMent(defVal));
+}
+
+// 초기 미리보기 렌더링
+setTimeout(refreshMentPreviews, 150);
+
+// 초기 원생 목록 렌더링
+document.addEventListener('DOMContentLoaded', () => { renderStudents(); });
+setTimeout(renderStudents, 100);
+
+// ── ── ── ── ── ── ── ── ── ──
+
+
+function showToast(title, icon = '✅', sub = '') {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.style.position = 'relative';
+  el.style.overflow = 'hidden';
+  el.innerHTML = `
+    <div class="toast-icon">${icon}</div>
+    <div class="toast-body">
+      <div class="toast-title">${title}</div>
+      ${sub ? `<div class="toast-sub">${sub}</div>` : ''}
+    </div>
+    <div class="toast-prog"></div>`;
+  container.appendChild(el);
+  setTimeout(() => {
+    el.style.transition = 'opacity 0.3s, transform 0.3s';
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(20px)';
+    setTimeout(() => el.remove(), 300);
+  }, 3000);
+}
+</script>
+</div><!-- /app-wrap -->
+</body>
+</html>

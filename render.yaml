@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: hawoenim
+    runtime: node
+    plan: free
+    buildCommand: npm install && node src/setup.js
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DB_PATH
+        value: /data/hawoenim.db
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SUPER_PW
+        value: super1234
+      - key: MAIL_HOST
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_SECURE
+        value: false
+      - key: MAIL_USER
+        sync: false
+      - key: MAIL_PASS
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+    disk:
+      name: hawoenim-db
+      mountPath: /data
+      sizeGB: 1

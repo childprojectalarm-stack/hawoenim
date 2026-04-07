@@ -1,0 +1,25 @@
+{
+  "name": "hawoenim-v2",
+  "version": "2.0.0",
+  "description": "하원알림 멀티테넌트 유치원 하원 예약 시스템",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "setup": "node src/setup.js",
+    "setup:sample": "node src/setup.js --sample"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "better-sqlite3": "^9.4.3",
+    "nodemailer": "^6.9.8",
+    "node-cron": "^3.0.3",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.5",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": { "nodemon": "^3.0.2" }
+}

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>하원알림 슈퍼관리자</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0C12;--s:#131720;--s2:#181D2A;--s3:#1E2436;--b:rgba(255,255,255,0.06);--b2:rgba(255,255,255,0.11);--text:#EEF0F6;--sub:#8B91A8;--hint:#4A5070;--gold:#F5C842;--gold-p:rgba(245,200,66,0.1);--blue:#4F8EF7;--blue-p:rgba(79,142,247,0.1);--green:#34D399;--green-p:rgba(52,211,153,0.1);--red:#F87171;--red-p:rgba(248,113,113,0.1);--purple:#A78BFA;--purple-p:rgba(167,139,250,0.1);--r:14px;--rs:9px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+
+/* ─ 사이드바 ─ */
+.sidebar{width:230px;background:var(--s);border-right:1px solid var(--b);display:flex;flex-direction:column;flex-shrink:0;position:fixed;height:100vh;z-index:10;}
+.logo{padding:24px 20px 18px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:10px;}
+.logo-icon{width:34px;height:34px;background:var(--gold);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.logo-text{font-size:15px;font-weight:700;color:var(--text);}
+.logo-badge{font-size:10px;background:var(--gold-p);color:var(--gold);border:1px solid rgba(245,200,66,0.25);border-radius:5px;padding:2px 7px;font-weight:700;margin-top:2px;}
+.nav{padding:14px 10px;flex:1;}
+.nav-label{font-size:10px;font-weight:700;color:var(--hint);letter-spacing:1px;text-transform:uppercase;padding:0 10px;margin-bottom:5px;margin-top:14px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--sub);border:none;background:none;width:100%;text-align:left;font-family:'Noto Sans KR',sans-serif;transition:all 0.15s;}
+.nav-item:hover{background:var(--s3);color:var(--text);}
+.nav-item.active{background:var(--gold-p);color:var(--gold);}
+.nav-icon{font-size:15px;width:18px;text-align:center;}
+.sidebar-foot{padding:14px 10px 20px;border-top:1px solid var(--b);}
+.user-row{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background 0.15s;}
+.user-row:hover{background:var(--s3);}
+.user-ava{width:30px;height:30px;background:var(--gold);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.user-name{font-size:12px;font-weight:500;color:var(--text);}
+.user-role{font-size:10px;color:var(--hint);}
+.btn-logout{width:100%;height:32px;margin-top:5px;background:var(--red-p);border:1px solid rgba(248,113,113,0.18);border-radius:var(--rs);font-size:11px;font-weight:700;color:var(--red);cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.btn-logout:hover{background:var(--red);color:#fff;}
+
+/* ─ 메인 ─ */
+.main{margin-left:230px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{height:58px;background:var(--s);border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:5;}
+.page-title{font-size:16px;font-weight:700;}
+.topbar-time{font-family:'DM Mono',monospace;font-size:13px;color:var(--sub);background:var(--s2);padding:5px 11px;border-radius:var(--rs);border:1px solid var(--b);}
+
+.content{padding:24px 28px;display:none;flex-direction:column;gap:20px;animation:fadeIn 0.2s ease;}
+.content.active{display:flex;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─ 통계 ─ */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.stat-card{background:var(--s);border:1px solid var(--b);border-radius:var(--r);padding:18px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.sg .stat-card:nth-child(1)::before{background:var(--gold);}
+.sg .stat-card:nth-child(2)::before{background:var(--blue);}
+.sg .stat-card:nth-child(3)::before{background:var(--green);}
+.sg .stat-card:nth-child(4)::before{background:var(--purple);}
+.stat-icon{font-size:20px;margin-bottom:12px;}
+.stat-num{font-family:'DM Mono',monospace;font-size:28px;font-weight:500;margin-bottom:4px;}
+.sg .stat-card:nth-child(1) .stat-num{color:var(--gold);}
+.sg .stat-card:nth-child(2) .stat-num{color:var(--blue);}
+.sg .stat-card:nth-child(3) .stat-num{color:var(--green);}
+.sg .stat-card:nth-child(4) .stat-num{color:var(--purple);}
+.stat-label{font-size:12px;color:var(--sub);}
+
+/* ─ 섹션 ─ */
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.sec-title{font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:7px;}
+.sec-title::before{content:'';width:5px;height:5px;background:var(--gold);border-radius:50%;}
+.btn-primary{height:36px;padding:0 16px;background:var(--gold);border:none;border-radius:var(--rs);font-size:12px;font-weight:700;color:#1A1000;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:opacity 0.15s;white-space:nowrap;}
+.btn-primary:hover{opacity:0.85;}
+.btn-sm{height:28px;padding:0 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;border:none;transition:opacity 0.15s;white-space:nowrap;}
+.btn-sm:hover{opacity:0.8;}
+.btn-blue{background:var(--blue-p);color:var(--blue);}
+.btn-red{background:var(--red-p);color:var(--red);}
+.btn-green{background:var(--green-p);color:var(--green);}
+
+/* ─ 테이블 ─ */
+.table-wrap{background:var(--s);border:1px solid var(--b);border-radius:var(--r);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:10px 16px;text-align:left;font-size:10px;font-weight:700;color:var(--hint);letter-spacing:0.8px;text-transform:uppercase;border-bottom:1px solid var(--b);}
+tbody tr{border-bottom:1px solid var(--b);transition:background 0.12s;cursor:pointer;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--s2);}
+tbody td{padding:12px 16px;font-size:12px;color:var(--sub);}
+.td-name-cell{display:flex;align-items:center;gap:9px;}
+.td-ava{width:30px;height:30px;background:var(--s3);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.td-main{font-size:13px;font-weight:500;color:var(--text);}
+.td-sub{font-size:11px;color:var(--hint);margin-top:1px;}
+.pill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;}
+.pill-active{background:var(--green-p);color:var(--green);}
+.pill-inactive{background:var(--red-p);color:var(--red);}
+
+/* ─ 모달 ─ */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
+.modal-bg.show{display:flex;}
+.modal-box{background:var(--s);border:1px solid var(--b2);border-radius:var(--r);padding:26px;width:440px;max-width:90vw;max-height:90vh;overflow-y:auto;animation:fadeIn 0.2s ease;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+.modal-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;}
+.modal-close{width:26px;height:26px;background:var(--s2);border:1px solid var(--b);border-radius:7px;cursor:pointer;font-size:12px;color:var(--sub);display:flex;align-items:center;justify-content:center;}
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:13px;}
+.form-label{font-size:10px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:0.6px;}
+.form-input,.form-select{height:40px;background:var(--s2);border:1px solid var(--b);border-radius:var(--rs);padding:0 12px;font-size:13px;color:var(--text);font-family:'Noto Sans KR',sans-serif;outline:none;transition:border-color 0.2s;width:100%;}
+.form-input:focus,.form-select:focus{border-color:var(--gold);}
+.form-input::placeholder{color:var(--hint);}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;}
+.btn-cancel{height:36px;padding:0 16px;background:var(--s2);border:1px solid var(--b);border-radius:var(--rs);font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
+.btn-save{height:36px;padding:0 18px;background:var(--gold);border:none;border-radius:var(--rs);font-size:12px;font-weight:700;color:#1A1000;cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
+.error-msg{font-size:12px;color:var(--red);background:var(--red-p);border-radius:6px;padding:8px 12px;margin-bottom:10px;display:none;}
+
+/* ─ 로그인 ─ */
+#login-screen{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;align-items:center;justify-content:center;}
+#login-screen.hiding{animation:loginOut 0.4s ease forwards;}
+@keyframes loginOut{to{opacity:0;transform:scale(1.03)}}
+.login-card{background:var(--s);border:1px solid var(--b2);border-radius:20px;padding:40px 36px 36px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:fadeIn 0.4s ease;}
+.login-head{text-align:center;margin-bottom:28px;}
+.login-logo{width:52px;height:52px;background:var(--gold);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px;}
+.login-title{font-size:22px;font-weight:700;margin-bottom:5px;}
+.login-sub{font-size:13px;color:var(--sub);}
+.login-badge{display:inline-block;background:var(--gold-p);color:var(--gold);border:1px solid rgba(245,200,66,0.25);border-radius:5px;padding:3px 10px;font-size:11px;font-weight:700;margin-top:8px;}
+.l-input-wrap{position:relative;margin-bottom:12px;}
+.l-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;}
+.l-input{width:100%;height:44px;background:var(--s2);border:1px solid var(--b);border-radius:var(--rs);padding:0 14px 0 38px;font-size:13px;color:var(--text);font-family:'Noto Sans KR',sans-serif;outline:none;transition:border-color 0.2s;}
+.l-input:focus{border-color:var(--gold);}
+.l-input::placeholder{color:var(--hint);}
+.btn-login{width:100%;height:46px;background:var(--gold);border:none;border-radius:var(--rs);font-size:14px;font-weight:700;color:#1A1000;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:opacity 0.15s;margin-top:4px;}
+.btn-login:hover{opacity:0.85;}
+.btn-login:disabled{opacity:0.55;cursor:not-allowed;}
+.l-error{background:var(--red-p);border:1px solid rgba(248,113,113,0.2);border-radius:var(--rs);padding:9px 12px;font-size:12px;color:var(--red);display:none;align-items:center;gap:8px;margin-bottom:10px;}
+.l-error.show{display:flex;}
+
+/* ─ 토스트 ─ */
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--s);border:1px solid var(--b2);border-radius:var(--r);padding:12px 16px;display:flex;align-items:center;gap:10px;min-width:260px;box-shadow:0 4px 20px rgba(0,0,0,0.35);animation:toastIn 0.3s cubic-bezier(0.34,1.5,0.64,1);}
+@keyframes toastIn{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
+.toast-icon{font-size:18px;}
+.toast-title{font-size:13px;font-weight:600;color:var(--text);}
+.toast-sub{font-size:11px;color:var(--hint);}
+::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px;}
+#app-wrap{display:none;} #app-wrap.visible{display:contents;}
+</style>
+</head>
+<body>
+
+<!-- 로그인 -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-head">
+      <div class="login-logo">👑</div>
+      <div class="login-title">하원알림</div>
+      <div class="login-sub">슈퍼관리자 콘솔</div>
+      <div class="login-badge">SUPER ADMIN</div>
+    </div>
+    <div class="l-error" id="l-err"><span>⚠️</span><span id="l-err-msg"></span></div>
+    <div class="l-input-wrap">
+      <span class="l-icon">👤</span>
+      <input class="l-input" id="l-id" placeholder="아이디" onkeydown="if(event.key==='Enter')document.getElementById('l-pw').focus()">
+    </div>
+    <div class="l-input-wrap">
+      <span class="l-icon">🔒</span>
+      <input class="l-input" id="l-pw" type="password" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-login" id="btn-login" onclick="doLogin()">🔐 로그인</button>
+  </div>
+</div>
+
+<!-- 앱 본체 -->
+<div id="app-wrap">
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">👑</div>
+    <div>
+      <div class="logo-text">슈퍼관리자</div>
+      <div class="logo-badge">SUPER ADMIN</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-label">관리</div>
+    <button class="nav-item active" onclick="showPage('dashboard',this)"><span class="nav-icon">📊</span>대시보드</button>
+    <button class="nav-item" onclick="showPage('kindergartens',this)"><span class="nav-icon">🏫</span>유치원 관리</button>
+    <button class="nav-item" onclick="showPage('admins',this)"><span class="nav-icon">👤</span>관리자 계정</button>
+  </nav>
+  <div class="sidebar-foot">
+    <div class="user-row">
+      <div class="user-ava">👑</div>
+      <div><div class="user-name" id="s-uname">슈퍼관리자</div><div class="user-role">전체 권한</div></div>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">🚪 로그아웃</button>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="page-title" id="page-title">대시보드</div>
+    <div class="topbar-time" id="clock">--:--:--</div>
+  </div>
+
+  <!-- 대시보드 -->
+  <div class="content active sg" id="page-dashboard">
+    <div class="stats-grid" id="stat-grid">
+      <div class="stat-card"><div class="stat-icon">🏫</div><div class="stat-num" id="s-kg">-</div><div class="stat-label">등록 유치원</div></div>
+      <div class="stat-card"><div class="stat-icon">👤</div><div class="stat-num" id="s-adm">-</div><div class="stat-label">유치원 관리자</div></div>
+      <div class="stat-card"><div class="stat-icon">🧒</div><div class="stat-num" id="s-stu">-</div><div class="stat-label">전체 원생</div></div>
+      <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-num" id="s-res">-</div><div class="stat-label">오늘 예약</div></div>
+    </div>
+    <div>
+      <div class="sec-header"><div class="sec-title">등록된 유치원 현황</div></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>유치원</th><th>담당 관리자</th><th>반 수</th><th>원생 수</th><th>상태</th></tr></thead>
+        <tbody id="kg-dash-tbody"></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- 유치원 관리 -->
+  <div class="content" id="page-kindergartens">
+    <div class="sec-header">
+      <div class="sec-title">유치원 목록</div>
+      <button class="btn-primary" onclick="openKgModal()">+ 유치원 등록</button>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>유치원명</th><th>원장</th><th>전화번호</th><th>주소</th><th>상태</th><th>액션</th></tr></thead>
+      <tbody id="kg-tbody"></tbody>
+    </table></div>
+  </div>
+
+  <!-- 관리자 계정 -->
+  <div class="content" id="page-admins">
+    <div class="sec-header">
+      <div class="sec-title">유치원 관리자 목록</div>
+      <button class="btn-primary" onclick="openAdminModal()">+ 관리자 등록</button>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>아이디</th><th>이름</th><th>소속 유치원</th><th>이메일</th><th>등록일</th><th>액션</th></tr></thead>
+      <tbody id="admin-tbody"></tbody>
+    </table></div>
+  </div>
+</main>
+</div><!-- /app-wrap -->
+
+<!-- 유치원 등록/수정 모달 -->
+<div class="modal-bg" id="modal-kg">
+  <div class="modal-box">
+    <div class="modal-title"><span id="kg-modal-title">유치원 등록</span><button class="modal-close" onclick="closeModal('modal-kg')">✕</button></div>
+    <div class="error-msg" id="kg-err"></div>
+    <input type="hidden" id="kg-edit-id">
+    <div class="form-group"><div class="form-label">유치원 이름 *</div><input class="form-input" id="kg-name" placeholder="예: 햇살 유치원"></div>
+    <div class="form-group"><div class="form-label">원장 이름</div><input class="form-input" id="kg-director" placeholder="예: 김영희"></div>
+    <div class="form-group"><div class="form-label">전화번호</div><input class="form-input" id="kg-phone" placeholder="예: 051-123-4567"></div>
+    <div class="form-group"><div class="form-label">주소</div><input class="form-input" id="kg-addr" placeholder="예: 부산시 해운대구 햇살로 123"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('modal-kg')">취소</button>
+      <button class="btn-save" onclick="saveKg()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 관리자 등록/수정 모달 -->
+<div class="modal-bg" id="modal-admin">
+  <div class="modal-box">
+    <div class="modal-title"><span id="admin-modal-title">관리자 등록</span><button class="modal-close" onclick="closeModal('modal-admin')">✕</button></div>
+    <div class="error-msg" id="admin-err"></div>
+    <input type="hidden" id="admin-edit-id">
+    <div class="form-group"><div class="form-label">아이디 *</div><input class="form-input" id="admin-username" placeholder="4자 이상"></div>
+    <div class="form-group"><div class="form-label">비밀번호 *</div><input class="form-input" type="password" id="admin-pw" placeholder="수정 시 빈칸이면 변경 안 됨"></div>
+    <div class="form-group"><div class="form-label">이름</div><input class="form-input" id="admin-name" placeholder="예: 박지현"></div>
+    <div class="form-group"><div class="form-label">이메일</div><input class="form-input" id="admin-email" placeholder="example@email.com"></div>
+    <div class="form-group"><div class="form-label">소속 유치원 *</div><select class="form-select" id="admin-kg"></select></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('modal-admin')">취소</button>
+      <button class="btn-save" onclick="saveAdmin()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+const API = '';
+const Token = { get:()=>localStorage.getItem('super_token'), set:t=>localStorage.setItem('super_token',t), del:()=>localStorage.removeItem('super_token') };
+
+async function api(method, path, body) {
+  const opts = { method, headers:{'Content-Type':'application/json'} };
+  const t = Token.get();
+  if (t) opts.headers['Authorization'] = 'Bearer ' + t;
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + path, opts);
+  const data = await res.json().catch(()=>({}));
+  if (res.status===401||res.status===403) { Token.del(); showLoginScreen(); return null; }
+  if (!res.ok) throw new Error(data.message||`HTTP ${res.status}`);
+  return data;
+}
+
+// ── 로그인 ──
+async function doLogin() {
+  const id = document.getElementById('l-id').value.trim();
+  const pw = document.getElementById('l-pw').value;
+  const err = document.getElementById('l-err');
+  const btn = document.getElementById('btn-login');
+  err.classList.remove('show');
+  if (!id||!pw) { document.getElementById('l-err-msg').textContent='아이디와 비밀번호를 입력해주세요.'; err.classList.add('show'); return; }
+  btn.disabled=true; btn.textContent='확인 중...';
+  try {
+    const data = await api('POST','/api/auth/login',{username:id,password:pw});
+    if (!data) return;
+    if (data.user.role !== 'super') { document.getElementById('l-err-msg').textContent='슈퍼관리자 계정이 아닙니다.'; err.classList.add('show'); btn.disabled=false; btn.textContent='🔐 로그인'; return; }
+    Token.set(data.token);
+    localStorage.setItem('super_user', JSON.stringify(data.user));
+    document.getElementById('s-uname').textContent = data.user.name || data.user.username;
+    document.getElementById('login-screen').classList.add('hiding');
+    setTimeout(()=>{document.getElementById('login-screen').style.display='none'; document.getElementById('app-wrap').classList.add('visible'); loadAll();}, 400);
+  } catch(e) {
+    document.getElementById('l-err-msg').textContent=e.message; err.classList.add('show');
+    btn.disabled=false; btn.textContent='🔐 로그인';
+  }
+}
+function doLogout(){ Token.del(); localStorage.removeItem('super_user'); showLoginScreen(); }
+function showLoginScreen(){
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-screen').classList.remove('hiding');
+  document.getElementById('app-wrap').classList.remove('visible');
+  document.getElementById('l-id').value=''; document.getElementById('l-pw').value='';
+  document.getElementById('btn-login').disabled=false; document.getElementById('btn-login').textContent='🔐 로그인';
+}
+(async function checkSession(){
+  const t=Token.get(); const u=JSON.parse(localStorage.getItem('super_user')||'null');
+  if(!t||!u||u.role!=='super') return;
+  try{ await api('GET','/api/health'); document.getElementById('s-uname').textContent=u.name||u.username; document.getElementById('login-screen').style.display='none'; document.getElementById('app-wrap').classList.add('visible'); loadAll(); }
+  catch{ Token.del(); }
+})();
+
+// ── 페이지 전환 ──
+const titles = {dashboard:'대시보드',kindergartens:'유치원 관리',admins:'관리자 계정'};
+function showPage(id, btn) {
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.getElementById('page-title').textContent=titles[id]||id;
+  if(btn) btn.classList.add('active');
+}
+
+// ── 데이터 로드 ──
+let kgList = [];
+async function loadAll() {
+  loadStats(); loadKgList(); loadAdminList();
+}
+async function loadStats() {
+  try {
+    const d = await api('GET','/api/super/stats');
+    if(d) { document.getElementById('s-kg').textContent=d.data.kindergartens; document.getElementById('s-adm').textContent=d.data.admins; document.getElementById('s-stu').textContent=d.data.students; document.getElementById('s-res').textContent=d.data.reservations; }
+  } catch{}
+}
+async function loadKgList() {
+  try {
+    const d = await api('GET','/api/super/kindergartens');
+    if (!d) return;
+    kgList = d.data;
+    // 대시보드 테이블
+    document.getElementById('kg-dash-tbody').innerHTML = kgList.map(k=>`
+      <tr><td><div class="td-name-cell"><div class="td-ava">🏫</div><div><div class="td-main">${k.name}</div><div class="td-sub">${k.address||'-'}</div></div></div></td>
+      <td>${k.admin_name||'<span style="color:var(--hint)">미지정</span>'}</td>
+      <td style="font-family:'DM Mono',monospace">${k.classroom_count}</td>
+      <td style="font-family:'DM Mono',monospace">${k.student_count}</td>
+      <td><span class="pill ${k.status==='active'?'pill-active':'pill-inactive'}">${k.status==='active'?'운영중':'중지'}</span></td>
+      </tr>`).join('');
+    // 유치원 관리 테이블
+    document.getElementById('kg-tbody').innerHTML = kgList.map(k=>`
+      <tr><td><div class="td-name-cell"><div class="td-ava">🏫</div><div><div class="td-main">${k.name}</div></div></div></td>
+      <td>${k.director||'-'}</td><td>${k.phone||'-'}</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${k.address||'-'}</td>
+      <td><span class="pill ${k.status==='active'?'pill-active':'pill-inactive'}">${k.status==='active'?'운영중':'중지'}</span></td>
+      <td><div style="display:flex;gap:5px;"><button class="btn-sm btn-blue" onclick="openKgModal(${JSON.stringify(k).replace(/"/g,'&quot;')})">수정</button><button class="btn-sm btn-red" onclick="deleteKg(${k.id},'${k.name}')">삭제</button></div></td>
+      </tr>`).join('');
+    // 관리자 모달 셀렉트 업데이트
+    const sel = document.getElementById('admin-kg');
+    sel.innerHTML = '<option value="">유치원 선택</option>' + kgList.map(k=>`<option value="${k.id}">${k.name}</option>`).join('');
+  } catch(e){ console.error(e); }
+}
+async function loadAdminList() {
+  try {
+    const d = await api('GET','/api/super/admins');
+    if(!d) return;
+    document.getElementById('admin-tbody').innerHTML = d.data.filter(u=>u.role==='kg_admin').map(u=>`
+      <tr><td><div class="td-name-cell"><div class="td-ava">👤</div><div><div class="td-main">${u.username}</div></div></div></td>
+      <td>${u.name}</td>
+      <td>${u.kindergarten_name||'<span style="color:var(--hint)">미지정</span>'}</td>
+      <td>${u.email||'-'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px">${u.created_at?.slice(0,10)||'-'}</td>
+      <td><div style="display:flex;gap:5px;"><button class="btn-sm btn-blue" onclick="openAdminModal(${JSON.stringify(u).replace(/"/g,'&quot;')})">수정</button><button class="btn-sm btn-red" onclick="deleteAdmin(${u.id},'${u.username}')">삭제</button></div></td>
+      </tr>`).join('');
+  } catch(e){ console.error(e); }
+}
+
+// ── 유치원 CRUD ──
+function openKgModal(kg) {
+  document.getElementById('kg-err').style.display='none';
+  document.getElementById('kg-edit-id').value = kg?.id||'';
+  document.getElementById('kg-modal-title').textContent = kg?'유치원 수정':'유치원 등록';
+  document.getElementById('kg-name').value = kg?.name||'';
+  document.getElementById('kg-director').value = kg?.director||'';
+  document.getElementById('kg-phone').value = kg?.phone||'';
+  document.getElementById('kg-addr').value = kg?.address||'';
+  document.getElementById('modal-kg').classList.add('show');
+}
+async function saveKg() {
+  const id = document.getElementById('kg-edit-id').value;
+  const body = { name:document.getElementById('kg-name').value.trim(), director:document.getElementById('kg-director').value, phone:document.getElementById('kg-phone').value, address:document.getElementById('kg-addr').value };
+  const errEl = document.getElementById('kg-err');
+  try {
+    if (id) await api('PUT',`/api/super/kindergartens/${id}`,body);
+    else await api('POST','/api/super/kindergartens',body);
+    closeModal('modal-kg'); loadAll(); toast(id?'유치원 정보가 수정되었습니다':'유치원이 등록되었습니다','✅');
+  } catch(e){ errEl.textContent=e.message; errEl.style.display='block'; }
+}
+async function deleteKg(id, name) {
+  if(!confirm(`"${name}" 유치원을 삭제하시겠습니까?\n관련 반/원생 데이터가 모두 삭제됩니다.`)) return;
+  try { await api('DELETE',`/api/super/kindergartens/${id}`); loadAll(); toast('유치원이 삭제되었습니다','🗑️'); } catch(e){ toast(e.message,'⚠️'); }
+}
+
+// ── 관리자 CRUD ──
+function openAdminModal(u) {
+  document.getElementById('admin-err').style.display='none';
+  document.getElementById('admin-edit-id').value = u?.id||'';
+  document.getElementById('admin-modal-title').textContent = u?'관리자 수정':'관리자 등록';
+  document.getElementById('admin-username').value = u?.username||'';
+  document.getElementById('admin-username').disabled = !!u;
+  document.getElementById('admin-pw').value = '';
+  document.getElementById('admin-name').value = u?.name||'';
+  document.getElementById('admin-email').value = u?.email||'';
+  document.getElementById('admin-kg').value = u?.kindergarten_id||'';
+  document.getElementById('modal-admin').classList.add('show');
+}
+async function saveAdmin() {
+  const id = document.getElementById('admin-edit-id').value;
+  const body = { username:document.getElementById('admin-username').value.trim(), password:document.getElementById('admin-pw').value, name:document.getElementById('admin-name').value, email:document.getElementById('admin-email').value, kindergarten_id:parseInt(document.getElementById('admin-kg').value)||null };
+  const errEl = document.getElementById('admin-err');
+  try {
+    if (id) await api('PUT',`/api/super/admins/${id}`,body);
+    else await api('POST','/api/super/admins',body);
+    closeModal('modal-admin'); loadAdminList(); toast(id?'관리자 정보가 수정되었습니다':'관리자가 등록되었습니다','✅');
+  } catch(e){ errEl.textContent=e.message; errEl.style.display='block'; }
+}
+async function deleteAdmin(id, username) {
+  if(!confirm(`"${username}" 계정을 삭제하시겠습니까?`)) return;
+  try { await api('DELETE',`/api/super/admins/${id}`); loadAdminList(); toast('관리자가 삭제되었습니다','🗑️'); } catch(e){ toast(e.message,'⚠️'); }
+}
+
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-bg').forEach(b=>b.addEventListener('click',e=>{if(e.target===b)b.classList.remove('show');}));
+
+// ── 유틸 ──
+function toast(msg, icon='✅', sub='') {
+  const w = document.getElementById('toast-wrap');
+  const el = document.createElement('div'); el.className='toast';
+  el.innerHTML=`<span class="toast-icon">${icon}</span><div><div class="toast-title">${msg}</div>${sub?`<div class="toast-sub">${sub}</div>`:''}</div>`;
+  w.appendChild(el);
+  setTimeout(()=>{el.style.transition='opacity 0.3s,transform 0.3s';el.style.opacity='0';el.style.transform='translateX(20px)';setTimeout(()=>el.remove(),300);},3000);
+}
+setInterval(()=>{ const n=new Date(); document.getElementById('clock').textContent=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;},1000);
+</script>
+</body>
+</html>
