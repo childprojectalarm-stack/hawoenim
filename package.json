@@ -4,7 +4,7 @@
   "description": "하원알림 멀티테넌트 유치원 하원 예약 시스템",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node src/setup.js && node src/index.js",
     "dev": "nodemon src/index.js",
     "setup": "node src/setup.js",
     "setup:sample": "node src/setup.js --sample"
