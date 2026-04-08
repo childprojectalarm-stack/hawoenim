@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#FF6B35">
+<title>하원알림</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--p:#FF6B35;--pd:#E55A25;--pp:#FFF0EB;--s:#2D3A8C;--g:#06D6A0;--gp:#E8FBF6;--a:#F59E0B;--ap:#FFFBEB;--r:#EF4444;--rp:#FEF2F2;--bg:#F5F5FA;--c:#fff;--t:#1A1A2E;--sub:#6B7280;--h:#B0B7C3;--b:#E8E9F3;--ra:20px;--rs:12px;--sh:0 4px 20px rgba(45,58,140,.10);}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);min-height:100vh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;}
+.ld{position:fixed;inset:0;background:rgba(255,255,255,.92);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;}
+.ld.hide{display:none;}
+.sp{width:44px;height:44px;border:4px solid var(--b);border-top-color:var(--p);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ts{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(10px);background:#1A1A2E;color:#fff;border-radius:20px;padding:12px 22px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none;}
+.ts.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#ls{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 24px;background:linear-gradient(160deg,#FF6B35 0%,#E55A25 35%,#2D3A8C 100%);}
+.lc{background:#fff;border-radius:28px;padding:36px 28px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+.ll{text-align:center;margin-bottom:28px;}
+.ll .lg{width:68px;height:68px;background:linear-gradient(135deg,#FF6B35,#FF8F65);border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 12px;box-shadow:0 8px 24px rgba(255,107,53,.3);}
+.ll h1{font-size:22px;font-weight:900;color:var(--t);}
+.ll p{font-size:13px;color:var(--sub);margin-top:4px;}
+.ig{margin-bottom:14px;}
+.il{font-size:12px;font-weight:700;color:var(--sub);margin-bottom:6px;display:block;}
+.ii{width:100%;height:50px;border:2px solid var(--b);border-radius:var(--rs);padding:0 16px;font-size:15px;font-family:inherit;outline:none;transition:border-color .2s;background:#fafafa;color:var(--t);}
+.ii:focus{border-color:var(--p);background:#fff;}
+.ii::placeholder{color:var(--h);}
+.bl{width:100%;height:52px;background:linear-gradient(135deg,#FF6B35,#FF8F65);border:none;border-radius:var(--rs);color:#fff;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 20px rgba(255,107,53,.3);}
+.bl:disabled{opacity:.6;}
+.em{background:var(--rp);border:1px solid #FCA5A5;border-radius:var(--rs);padding:10px 14px;font-size:13px;color:var(--r);margin-bottom:14px;display:none;line-height:1.6;}
+.em.show{display:block;}
+.lt{font-size:11px;color:var(--h);text-align:center;margin-top:16px;line-height:1.7;}
+#app{display:none;flex-direction:column;min-height:100vh;}
+#app.show{display:flex;}
+.hd{background:var(--p);padding:env(safe-area-inset-top,0) 0 0;position:sticky;top:0;z-index:10;box-shadow:0 2px 12px rgba(255,107,53,.3);}
+.hi{display:flex;align-items:center;padding:14px 20px;gap:12px;}
+.hico{width:36px;height:36px;background:rgba(255,255,255,.2);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.hin{flex:1;}
+.hkg{font-size:16px;font-weight:800;color:#fff;}
+.hsub{font-size:11px;color:rgba(255,255,255,.8);margin-top:1px;}
+.htm{font-size:13px;font-weight:700;color:rgba(255,255,255,.9);background:rgba(255,255,255,.15);padding:6px 12px;border-radius:20px;}
+.ct{flex:1;overflow-y:auto;padding-bottom:80px;}
+.sc{margin:16px;background:linear-gradient(135deg,#2D3A8C,#4A5AB8);border-radius:var(--ra);padding:22px 20px;color:#fff;position:relative;overflow:hidden;}
+.sc::after{content:'🏫';font-size:70px;position:absolute;right:-8px;bottom:-12px;opacity:.12;}
+.sb{font-size:11px;font-weight:700;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:10px;}
+.sn{font-size:24px;font-weight:900;margin-bottom:4px;}
+.scl{font-size:13px;opacity:.85;}
+.sr{display:flex;gap:10px;margin-top:14px;}
+.sp2{background:rgba(255,255,255,.15);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;}
+.sw{margin:0 16px 16px;}
+.st{font-size:14px;font-weight:700;color:var(--t);display:flex;align-items:center;gap:6px;margin-bottom:12px;}
+.st::before{content:'';width:4px;height:16px;background:var(--p);border-radius:2px;}
+.rc{background:var(--c);border-radius:var(--ra);padding:18px;box-shadow:var(--sh);border:1px solid var(--b);}
+.rt{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.stb{font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;}
+.s0{background:var(--ap);color:var(--a);}
+.s1{background:#EFF6FF;color:#3B82F6;}
+.s2{background:var(--gp);color:var(--g);}
+.s3{background:var(--rp);color:var(--r);}
+.rtm{font-size:36px;font-weight:900;color:var(--p);line-height:1;}
+.rl{font-size:12px;color:var(--sub);margin-top:4px;}
+.rd{font-size:12px;color:var(--h);margin-top:8px;}
+.bca{width:100%;height:40px;background:var(--rp);border:1px solid #FCA5A5;border-radius:var(--rs);color:var(--r);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:14px;}
+.nr{text-align:center;padding:28px 0;color:var(--h);}
+.ni{font-size:48px;margin-bottom:10px;}
+.nt{font-size:14px;font-weight:600;color:var(--sub);}
+.ns{font-size:12px;margin-top:4px;}
+.tg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.tb{height:52px;background:var(--c);border:2px solid var(--b);border-radius:var(--rs);font-size:14px;font-weight:700;color:var(--t);cursor:pointer;font-family:inherit;}
+.tb.sel{background:var(--p);border-color:var(--p);color:#fff;}
+.tb.past{opacity:.4;cursor:not-allowed;}
+.br{width:100%;height:54px;background:linear-gradient(135deg,var(--p),#FF8F65);border:none;border-radius:var(--ra);color:#fff;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 20px rgba(255,107,53,.3);}
+.br:disabled{opacity:.5;cursor:not-allowed;}
+.tb-bar{background:#fff;border-top:1px solid var(--b);display:flex;position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;z-index:10;box-shadow:0 -2px 10px rgba(0,0,0,.06);}
+.ti{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 calc(10px + env(safe-area-inset-bottom));cursor:pointer;font-size:10px;font-weight:600;color:var(--h);}
+.ti.active{color:var(--p);}
+.tico{font-size:22px;}
+.hl{padding:16px;display:flex;flex-direction:column;gap:10px;}
+.hi2{background:var(--c);border-radius:var(--ra);padding:16px;border:1px solid var(--b);display:flex;align-items:center;gap:14px;}
+.hd2{font-size:11px;color:var(--h);width:46px;flex-shrink:0;text-align:center;line-height:1.4;}
+.hd2 strong{font-size:15px;color:var(--t);display:block;}
+.hif{flex:1;}
+.htm2{font-size:18px;font-weight:800;color:var(--p);}
+.hm{font-size:11px;color:var(--sub);margin-top:2px;}
+.sw2{padding:20px 16px;}
+.sg{background:var(--c);border-radius:var(--ra);margin-bottom:16px;overflow:hidden;border:1px solid var(--b);}
+.si{display:flex;align-items:center;gap:14px;padding:16px;border-bottom:1px solid var(--b);}
+.si:last-child{border-bottom:none;}
+.sico{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.slb{font-size:14px;font-weight:600;color:var(--t);}
+.sv{margin-left:auto;font-size:13px;color:var(--sub);}
+.blo{width:100%;height:52px;background:var(--rp);border:1px solid #FCA5A5;border-radius:var(--ra);color:var(--r);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;}
+.ab{margin:0 16px 16px;background:linear-gradient(135deg,#3B82F6,#6366F1);border-radius:var(--ra);padding:16px 18px;color:#fff;display:flex;align-items:center;gap:14px;}
+.ai{font-size:30px;flex-shrink:0;}
+.at{font-size:14px;font-weight:700;}
+.as{font-size:12px;opacity:.85;margin-top:3px;}
+.scr{display:none;}
+.scr.active{display:block;animation:fi .2s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="ld" id="ld"><div class="sp"></div><div style="font-size:13px;color:#888">로딩 중...</div></div>
+<div class="ts" id="ts"></div>
+
+<div id="ls">
+  <div class="lc">
+    <div class="ll"><div class="lg">🏫</div><h1>하원알림</h1><p>학부모 하원 예약 서비스</p></div>
+    <div class="em" id="em"></div>
+    <div class="ig"><label class="il">📱 등록된 전화번호</label><input class="ii" id="ip" type="tel" placeholder="010-0000-0000" autocomplete="tel"></div>
+    <div class="ig"><label class="il">👶 자녀 이름 (선택)</label><input class="ii" id="in" type="text" placeholder="자녀 이름을 입력하세요"></div>
+    <button class="bl" id="bb" onclick="login()"><span>🔐</span> 로그인</button>
+    <div class="lt">유치원에 등록된 전화번호로 로그인합니다<br>문의: 담당 선생님께 연락해 주세요</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="hd"><div class="hi">
+    <div class="hico">🏫</div>
+    <div class="hin"><div class="hkg" id="hkg">하원알림</div><div class="hsub" id="hsb">학부모 앱</div></div>
+    <div class="htm" id="htm">--:--</div>
+  </div></div>
+  <div class="ct">
+    <div class="scr active" id="s-home">
+      <div class="sc"><div class="sb" id="skg"></div><div class="sn" id="snm"></div><div class="scl" id="scl"></div><div class="sr"><div class="sp2" id="srl"></div><div class="sp2" id="std">오늘 예약 없음</div></div></div>
+      <div class="ab" id="anb" style="display:none"><div class="ai">📢</div><div><div class="at">하원 방송이 나갔습니다!</div><div class="as" id="ans"></div></div></div>
+      <div class="sw"><div class="st">오늘 하원 예약</div><div id="tc"></div></div>
+      <div class="sw" id="qs"><div class="st">하원 시간 예약</div><div class="tg" id="tgd"></div><button class="br" id="brb" disabled onclick="mkRes()"><span>📅</span> 예약하기</button></div>
+    </div>
+    <div class="scr" id="s-history"><div class="hl" id="hlist"></div></div>
+    <div class="scr" id="s-settings">
+      <div class="sw2">
+        <div class="sg">
+          <div class="si"><div class="sico" style="background:#FFF0EB">👶</div><div class="slb">자녀</div><div class="sv" id="sst"></div></div>
+          <div class="si"><div class="sico" style="background:#EFF6FF">🏫</div><div class="slb">유치원</div><div class="sv" id="skg2"></div></div>
+          <div class="si"><div class="sico" style="background:#F0FDF4">👤</div><div class="slb">보호자</div><div class="sv" id="snm2"></div></div>
+          <div class="si"><div class="sico" style="background:#FFFBEB">📱</div><div class="slb">전화번호</div><div class="sv" id="sph"></div></div>
+        </div>
+        <div class="sg">
+          <div class="si"><div class="sico" style="background:#F5F3FF">ℹ️</div><div class="slb">버전</div><div class="sv">1.0.0</div></div>
+          <div class="si"><div class="sico" style="background:#F0FDF4">🌐</div><div class="slb">서버</div><div class="sv" id="ssv">확인 중...</div></div>
+        </div>
+        <button class="blo" onclick="logout()">🚪 로그아웃</button>
+      </div>
+    </div>
+  </div>
+  <div class="tb-bar">
+    <div class="ti active" id="t-home" onclick="tab('home',this)"><span class="tico">🏠</span><span>홈</span></div>
+    <div class="ti" id="t-history" onclick="tab('history',this)"><span class="tico">📋</span><span>내역</span></div>
+    <div class="ti" id="t-settings" onclick="tab('settings',this)"><span class="tico">⚙️</span><span>설정</span></div>
+  </div>
+</div>
+
+<script>
+const SRV='https://hawoenim-production.up.railway.app';
+let tok=localStorage.getItem('ft'),fam=JSON.parse(localStorage.getItem('fi')||'null'),sel=null;
+
+function tick(){const n=new Date();document.getElementById('htm').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');}
+setInterval(tick,1000);tick();
+function ld(v){document.getElementById('ld').classList.toggle('hide',!v);}
+function toast(m,d=2500){const t=document.getElementById('ts');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+async function req(method,path,body){
+  const o={method,headers:{'Content-Type':'application/json'}};
+  if(tok)o.headers['Authorization']='Bearer '+tok;
+  if(body)o.body=JSON.stringify(body);
+  try{const r=await fetch(SRV+path,o);const d=await r.json().catch(()=>({}));if(r.status===401){logout();return null;}return d;}
+  catch(e){return{success:false,message:'서버 연결 오류'};}
+}
+
+document.getElementById('ip').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
+document.getElementById('in').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
+
+async function login(){
+  const phone=document.getElementById('ip').value.trim(),name=document.getElementById('in').value.trim();
+  const em=document.getElementById('em'),btn=document.getElementById('bb');
+  em.classList.remove('show');
+  if(!phone){em.textContent='전화번호를 입력해주세요.';em.classList.add('show');return;}
+  btn.disabled=true;btn.innerHTML='<span>⏳</span> 확인 중...';ld(true);
+  const d=await req('POST','/api/family/login',{phone,student_name:name||undefined});
+  ld(false);btn.disabled=false;btn.innerHTML='<span>🔐</span> 로그인';
+  if(!d||!d.success){em.textContent=d?.message||'로그인 실패';em.classList.add('show');return;}
+  tok=d.token;fam=d.family;
+  localStorage.setItem('ft',tok);localStorage.setItem('fi',JSON.stringify(fam));
+  startApp();
+}
+
+function startApp(){
+  document.getElementById('ls').style.display='none';
+  document.getElementById('app').classList.add('show');
+  applyInfo();loadHome();
+  req('GET','/api/health').then(d=>document.getElementById('ssv').textContent=d?.success?'🟢 정상':'🔴 오류');
+}
+
+function applyInfo(){
+  if(!fam)return;
+  const kg=fam.kindergarten_name||'하원알림';
+  document.getElementById('hkg').textContent=kg;
+  document.getElementById('hsb').textContent=(fam.name||'')+' 보호자 · '+(fam.student_name||'')+' 학생';
+  document.getElementById('skg').textContent=kg;
+  document.getElementById('snm').textContent=fam.student_name||'';
+  document.getElementById('scl').textContent='🏫 '+(fam.classroom_name||'');
+  document.getElementById('srl').textContent=(fam.relation||'')+' '+(fam.name||'');
+  document.getElementById('sst').textContent=fam.student_name||'';
+  document.getElementById('skg2').textContent=kg;
+  document.getElementById('snm2').textContent=fam.name||'';
+  document.getElementById('sph').textContent=fam.phone||'';
+}
+
+async function loadHome(){
+  const d=await req('GET','/api/family/me');
+  if(!d||!d.success)return;
+  fam={...fam,...d.family};localStorage.setItem('fi',JSON.stringify(fam));applyInfo();
+  renderToday(d.todayReservation);renderGrid(d.todayReservation);
+}
+
+function renderToday(r){
+  const el=document.getElementById('tc'),ab=document.getElementById('anb');
+  if(!r||r.status==='cancelled'){
+    document.getElementById('std').textContent='오늘 예약 없음';
+    el.innerHTML='<div class="nr"><div class="ni">📅</div><div class="nt">오늘 예약이 없습니다</div><div class="ns">아래에서 하원 시간을 선택하세요</div></div>';
+    ab.style.display='none';return;
+  }
+  const sm={pending:'대기중',announced:'방송완료',done:'완료',cancelled:'취소'};
+  const sc={pending:'s0',announced:'s1',done:'s2',cancelled:'s3'};
+  document.getElementById('std').textContent=r.pickup_time+' 예약';
+  if(r.status==='announced'){ab.style.display='flex';document.getElementById('ans').textContent=r.pickup_time+' 하원 - 잠시 후 나와주세요!';}
+  else ab.style.display='none';
+  const cb=r.status==='pending'?'<button class="bca" onclick="cancelR('+r.id+')">예약 취소</button>':'';
+  el.innerHTML='<div class="rc"><div class="rt"><div><div class="rtm">'+r.pickup_time+'</div><div class="rl">하원 예정 시간</div></div><span class="stb '+(sc[r.status]||'s0')+'">'+(sm[r.status]||r.status)+'</span></div><div class="rd">📅 '+r.reserve_date+'</div>'+cb+'</div>';
+}
+
+function renderGrid(tr){
+  const g=document.getElementById('tgd'),qs=document.getElementById('qs');
+  if(tr&&tr.status!=='cancelled'){qs.style.display='none';return;}
+  qs.style.display='block';
+  const ts=['13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00'];
+  const n=new Date(),nm=n.getHours()*60+n.getMinutes();
+  g.innerHTML=ts.map(t=>{const[h,m]=t.split(':').map(Number),p=(h*60+m)<=nm;return '<button class="tb'+(p?' past':'')+'" onclick="selT(''+t+'',this)" '+(p?'disabled':'')+'>'+t+'</button>';}).join('');
+  sel=null;document.getElementById('brb').disabled=true;
+}
+
+function selT(t,btn){document.querySelectorAll('.tb').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');sel=t;document.getElementById('brb').disabled=false;}
+
+async function mkRes(){
+  if(!sel)return;ld(true);
+  const d=await req('POST','/api/family/reservations',{pickup_time:sel});
+  ld(false);
+  if(d?.success){toast('✅ '+sel+' 하원 예약 완료!');loadHome();}
+  else toast('❌ '+(d?.message||'예약 실패'));
+}
+
+async function cancelR(id){
+  if(!confirm('예약을 취소하시겠습니까?'))return;ld(true);
+  const d=await req('PUT','/api/family/reservations/'+id+'/cancel');ld(false);
+  if(d?.success){toast('예약이 취소됐습니다');loadHome();}else toast('❌ '+(d?.message||'취소 실패'));
+}
+
+async function loadHist(){
+  const d=await req('GET','/api/family/reservations?limit=30');
+  const el=document.getElementById('hlist');
+  if(!d||!d.data?.length){el.innerHTML='<div class="nr" style="padding:40px 0"><div class="ni">📋</div><div class="nt">예약 내역이 없습니다</div></div>';return;}
+  const sm={pending:'대기중',announced:'방송완료',done:'완료',cancelled:'취소'};
+  const sc={pending:'s0',announced:'s1',done:'s2',cancelled:'s3'};
+  el.innerHTML=d.data.map(r=>{const dt=new Date(r.reserve_date),mn=dt.getMonth()+1,dy=dt.getDate();
+    return '<div class="hi2"><div class="hd2">'+mn+'/'+dy+'<br><strong>'+r.pickup_time+'</strong></div><div class="hif"><div class="htm2">'+r.pickup_time+'</div><div class="hm">'+r.reserve_date+' · <span class="stb '+(sc[r.status]||'s0')+'" style="font-size:10px;padding:2px 8px">'+(sm[r.status]||r.status)+'</span></div></div></div>';
+  }).join('');
+}
+
+function tab(nm,el){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.ti').forEach(t=>t.classList.remove('active'));
+  document.getElementById('s-'+nm).classList.add('active');
+  if(el)el.classList.add('active');
+  if(nm==='history')loadHist();
+  if(nm==='home')loadHome();
+}
+
+function logout(){
+  localStorage.removeItem('ft');localStorage.removeItem('fi');tok=null;fam=null;
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('ls').style.display='';
+}
+
+ld(true);
+if(tok&&fam){startApp();ld(false);}else{ld(false);}
+</script>
+</body>
+</html>
