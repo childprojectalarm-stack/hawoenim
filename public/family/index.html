@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#FF6B35">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="하원알림">
+<title>하원알림 - 학부모</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#FF6B35;--primary-d:#E55A25;--primary-pale:#FFF0EB;--secondary:#2D3A8C;--green:#06D6A0;--green-pale:#E8FBF6;--amber:#F59E0B;--amber-pale:#FFFBEB;--red:#EF4444;--red-pale:#FEF2F2;--bg:#F5F5FA;--card:#fff;--text:#1A1A2E;--sub:#6B7280;--hint:#B0B7C3;--border:#E8E9F3;--r:20px;--rs:12px;--shadow:0 4px 20px rgba(45,58,140,.10);}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);min-height:100vh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;}
+.loading{position:fixed;inset:0;background:rgba(255,255,255,.9);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;}
+.loading.hide{display:none;}
+.spinner{width:44px;height:44px;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(10px);background:#1A1A2E;color:#fff;border-radius:20px;padding:12px 22px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#login-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;background:linear-gradient(160deg,#FF6B35 0%,#E55A25 35%,#2D3A8C 100%);}
+.login-card{background:#fff;border-radius:28px;padding:36px 28px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+.login-logo{text-align:center;margin-bottom:28px;}
+.login-logo .lg{width:68px;height:68px;background:linear-gradient(135deg,#FF6B35,#FF8F65);border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 12px;box-shadow:0 8px 24px rgba(255,107,53,.3);}
+.login-logo h1{font-size:22px;font-weight:900;color:var(--text);}
+.login-logo p{font-size:13px;color:var(--sub);margin-top:4px;}
+.inp-group{margin-bottom:14px;}
+.inp-label{font-size:12px;font-weight:700;color:var(--sub);margin-bottom:6px;display:block;}
+.inp{width:100%;height:50px;border:2px solid var(--border);border-radius:var(--rs);padding:0 16px;font-size:15px;font-family:inherit;outline:none;transition:border-color .2s;background:#fafafa;color:var(--text);}
+.inp:focus{border-color:var(--primary);background:#fff;}
+.inp::placeholder{color:var(--hint);}
+.btn-login{width:100%;height:52px;background:linear-gradient(135deg,#FF6B35,#FF8F65);border:none;border-radius:var(--rs);color:#fff;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 20px rgba(255,107,53,.3);}
+.btn-login:disabled{opacity:.6;}
+.err-msg{background:var(--red-pale);border:1px solid #FCA5A5;border-radius:var(--rs);padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:14px;display:none;line-height:1.6;}
+.err-msg.show{display:block;}
+.login-tip{font-size:11px;color:var(--hint);text-align:center;margin-top:16px;line-height:1.7;}
+#app{display:none;flex-direction:column;min-height:100vh;}
+#app.show{display:flex;}
+.header{background:var(--primary);padding:env(safe-area-inset-top,0) 0 0;position:sticky;top:0;z-index:10;box-shadow:0 2px 12px rgba(255,107,53,.3);}
+.header-inner{display:flex;align-items:center;padding:14px 20px;gap:12px;}
+.header-icon{width:36px;height:36px;background:rgba(255,255,255,.2);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.header-info{flex:1;}
+.header-kg{font-size:16px;font-weight:800;color:#fff;}
+.header-sub{font-size:11px;color:rgba(255,255,255,.8);margin-top:1px;}
+.header-time{font-size:13px;font-weight:700;color:rgba(255,255,255,.9);background:rgba(255,255,255,.15);padding:6px 12px;border-radius:20px;}
+.content{flex:1;overflow-y:auto;padding-bottom:80px;}
+.student-card{margin:16px;background:linear-gradient(135deg,#2D3A8C,#4A5AB8);border-radius:var(--r);padding:22px 20px;color:#fff;position:relative;overflow:hidden;}
+.student-card::after{content:'🏫';font-size:70px;position:absolute;right:-8px;bottom:-12px;opacity:.12;}
+.student-badge{font-size:11px;font-weight:700;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:10px;}
+.student-name{font-size:24px;font-weight:900;margin-bottom:4px;}
+.student-class{font-size:13px;opacity:.85;}
+.student-row{display:flex;gap:10px;margin-top:14px;}
+.student-pill{background:rgba(255,255,255,.15);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;}
+.section-wrap{margin:0 16px 16px;}
+.section-title{font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;margin-bottom:12px;}
+.section-title::before{content:'';width:4px;height:16px;background:var(--primary);border-radius:2px;}
+.res-card{background:var(--card);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);border:1px solid var(--border);}
+.res-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.status-pill{font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;}
+.sp{background:var(--amber-pale);color:var(--amber);}
+.sa{background:#EFF6FF;color:#3B82F6;}
+.sd{background:var(--green-pale);color:var(--green);}
+.sc{background:var(--red-pale);color:var(--red);}
+.res-time{font-size:36px;font-weight:900;color:var(--primary);line-height:1;}
+.res-time-lbl{font-size:12px;color:var(--sub);margin-top:4px;}
+.res-date{font-size:12px;color:var(--hint);margin-top:8px;}
+.btn-cancel-res{width:100%;height:40px;background:var(--red-pale);border:1px solid #FCA5A5;border-radius:var(--rs);color:var(--red);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:14px;}
+.no-res{text-align:center;padding:28px 0;color:var(--hint);}
+.no-res-icon{font-size:48px;margin-bottom:10px;}
+.no-res-text{font-size:14px;font-weight:600;color:var(--sub);}
+.no-res-sub{font-size:12px;margin-top:4px;}
+.time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.time-btn{height:52px;background:var(--card);border:2px solid var(--border);border-radius:var(--rs);font-size:14px;font-weight:700;color:var(--text);cursor:pointer;font-family:inherit;}
+.time-btn.sel{background:var(--primary);border-color:var(--primary);color:#fff;}
+.time-btn.past{opacity:.4;cursor:not-allowed;}
+.btn-reserve{width:100%;height:54px;background:linear-gradient(135deg,var(--primary),#FF8F65);border:none;border-radius:var(--r);color:#fff;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 20px rgba(255,107,53,.3);}
+.btn-reserve:disabled{opacity:.5;cursor:not-allowed;}
+.tab-bar{background:#fff;border-top:1px solid var(--border);display:flex;position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;z-index:10;box-shadow:0 -2px 10px rgba(0,0,0,.06);}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 calc(10px + env(safe-area-inset-bottom));cursor:pointer;font-size:10px;font-weight:600;color:var(--hint);}
+.tab-item.active{color:var(--primary);}
+.tab-icon{font-size:22px;}
+.hist-list{padding:16px;display:flex;flex-direction:column;gap:10px;}
+.hist-item{background:var(--card);border-radius:var(--r);padding:16px;border:1px solid var(--border);display:flex;align-items:center;gap:14px;}
+.hist-date{font-size:11px;color:var(--hint);width:46px;flex-shrink:0;text-align:center;line-height:1.4;}
+.hist-date strong{font-size:15px;color:var(--text);display:block;}
+.hist-info{flex:1;}
+.hist-time{font-size:18px;font-weight:800;color:var(--primary);}
+.hist-meta{font-size:11px;color:var(--sub);margin-top:2px;}
+.set-wrap{padding:20px 16px;}
+.set-group{background:var(--card);border-radius:var(--r);margin-bottom:16px;overflow:hidden;border:1px solid var(--border);}
+.set-item{display:flex;align-items:center;gap:14px;padding:16px;border-bottom:1px solid var(--border);}
+.set-item:last-child{border-bottom:none;}
+.set-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.set-label{font-size:14px;font-weight:600;color:var(--text);}
+.set-value{margin-left:auto;font-size:13px;color:var(--sub);}
+.btn-logout{width:100%;height:52px;background:var(--red-pale);border:1px solid #FCA5A5;border-radius:var(--r);color:var(--red);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;}
+.announce-banner{margin:0 16px 16px;background:linear-gradient(135deg,#3B82F6,#6366F1);border-radius:var(--r);padding:16px 18px;color:#fff;display:flex;align-items:center;gap:14px;}
+.ann-icon{font-size:30px;flex-shrink:0;}
+.ann-title{font-size:14px;font-weight:700;}
+.ann-sub{font-size:12px;opacity:.85;margin-top:3px;}
+.screen{display:none;}
+.screen.active{display:block;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="loading" id="loading"><div class="spinner"></div><div style="font-size:13px;color:#888">로딩 중...</div></div>
+<div class="toast" id="toast"></div>
+
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo"><div class="lg">🏫</div><h1>하원알림</h1><p>학부모 하원 예약 서비스</p></div>
+    <div class="err-msg" id="err-msg"></div>
+    <div class="inp-group"><label class="inp-label">📱 등록된 전화번호</label><input class="inp" id="inp-phone" type="tel" placeholder="010-0000-0000" autocomplete="tel"></div>
+    <div class="inp-group"><label class="inp-label">👶 자녀 이름 (선택)</label><input class="inp" id="inp-name" type="text" placeholder="자녀 이름을 입력하세요"></div>
+    <button class="btn-login" id="btn-login" onclick="doLogin()"><span>🔐</span> 로그인</button>
+    <div class="login-tip">유치원에 등록된 전화번호로 로그인합니다<br>문의: 담당 선생님께 연락해 주세요</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="header">
+    <div class="header-inner">
+      <div class="header-icon">🏫</div>
+      <div class="header-info"><div class="header-kg" id="h-kg">하원알림</div><div class="header-sub" id="h-sub">학부모 앱</div></div>
+      <div class="header-time" id="h-time">--:--</div>
+    </div>
+  </div>
+  <div class="content">
+    <div class="screen active" id="screen-home">
+      <div class="student-card">
+        <div class="student-badge" id="sc-kg">유치원</div>
+        <div class="student-name" id="sc-name">학생</div>
+        <div class="student-class" id="sc-class">반</div>
+        <div class="student-row"><div class="student-pill" id="sc-rel">보호자</div><div class="student-pill" id="sc-today">오늘 예약 없음</div></div>
+      </div>
+      <div class="announce-banner" id="ann-banner" style="display:none">
+        <div class="ann-icon">📢</div><div><div class="ann-title">하원 방송이 나갔습니다!</div><div class="ann-sub" id="ann-sub">잠시 후 하원해 주세요</div></div>
+      </div>
+      <div class="section-wrap"><div class="section-title">오늘 하원 예약</div><div id="today-card"></div></div>
+      <div class="section-wrap" id="quick-section">
+        <div class="section-title">하원 시간 예약</div>
+        <div class="time-grid" id="time-grid"></div>
+        <button class="btn-reserve" id="btn-reserve" disabled onclick="makeRes()"><span>📅</span> 예약하기</button>
+      </div>
+    </div>
+    <div class="screen" id="screen-history"><div class="hist-list" id="hist-list"></div></div>
+    <div class="screen" id="screen-settings">
+      <div class="set-wrap">
+        <div class="set-group">
+          <div class="set-item"><div class="set-icon" style="background:#FFF0EB">👶</div><div class="set-label">자녀</div><div class="set-value" id="s-student"></div></div>
+          <div class="set-item"><div class="set-icon" style="background:#EFF6FF">🏫</div><div class="set-label">유치원</div><div class="set-value" id="s-kg"></div></div>
+          <div class="set-item"><div class="set-icon" style="background:#F0FDF4">👤</div><div class="set-label">보호자</div><div class="set-value" id="s-name"></div></div>
+          <div class="set-item"><div class="set-icon" style="background:#FFFBEB">📱</div><div class="set-label">전화번호</div><div class="set-value" id="s-phone"></div></div>
+        </div>
+        <div class="set-group">
+          <div class="set-item"><div class="set-icon" style="background:#F5F3FF">ℹ️</div><div class="set-label">앱 버전</div><div class="set-value">1.0.0</div></div>
+          <div class="set-item"><div class="set-icon" style="background:#F0FDF4">🌐</div><div class="set-label">서버</div><div class="set-value" id="s-server">확인 중...</div></div>
+        </div>
+        <button class="btn-logout" onclick="doLogout()">🚪 로그아웃</button>
+      </div>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <div class="tab-item active" id="tab-home" onclick="switchTab('home',this)"><span class="tab-icon">🏠</span><span>홈</span></div>
+    <div class="tab-item" id="tab-history" onclick="switchTab('history',this)"><span class="tab-icon">📋</span><span>내역</span></div>
+    <div class="tab-item" id="tab-settings" onclick="switchTab('settings',this)"><span class="tab-icon">⚙️</span><span>설정</span></div>
+  </div>
+</div>
+
+<script>
+const SERVER='https://hawoenim-production.up.railway.app';
+let token=localStorage.getItem('ft'),family=JSON.parse(localStorage.getItem('fi')||'null'),selTime=null;
+
+function tick(){const n=new Date(),h=String(n.getHours()).padStart(2,'0'),m=String(n.getMinutes()).padStart(2,'0');document.getElementById('h-time').textContent=h+':'+m;}
+setInterval(tick,1000);tick();
+
+function loading(v){document.getElementById('loading').classList.toggle('hide',!v);}
+function toast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+
+async function api(method,path,body){
+  const o={method,headers:{'Content-Type':'application/json'}};
+  if(token)o.headers['Authorization']='Bearer '+token;
+  if(body)o.body=JSON.stringify(body);
+  try{const r=await fetch(SERVER+path,o);const d=await r.json().catch(()=>({}));if(r.status===401){doLogout();return null;}return d;}
+  catch(e){return{success:false,message:'네트워크 오류'};}
+}
+
+document.getElementById('inp-phone').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('inp-name').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+async function doLogin(){
+  const phone=document.getElementById('inp-phone').value.trim(),name=document.getElementById('inp-name').value.trim();
+  const err=document.getElementById('err-msg'),btn=document.getElementById('btn-login');
+  err.classList.remove('show');
+  if(!phone){err.textContent='전화번호를 입력해주세요.';err.classList.add('show');return;}
+  btn.disabled=true;btn.innerHTML='<span>⏳</span> 확인 중...';loading(true);
+  const d=await api('POST','/api/family/login',{phone,student_name:name||undefined});
+  loading(false);btn.disabled=false;btn.innerHTML='<span>🔐</span> 로그인';
+  if(!d||!d.success){err.textContent=d?.message||'로그인에 실패했습니다.';err.classList.add('show');return;}
+  token=d.token;family=d.family;
+  localStorage.setItem('ft',token);localStorage.setItem('fi',JSON.stringify(family));
+  startApp();
+}
+
+function startApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').classList.add('show');
+  applyInfo();loadHome();
+  api('GET','/api/health').then(d=>document.getElementById('s-server').textContent=d?.success?'🟢 정상':'🔴 오류');
+}
+
+function applyInfo(){
+  if(!family)return;
+  document.getElementById('h-kg').textContent=family.kindergarten_name||'하원알림';
+  document.getElementById('h-sub').textContent=(family.name||'')+' 보호자 · '+(family.student_name||'')+' 학생';
+  document.getElementById('sc-kg').textContent=family.kindergarten_name||'';
+  document.getElementById('sc-name').textContent=family.student_name||'';
+  document.getElementById('sc-class').textContent='🏫 '+(family.classroom_name||'');
+  document.getElementById('sc-rel').textContent=(family.relation||'')+' '+(family.name||'');
+  document.getElementById('s-student').textContent=family.student_name||'';
+  document.getElementById('s-kg').textContent=family.kindergarten_name||'';
+  document.getElementById('s-name').textContent=family.name||'';
+  document.getElementById('s-phone').textContent=family.phone||'';
+}
+
+async function loadHome(){
+  const d=await api('GET','/api/family/me');
+  if(!d||!d.success)return;
+  family={...family,...d.family};localStorage.setItem('fi',JSON.stringify(family));applyInfo();
+  renderToday(d.todayReservation);renderGrid(d.todayReservation);
+}
+
+function renderToday(res){
+  const el=document.getElementById('today-card'),banner=document.getElementById('ann-banner');
+  if(!res||res.status==='cancelled'){
+    document.getElementById('sc-today').textContent='오늘 예약 없음';
+    el.innerHTML='<div class="no-res"><div class="no-res-icon">📅</div><div class="no-res-text">오늘 예약이 없습니다</div><div class="no-res-sub">아래에서 하원 시간을 선택하세요</div></div>';
+    banner.style.display='none';return;
+  }
+  const sm={pending:'대기중',announced:'방송 완료',done:'하원 완료',cancelled:'취소됨'};
+  const sc={pending:'sp',announced:'sa',done:'sd',cancelled:'sc'};
+  document.getElementById('sc-today').textContent=res.pickup_time+' 예약';
+  if(res.status==='announced'){banner.style.display='flex';document.getElementById('ann-sub').textContent=res.pickup_time+' 하원 - 잠시 후 나와주세요!';}
+  else banner.style.display='none';
+  const cb=res.status==='pending'?'<button class="btn-cancel-res" onclick="cancelRes('+res.id+')">예약 취소</button>':'';
+  el.innerHTML='<div class="res-card"><div class="res-top"><div><div class="res-time">'+res.pickup_time+'</div><div class="res-time-lbl">하원 예정 시간</div></div><span class="status-pill '+(sc[res.status]||'sp')+'">'+(sm[res.status]||res.status)+'</span></div><div class="res-date">📅 '+res.reserve_date+'</div>'+cb+'</div>';
+}
+
+function renderGrid(todayRes){
+  const grid=document.getElementById('time-grid'),sec=document.getElementById('quick-section');
+  if(todayRes&&todayRes.status!=='cancelled'){sec.style.display='none';return;}
+  sec.style.display='block';
+  const times=['13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00'];
+  const now=new Date(),nm=now.getHours()*60+now.getMinutes();
+  grid.innerHTML=times.map(t=>{const[h,m]=t.split(':').map(Number),past=(h*60+m)<=nm;return '<button class="time-btn'+(past?' past':'')+'" onclick="selT(''+t+'',this)" '+(past?'disabled':'')+'>'+t+'</button>';}).join('');
+  selTime=null;document.getElementById('btn-reserve').disabled=true;
+}
+
+function selT(t,btn){document.querySelectorAll('.time-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');selTime=t;document.getElementById('btn-reserve').disabled=false;}
+
+async function makeRes(){
+  if(!selTime)return;loading(true);
+  const d=await api('POST','/api/family/reservations',{pickup_time:selTime});
+  loading(false);
+  if(d?.success){toast('✅ '+selTime+' 하원 예약 완료!');loadHome();}
+  else toast('❌ '+(d?.message||'예약 실패'));
+}
+
+async function cancelRes(id){
+  if(!confirm('예약을 취소하시겠습니까?'))return;loading(true);
+  const d=await api('PUT','/api/family/reservations/'+id+'/cancel');loading(false);
+  if(d?.success){toast('예약이 취소됐습니다');loadHome();}else toast('❌ '+(d?.message||'취소 실패'));
+}
+
+async function loadHistory(){
+  const d=await api('GET','/api/family/reservations?limit=20');
+  const el=document.getElementById('hist-list');
+  if(!d||!d.data?.length){el.innerHTML='<div class="no-res" style="padding:40px 0"><div class="no-res-icon">📋</div><div class="no-res-text">예약 내역이 없습니다</div></div>';return;}
+  const sm={pending:'대기중',announced:'방송 완료',done:'완료',cancelled:'취소'};
+  const sc={pending:'sp',announced:'sa',done:'sd',cancelled:'sc'};
+  el.innerHTML=d.data.map(r=>{const dt=new Date(r.reserve_date),mon=dt.getMonth()+1,day=dt.getDate();return '<div class="hist-item"><div class="hist-date">'+mon+'/'+day+'<br><strong>'+r.pickup_time+'</strong></div><div class="hist-info"><div class="hist-time">'+r.pickup_time+'</div><div class="hist-meta">'+r.reserve_date+' · <span class="status-pill '+(sc[r.status]||'sp')+'" style="font-size:10px;padding:2px 8px">'+(sm[r.status]||r.status)+'</span></div></div></div>';}).join('');
+}
+
+function switchTab(name,el){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  if(el)el.classList.add('active');
+  if(name==='history')loadHistory();
+  if(name==='home')loadHome();
+}
+
+function doLogout(){
+  localStorage.removeItem('ft');localStorage.removeItem('fi');token=null;family=null;
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('login-screen').style.display='';
+}
+
+loading(true);
+if(token&&family){startApp();loading(false);}
+else{loading(false);}
+</script>
+</body>
+</html>
