@@ -10,13 +10,13 @@ const router  = express.Router();
 router.post('/login', (req, res) => {
   const { username, password } = req.body;
   if (!username || !password)
-    return res.status(400).json({ success: false, message: '아이디와 비밀번호를 입력해주세요.' });
+    return res.status(400).json({ success: false, message: 'ìì´ëì ë¹ë°ë²í¸ë¥¼ ìë ¥í´ì£¼ì¸ì.' });
 
   const user = db.prepare('SELECT * FROM users WHERE username=?').get(username);
   if (!user || !bcrypt.compareSync(password, user.password))
-    return res.status(401).json({ success: false, message: '아이디 또는 비밀번호가 올바르지 않습니다.' });
+    return res.status(401).json({ success: false, message: 'ìì´ë ëë ë¹ë°ë²í¸ê° ì¬ë°ë¥´ì§ ììµëë¤.' });
 
-  // 유치원 정보 함께 반환
+  // ì ì¹ì ì ë³´ í¨ê» ë°í
   let kindergarten = null;
   if (user.kindergarten_id) {
     kindergarten = db.prepare('SELECT id, name FROM kindergartens WHERE id=?').get(user.kindergarten_id);
@@ -28,14 +28,17 @@ router.post('/login', (req, res) => {
     { expiresIn: '8h' }
   );
 
+  const userObj = {
+    username: user.username, name: user.name,
+    email: user.email, role: user.role,
+    kindergarten_id: user.kindergarten_id,
+    kindergartenName: kindergarten ? kindergarten.name : null,
+    kindergarten
+  };
   res.json({
     success: true, token,
-    user: {
-      username: user.username, name: user.name,
-      email: user.email, role: user.role,
-      kindergarten_id: user.kindergarten_id,
-      kindergarten
-    }
+    user: userObj,
+    admin: userObj
   });
 });
 
@@ -43,12 +46,12 @@ router.post('/login', (req, res) => {
 router.put('/change-id', auth, (req, res) => {
   const { newUsername, currentPassword } = req.body;
   if (!newUsername || newUsername.length < 4)
-    return res.status(400).json({ success: false, message: '아이디는 4자 이상이어야 합니다.' });
+    return res.status(400).json({ success: false, message: 'ìì´ëë 4ì ì´ìì´ì´ì¼ í©ëë¤.' });
   const user = db.prepare('SELECT * FROM users WHERE id=?').get(req.user.id);
   if (!bcrypt.compareSync(currentPassword, user.password))
-    return res.status(401).json({ success: false, message: '현재 비밀번호가 올바르지 않습니다.' });
+    return res.status(401).json({ success: false, message: 'íì¬ ë¹ë°ë²í¸ê° ì¬ë°ë¥´ì§ ììµëë¤.' });
   if (db.prepare('SELECT id FROM users WHERE username=? AND id!=?').get(newUsername, req.user.id))
-    return res.status(409).json({ success: false, message: '이미 사용 중인 아이디입니다.' });
+    return res.status(409).json({ success: false, message: 'ì´ë¯¸ ì¬ì© ì¤ì¸ ìì´ëìëë¤.' });
   db.prepare('UPDATE users SET username=? WHERE id=?').run(newUsername, req.user.id);
   res.json({ success: true });
 });
@@ -57,10 +60,10 @@ router.put('/change-id', auth, (req, res) => {
 router.put('/change-pw', auth, (req, res) => {
   const { currentPassword, newPassword } = req.body;
   if (!newPassword || newPassword.length < 6)
-    return res.status(400).json({ success: false, message: '새 비밀번호는 6자 이상이어야 합니다.' });
+    return res.status(400).json({ success: false, message: 'ì ë¹ë°ë²í¸ë 6ì ì´ìì´ì´ì¼ í©ëë¤.' });
   const user = db.prepare('SELECT * FROM users WHERE id=?').get(req.user.id);
   if (!bcrypt.compareSync(currentPassword, user.password))
-    return res.status(401).json({ success: false, message: '현재 비밀번호가 올바르지 않습니다.' });
+    return res.status(401).json({ success: false, message: 'íì¬ ë¹ë°ë²í¸ê° ì¬ë°ë¥´ì§ ììµëë¤.' });
   db.prepare('UPDATE users SET password=? WHERE id=?').run(bcrypt.hashSync(newPassword, 10), req.user.id);
   res.json({ success: true });
 });
@@ -69,7 +72,7 @@ router.put('/change-pw', auth, (req, res) => {
 router.put('/email', auth, (req, res) => {
   const { email } = req.body;
   if (!email || !email.includes('@'))
-    return res.status(400).json({ success: false, message: '올바른 이메일을 입력해주세요.' });
+    return res.status(400).json({ success: false, message: 'ì¬ë°ë¥¸ ì´ë©ì¼ì ìë ¥í´ì£¼ì¸ì.' });
   db.prepare('UPDATE users SET email=? WHERE id=?').run(email, req.user.id);
   res.json({ success: true });
 });
@@ -79,7 +82,7 @@ router.post('/find-pw', async (req, res) => {
   const { username, email } = req.body;
   const user = db.prepare('SELECT * FROM users WHERE username=?').get(username);
   if (!user || user.email !== email)
-    return res.status(404).json({ success: false, message: '아이디 또는 이메일이 일치하지 않습니다.' });
+    return res.status(404).json({ success: false, message: 'ìì´ë ëë ì´ë©ì¼ì´ ì¼ì¹íì§ ììµëë¤.' });
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
   const tempPw = Array.from({ length: 10 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
   db.prepare('UPDATE users SET password=? WHERE id=?').run(bcrypt.hashSync(tempPw, 10), user.id);
@@ -87,7 +90,7 @@ router.post('/find-pw', async (req, res) => {
     await sendTempPassword(email, username, tempPw);
     res.json({ success: true });
   } catch (e) {
-    res.status(500).json({ success: false, message: '이메일 발송 오류: ' + e.message });
+    res.status(500).json({ success: false, message: 'ì´ë©ì¼ ë°ì¡ ì¤ë¥: ' + e.message });
   }
 });
 
