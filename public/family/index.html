@@ -9,13 +9,16 @@
 <title>하원알림</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-:root{--p:#6366F1;--pd:#4F46E5;--g:#10B981;--gp:#ECFDF5;--r:#EF4444;--rp:#FEF2F2;--a:#F59E0B;--ap:#FFFBEB;--b:#3B82F6;--bp:#EFF6FF;--bg:#F8F9FF;--c:#fff;--t:#0F172A;--sub:#64748B;--hint:#CBD5E1;--bdr:#E2E8F0;--ra:18px;--rs:12px;--sh:0 4px 24px rgba(99,102,241,.1);}
+:root{--p:#6366F1;--g:#10B981;--gp:#ECFDF5;--r:#EF4444;--rp:#FEF2F2;--a:#F59E0B;--ap:#FFFBEB;--b:#3B82F6;--bp:#EFF6FF;--bg:#F8F9FF;--c:#fff;--t:#0F172A;--sub:#64748B;--hint:#CBD5E1;--bdr:#E2E8F0;--ra:18px;--rs:12px;--sh:0 4px 24px rgba(99,102,241,.1);}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);min-height:100vh;max-width:430px;margin:0 auto;}
-#ld{position:fixed;inset:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+/* 로딩 - 기본 숨김 */
+#ld{position:fixed;inset:0;background:rgba(255,255,255,.95);z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
 .ldr{width:44px;height:44px;border:4px solid var(--bdr);border-top-color:var(--p);border-radius:50%;animation:sp .8s linear infinite;}
 @keyframes sp{to{transform:rotate(360deg)}}
+/* 토스트 */
 #ts{position:fixed;bottom:calc(88px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(20px);background:#0F172A;color:#fff;border-radius:24px;padding:12px 24px;font-size:13px;font-weight:600;z-index:9998;opacity:0;transition:all .3s;white-space:nowrap;max-width:85vw;text-align:center;pointer-events:none;}
 #ts.show{opacity:1;transform:translateX(-50%) translateY(0);}
+/* 로그인 */
 #ls{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 24px;background:linear-gradient(145deg,#6366F1,#8B5CF6,#EC4899);}
 .lc{background:#fff;border-radius:28px;padding:36px 28px;width:100%;max-width:360px;box-shadow:0 24px 64px rgba(0,0,0,.2);}
 .lb{display:flex;flex-direction:column;align-items:center;margin-bottom:32px;gap:10px;}
@@ -29,9 +32,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .fi::placeholder{color:var(--hint);}
 .eb{background:var(--rp);border:1.5px solid #FCA5A5;border-radius:var(--rs);padding:12px 14px;font-size:13px;color:var(--r);margin-bottom:16px;display:none;line-height:1.6;}
 .eb.show{display:block;}
-.bp2{width:100%;height:54px;background:linear-gradient(135deg,#6366F1,#8B5CF6);border:none;border-radius:var(--rs);color:#fff;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 20px rgba(99,102,241,.35);margin-top:8px;transition:opacity .2s;}
+.bp2{width:100%;height:54px;background:linear-gradient(135deg,#6366F1,#8B5CF6);border:none;border-radius:var(--rs);color:#fff;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 20px rgba(99,102,241,.35);margin-top:8px;}
 .bp2:disabled{opacity:.6;}
 .lhint{font-size:11px;color:var(--hint);text-align:center;margin-top:20px;line-height:1.8;}
+/* 앱 */
 #app{display:none;flex-direction:column;min-height:100vh;}
 #app.show{display:flex;}
 .hd{background:linear-gradient(135deg,#6366F1,#8B5CF6);padding-top:env(safe-area-inset-top,0px);position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(99,102,241,.3);}
@@ -68,10 +72,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .nr{text-align:center;padding:32px 0;background:var(--c);border-radius:var(--ra);border:1px solid var(--bdr);}
 .ts2{padding:0 16px 16px;}
 .tg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
-.tb{height:52px;background:var(--c);border:2px solid var(--bdr);border-radius:var(--rs);font-size:13px;font-weight:700;color:var(--sub);cursor:pointer;font-family:inherit;transition:all .15s;}
+.tb{height:52px;background:var(--c);border:2px solid var(--bdr);border-radius:var(--rs);font-size:13px;font-weight:700;color:var(--sub);cursor:pointer;font-family:inherit;}
 .tb.sel{background:var(--p);border-color:var(--p);color:#fff;}
 .tb.past{opacity:.35;cursor:not-allowed;}
-.brv{width:100%;height:56px;background:linear-gradient(135deg,#6366F1,#8B5CF6);border:none;border-radius:var(--ra);color:#fff;font-size:17px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 6px 24px rgba(99,102,241,.35);transition:opacity .2s;}
+.brv{width:100%;height:56px;background:linear-gradient(135deg,#6366F1,#8B5CF6);border:none;border-radius:var(--ra);color:#fff;font-size:17px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 6px 24px rgba(99,102,241,.35);}
 .brv:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}
 .tbar{background:#fff;border-top:1px solid var(--bdr);display:flex;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:100;padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -4px 16px rgba(0,0,0,.06);}
 .tb2{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 0;cursor:pointer;font-size:10px;font-weight:600;color:var(--hint);border:none;background:none;font-family:inherit;}
@@ -100,74 +104,49 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </head>
 <body>
 
+<!-- 로딩 (기본 숨김 - display:none) -->
 <div id="ld"><div class="ldr"></div><p style="font-size:13px;color:#64748B;font-weight:500">잠시만 기다려주세요...</p></div>
 <div id="ts"></div>
 
+<!-- 로그인 -->
 <div id="ls">
   <div class="lc">
-    <div class="lb">
-      <div class="lg">🏫</div>
-      <div class="lt">하원알림</div>
-      <div class="ls2">학부모 하원 예약 서비스</div>
-    </div>
+    <div class="lb"><div class="lg">🏫</div><div class="lt">하원알림</div><div class="ls2">학부모 하원 예약 서비스</div></div>
     <div class="eb" id="eb"></div>
-    <div class="fg">
-      <label class="fl">전화번호</label>
-      <input class="fi" id="fp" type="tel" placeholder="010-0000-0000" autocomplete="tel" inputmode="tel">
-    </div>
-    <div class="fg">
-      <label class="fl">자녀 이름 <span style="font-weight:400;color:var(--hint)">(선택)</span></label>
-      <input class="fi" id="fn" type="text" placeholder="자녀 이름 입력">
-    </div>
+    <div class="fg"><label class="fl">전화번호</label><input class="fi" id="fp" type="tel" placeholder="010-0000-0000" autocomplete="tel" inputmode="tel"></div>
+    <div class="fg"><label class="fl">자녀 이름 <span style="font-weight:400;color:var(--hint)">(선택)</span></label><input class="fi" id="fn" type="text" placeholder="자녀 이름 입력"></div>
     <button class="bp2" id="lbtn" onclick="doLogin()"><span>🔐</span><span>로그인</span></button>
     <p class="lhint">유치원에 등록된 전화번호로 로그인하세요<br>문의: 담당 선생님께 연락해 주세요</p>
   </div>
 </div>
 
+<!-- 앱 -->
 <div id="app">
-  <div class="hd">
-    <div class="hi">
-      <div class="hico">🏫</div>
-      <div class="htx">
-        <div class="hkg" id="hkg">하원알림</div>
-        <div class="hu" id="hu">학부모 앱</div>
-      </div>
-      <div class="hcl" id="hcl">--:--</div>
-    </div>
-  </div>
+  <div class="hd"><div class="hi">
+    <div class="hico">🏫</div>
+    <div class="htx"><div class="hkg" id="hkg">하원알림</div><div class="hu" id="hu">학부모 앱</div></div>
+    <div class="hcl" id="hcl">--:--</div>
+  </div></div>
   <div class="ct">
     <div class="scr active" id="s-home">
       <div class="pc">
         <div class="ptag">재원생</div>
         <div class="pnm" id="pnm">학생 이름</div>
         <div class="pcl" id="pcl">반 정보</div>
-        <div class="pps">
-          <div class="pp" id="pgu">보호자</div>
-          <div class="pp td" id="ptd">오늘 예약 없음</div>
-        </div>
+        <div class="pps"><div class="pp" id="pgu">보호자</div><div class="pp td" id="ptd">오늘 예약 없음</div></div>
       </div>
       <div class="anb" id="anb" style="display:none">
         <span style="font-size:30px;flex-shrink:0">📢</span>
-        <div>
-          <div style="font-size:14px;font-weight:800">하원 방송이 나갔습니다!</div>
-          <div style="font-size:12px;opacity:.85;margin-top:3px" id="ans">잠시 후 하원해 주세요</div>
-        </div>
+        <div><div style="font-size:14px;font-weight:800">하원 방송이 나갔습니다!</div><div style="font-size:12px;opacity:.85;margin-top:3px" id="ans">잠시 후 하원해 주세요</div></div>
       </div>
-      <div class="sec">
-        <div class="sh">오늘 하원 예약</div>
-        <div id="tres"></div>
-      </div>
+      <div class="sec"><div class="sh">오늘 하원 예약</div><div id="tres"></div></div>
       <div class="ts2" id="tss">
         <div class="sh" style="margin-bottom:12px">하원 시간 선택</div>
         <div class="tg" id="tgd"></div>
-        <button class="brv" id="rbtn" disabled onclick="mkRes()">
-          <span>📅</span><span>하원 예약하기</span>
-        </button>
+        <button class="brv" id="rbtn" disabled onclick="mkRes()"><span>📅</span><span>하원 예약하기</span></button>
       </div>
     </div>
-    <div class="scr" id="s-history">
-      <div class="hl" id="hlist"></div>
-    </div>
+    <div class="scr" id="s-history"><div class="hl" id="hlist"></div></div>
     <div class="scr" id="s-settings">
       <div class="sw">
         <div class="sst">내 정보</div>
@@ -187,51 +166,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
   </div>
   <div class="tbar">
-    <button class="tb2 active" id="t-home" onclick="swTab('home',this)">
-      <span style="font-size:22px">🏠</span><span>홈</span>
-    </button>
-    <button class="tb2" id="t-history" onclick="swTab('history',this)">
-      <span style="font-size:22px">📋</span><span>내역</span>
-    </button>
-    <button class="tb2" id="t-settings" onclick="swTab('settings',this)">
-      <span style="font-size:22px">⚙️</span><span>설정</span>
-    </button>
+    <button class="tb2 active" id="t-home" onclick="swTab('home',this)"><span style="font-size:22px">🏠</span><span>홈</span></button>
+    <button class="tb2" id="t-history" onclick="swTab('history',this)"><span style="font-size:22px">📋</span><span>내역</span></button>
+    <button class="tb2" id="t-settings" onclick="swTab('settings',this)"><span style="font-size:22px">⚙️</span><span>설정</span></button>
   </div>
 </div>
 
 <script>
-const SV='https://hawoenim-production.up.railway.app';
-
-// 로딩 제어 - style.display 직접 조작 (classList 타이밍 문제 방지)
-function ldHide(){var e=document.getElementById('ld');if(e)e.style.display='none';}
-function ldShow(){var e=document.getElementById('ld');if(e)e.style.display='flex';}
-
-// 토큰/데이터
+var SV='https://hawoenim-production.up.railway.app';
 var tok=null,fam=null,sel=null;
 try{tok=localStorage.getItem('fw_t');}catch(e){}
 try{fam=JSON.parse(localStorage.getItem('fw_f')||'null');}catch(e){}
 
-// 시계
-function tick(){var n=new Date(),h=String(n.getHours()).padStart(2,'0'),m=String(n.getMinutes()).padStart(2,'0');var e=document.getElementById('hcl');if(e)e.textContent=h+':'+m;}
+function ldS(){document.getElementById('ld').style.display='flex';}
+function ldH(){document.getElementById('ld').style.display='none';}
+
+function tick(){var n=new Date(),e=document.getElementById('hcl');if(e)e.textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');}
 setInterval(tick,1000);tick();
 
-// 토스트
-function toast(msg,d){var e=document.getElementById('ts');if(!e)return;e.textContent=msg;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(function(){e.classList.remove('show');},(d||2800));}
+function toast(m,d){var e=document.getElementById('ts');if(!e)return;e.textContent=m;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(function(){e.classList.remove('show');},(d||2800));}
 
-// API 호출
 async function api(mt,path,body){
   var o={method:mt,headers:{'Content-Type':'application/json'}};
   if(tok)o.headers['Authorization']='Bearer '+tok;
   if(body)o.body=JSON.stringify(body);
-  try{
-    var r=await fetch(SV+path,o);
-    var d=await r.json().catch(function(){return{};});
-    if(r.status===401){doLogout();return null;}
-    return d;
-  }catch(e){return{success:false,message:'서버 연결 오류'};}
+  try{var r=await fetch(SV+path,o);var d=await r.json().catch(function(){return{};});if(r.status===401){doLogout();return null;}return d;}
+  catch(e){return{success:false,message:'서버 연결 오류'};}
 }
 
-// 로그인
 document.getElementById('fp').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('fn').focus();});
 document.getElementById('fn').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 
@@ -240,39 +202,26 @@ async function doLogin(){
   var eb=document.getElementById('eb'),btn=document.getElementById('lbtn');
   eb.classList.remove('show');
   if(!ph){eb.textContent='전화번호를 입력해주세요.';eb.classList.add('show');return;}
-  btn.disabled=true;
-  btn.innerHTML='<div class="ldr" style="width:20px;height:20px;border-width:3px;margin:0 auto"></div>';
-  ldShow();
+  btn.disabled=true;btn.innerHTML='<div class="ldr" style="width:20px;height:20px;border-width:3px;margin:0 auto"></div>';
+  ldS();
   var d=await api('POST','/api/family/login',{phone:ph,student_name:nm||undefined});
-  ldHide();
-  btn.disabled=false;
-  btn.innerHTML='<span>🔐</span><span>로그인</span>';
-  if(!d||!d.success){
-    eb.textContent=d&&d.message?d.message:'로그인에 실패했습니다. 유치원에 문의해주세요.';
-    eb.classList.add('show');
-    return;
-  }
+  ldH();btn.disabled=false;btn.innerHTML='<span>🔐</span><span>로그인</span>';
+  if(!d||!d.success){eb.textContent=d&&d.message?d.message:'로그인 실패. 유치원에 문의해주세요.';eb.classList.add('show');return;}
   tok=d.token;fam=d.family;
   try{localStorage.setItem('fw_t',tok);localStorage.setItem('fw_f',JSON.stringify(fam));}catch(e){}
   startApp();
 }
 
 function startApp(){
-  ldHide();
   document.getElementById('ls').style.display='none';
   document.getElementById('app').classList.add('show');
-  applyInfo();
-  loadHome();
-  api('GET','/api/health').then(function(d){
-    var e=document.getElementById('svsv');
-    if(e)e.textContent=d&&d.success?'🟢 정상':'🔴 오류';
-  });
+  applyInfo();loadHome();
+  api('GET','/api/health').then(function(d){var e=document.getElementById('svsv');if(e)e.textContent=d&&d.success?'🟢 정상':'🔴 오류';});
 }
 
 function applyInfo(){
   if(!fam)return;
-  var kg=fam.kindergarten_name||'하원알림';
-  var s=function(v){return v||'';};
+  var kg=fam.kindergarten_name||'하원알림',s=function(v){return v||'';};
   document.getElementById('hkg').textContent=kg;
   document.getElementById('hu').textContent=s(fam.name)+' 보호자 · '+s(fam.student_name)+' 학생';
   document.getElementById('pnm').textContent=s(fam.student_name);
@@ -301,12 +250,8 @@ function renderRes(r){
     ab.style.display='none';return;
   }
   td.textContent=r.pickup_time+' 예약';
-  if(r.status==='announced'){
-    ab.style.display='flex';
-    document.getElementById('ans').textContent=r.pickup_time+' 하원 · 잠시 후 나와주세요!';
-  }else{
-    ab.style.display='none';
-  }
+  if(r.status==='announced'){ab.style.display='flex';document.getElementById('ans').textContent=r.pickup_time+' 하원 · 잠시 후 나와주세요!';}
+  else ab.style.display='none';
   var cb=r.status==='pending'?'<button class="bca" onclick="cancelR('+r.id+')">예약 취소하기</button>':'';
   el.innerHTML='<div class="rc"><div class="rtr"><div><div class="rtm">'+r.pickup_time+'</div><div style="font-size:12px;color:var(--sub);margin-top:4px">하원 예정 시간</div></div><span class="rb '+(sc[r.status]||'rb0')+'">'+(sl[r.status]||r.status)+'</span></div><div class="rdr"><span>📅</span><span>'+r.reserve_date+' (오늘)</span></div>'+cb+'</div>';
 }
@@ -318,28 +263,24 @@ function buildGrid(tr){
   var times=['13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00'];
   var n=new Date(),nm=n.getHours()*60+n.getMinutes();
   document.getElementById('tgd').innerHTML=times.map(function(t){
-    var parts=t.split(':'),h=parseInt(parts[0]),m=parseInt(parts[1]),p=(h*60+m)<=nm;
-    return '<button class="tb'+(p?' past':'')+'" onclick="selT(''+t+'',this)"'+(p?' disabled':'')+'>'+t+'</button>';
+    var p=t.split(':'),h=parseInt(p[0]),m=parseInt(p[1]),past=(h*60+m)<=nm;
+    return '<button class="tb'+(past?' past':'')+'" onclick="selT(''+t+'',this)"'+(past?' disabled':'')+'>'+t+'</button>';
   }).join('');
   sel=null;document.getElementById('rbtn').disabled=true;
 }
 
-function selT(t,btn){
-  document.querySelectorAll('.tb').forEach(function(b){b.classList.remove('sel');});
-  btn.classList.add('sel');sel=t;document.getElementById('rbtn').disabled=false;
-}
+function selT(t,btn){document.querySelectorAll('.tb').forEach(function(b){b.classList.remove('sel');});btn.classList.add('sel');sel=t;document.getElementById('rbtn').disabled=false;}
 
 async function mkRes(){
-  if(!sel)return;ldShow();
-  var d=await api('POST','/api/family/reservations',{pickup_time:sel});
-  ldHide();
+  if(!sel)return;ldS();
+  var d=await api('POST','/api/family/reservations',{pickup_time:sel});ldH();
   if(d&&d.success){toast('✅ '+sel+' 하원 예약 완료!');sel=null;loadHome();}
-  else toast('❌ '+(d&&d.message?d.message:'예약에 실패했습니다'));
+  else toast('❌ '+(d&&d.message?d.message:'예약 실패'));
 }
 
 async function cancelR(id){
-  if(!confirm('예약을 취소하시겠습니까?'))return;ldShow();
-  var d=await api('PUT','/api/family/reservations/'+id+'/cancel');ldHide();
+  if(!confirm('예약을 취소하시겠습니까?'))return;ldS();
+  var d=await api('PUT','/api/family/reservations/'+id+'/cancel');ldH();
   if(d&&d.success){toast('예약이 취소됐습니다');loadHome();}
   else toast('❌ '+(d&&d.message?d.message:'취소 실패'));
 }
@@ -348,10 +289,7 @@ async function loadHistory(){
   var el=document.getElementById('hlist');
   el.innerHTML='<div style="text-align:center;padding:40px;color:var(--hint)">불러오는 중...</div>';
   var d=await api('GET','/api/family/reservations?limit=30');
-  if(!d||!d.data||!d.data.length){
-    el.innerHTML='<div class="nr" style="margin:0"><div style="font-size:48px;margin-bottom:10px">📋</div><div style="font-size:15px;font-weight:700;color:var(--sub)">예약 내역이 없습니다</div></div>';
-    return;
-  }
+  if(!d||!d.data||!d.data.length){el.innerHTML='<div class="nr" style="margin:0"><div style="font-size:48px;margin-bottom:10px">📋</div><div style="font-size:15px;font-weight:700;color:var(--sub)">예약 내역이 없습니다</div></div>';return;}
   var sl={pending:'대기중',announced:'방송완료',done:'완료',cancelled:'취소'};
   var sc={pending:'rb0',announced:'rb1',done:'rb2',cancelled:'rb3'};
   el.innerHTML=d.data.map(function(r){
@@ -363,8 +301,7 @@ async function loadHistory(){
 function swTab(nm,el){
   document.querySelectorAll('.scr').forEach(function(s){s.classList.remove('active');});
   document.querySelectorAll('.tb2').forEach(function(t){t.classList.remove('active');});
-  document.getElementById('s-'+nm).classList.add('active');
-  el.classList.add('active');
+  document.getElementById('s-'+nm).classList.add('active');el.classList.add('active');
   if(nm==='history')loadHistory();
   if(nm==='home')loadHome();
 }
@@ -374,25 +311,11 @@ function doLogout(){
   tok=null;fam=null;
   document.getElementById('app').classList.remove('show');
   document.getElementById('ls').style.display='';
-  document.getElementById('fp').value='';
-  document.getElementById('fn').value='';
+  document.getElementById('fp').value='';document.getElementById('fn').value='';
 }
 
-// 시작 - 무조건 로딩 숨기기
-window.onload = function(){
-  ldHide();
-  try{
-    if(tok&&fam){startApp();}
-  }catch(e){console.error(e);}
-};
-
-// onload 백업: DOMContentLoaded에서도 처리
-document.addEventListener('DOMContentLoaded',function(){
-  ldHide();
-  try{
-    if(tok&&fam){startApp();}
-  }catch(e){console.error(e);}
-});
+// 자동 로그인 (로딩 스피너 없이 바로 실행)
+if(tok&&fam){startApp();}
 </script>
 </body>
 </html>
