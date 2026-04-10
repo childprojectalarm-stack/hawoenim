@@ -1145,7 +1145,7 @@ tbody td {
 
 /* 로그인 완료 후 대시보드 wrap */
 #app-wrap { display: none; }
-#app-wrap.visible { display: flex; flex-direction: column; min-height: 100vh; }
+#app-wrap.visible { display: flex; flex-direction: row; min-height: 100vh; }
 
 /* ── 환경설정 ── */
 .settings-layout {
@@ -1474,6 +1474,19 @@ tbody td {
   margin-bottom: 14px;
 }
 .select-tree .form-select { flex: 1; }
+
+/* page-settings 위치 고정 */
+#page-settings {
+  position: fixed;
+  top: 0; left: 240px; right: 0; bottom: 0;
+  overflow-y: auto;
+  display: none;
+  flex-direction: column;
+  z-index: 10;
+}
+#page-settings.active {
+  display: flex;
+}
 </style>
 </head>
 <body>
@@ -2531,20 +2544,9 @@ function doLogout() {
 
 // ── 대시보드 초기 데이터 로드 ──
 
-async function loadClassroomsData(){
-  try{ var d=await api('GET','/api/kg/classrooms'); if(d&&d.data&&typeof renderClassrooms==='function') renderClassrooms(d.data); }catch(e){}
-}
-async function loadBroadcastLogs(){
-  try{ var d=await api('GET','/api/kg/broadcast-logs'); if(d&&d.data&&typeof renderBroadcastLogs==='function') renderBroadcastLogs(d.data); }catch(e){}
-}
-async function loadSettingsData(){
-  try{
-    var r=await Promise.all([api('GET','/api/kg/info'),api('GET','/api/kg/classrooms'),api('GET','/api/kg/students')]);
-    if(r[0]&&r[0].data&&typeof renderKgInfo==='function') renderKgInfo(r[0].data);
-    if(r[1]&&r[1].data&&typeof renderClassroomsList==='function') renderClassroomsList(r[1].data);
-    if(r[2]&&r[2].data&&typeof renderStudents==='function') renderStudents(r[2].data);
-  }catch(e){}
-}
+async function loadClassroomsData(){try{var d=await api('GET','/api/kg/classrooms');if(d&&d.data&&typeof renderClassrooms==='function')renderClassrooms(d.data);}catch(e){}}
+async function loadBroadcastLogs(){try{var d=await api('GET','/api/kg/broadcast-logs');if(d&&d.data&&typeof renderBroadcastLogs==='function')renderBroadcastLogs(d.data);}catch(e){}}
+async function loadSettingsData(){try{var r=await Promise.all([api('GET','/api/kg/info'),api('GET','/api/kg/classrooms'),api('GET','/api/kg/students')]);if(r[0]&&r[0].data&&typeof renderKgInfo==='function')renderKgInfo(r[0].data);if(r[1]&&r[1].data&&typeof renderClassroomsList==='function')renderClassroomsList(r[1].data);if(r[2]&&r[2].data&&typeof renderStudents==='function')renderStudents(r[2].data);}catch(e){}}
 async function loadDashboardData() {
   try {
     const today = new Date().toISOString().slice(0,10);
@@ -2678,20 +2680,14 @@ const pageTitles = {
 function showPage(id) {
   document.querySelectorAll('.content').forEach(function(el){ el.classList.remove('active'); });
   document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
-  var target = document.getElementById('page-' + id);
+  var target = document.getElementById('page-'+id);
   if(target) target.classList.add('active');
-  if(typeof pageTitles !== 'undefined' && pageTitles[id]) {
-    document.getElementById('page-title').textContent = pageTitles[id];
-  }
-  document.querySelectorAll('.nav-item').forEach(function(n){
-    var oc = n.getAttribute('onclick')||'';
-    if(oc.indexOf("'"+id+"'")>=0) n.classList.add('active');
-  });
-  // 데이터 로딩
-  if(id==='dashboard'||id==='reservations') setTimeout(loadDashboardData, 50);
-  if(id==='classrooms') setTimeout(function(){ if(typeof loadClassroomsData==='function') loadClassroomsData(); }, 50);
-  if(id==='log') setTimeout(function(){ if(typeof loadBroadcastLogs==='function') loadBroadcastLogs(); }, 50);
-  if(id==='settings') setTimeout(function(){ if(typeof loadSettingsData==='function') loadSettingsData(); }, 50);
+  if(typeof pageTitles!=='undefined'&&pageTitles[id]) document.getElementById('page-title').textContent=pageTitles[id];
+  document.querySelectorAll('.nav-item').forEach(function(n){ if((n.getAttribute('onclick')||'').indexOf("'"+id+"'")>=0) n.classList.add('active'); });
+  if(id==='dashboard'||id==='reservations') setTimeout(loadDashboardData,50);
+  if(id==='classrooms') setTimeout(function(){if(typeof loadClassroomsData==='function')loadClassroomsData();},50);
+  if(id==='log') setTimeout(function(){if(typeof loadBroadcastLogs==='function')loadBroadcastLogs();},50);
+  if(id==='settings') setTimeout(function(){if(typeof loadSettingsData==='function')loadSettingsData();},50);
 }
 
 // nav-item active 정확히 설정
