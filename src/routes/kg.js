@@ -185,4 +185,22 @@ router.put('/broadcast-settings', (req, res) => {
   res.json({ success: true });
 });
 
+// 유치원 정보 조회
+router.get('/kindergarten', (req, res) => {
+  const kgId = getKgId(req);
+  const kg = db.prepare('SELECT * FROM kindergartens WHERE id=?').get(kgId);
+  if (!kg) return res.json({ success: false, message: '유치원 정보 없음' });
+  res.json({ success: true, data: kg });
+});
+
+// 유치원 정보 수정
+router.put('/kindergarten', (req, res) => {
+  const kgId = getKgId(req);
+  const { name, director, phone, address } = req.body;
+  db.prepare('UPDATE kindergartens SET name=COALESCE(?,name), director=COALESCE(?,director), phone=COALESCE(?,phone), address=COALESCE(?,address) WHERE id=?')
+    .run(name||null, director||null, phone||null, address||null, kgId);
+  const kg = db.prepare('SELECT * FROM kindergartens WHERE id=?').get(kgId);
+  res.json({ success: true, data: kg });
+});
+
 module.exports = router;
