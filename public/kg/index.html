@@ -2535,12 +2535,16 @@ async function loadBroadcastLogs(){
 }
 async function loadSettingsData(){
   try{
-    // kg_user에서 유치원 정보 가져오기
-    var user = JSON.parse(localStorage.getItem('kg_user')||'{}');
-    var kgName = user.kindergartenName || user.kindergarten_name || (user.kindergarten&&user.kindergarten.name) || '';
-    // 유치원 정보 탭 필드 채우기
-    var nameEl = document.getElementById('kg-name');
-    if(nameEl && kgName) nameEl.value = kgName;
+    // 유치원 정보 API에서 가져오기
+    var kg = await api('GET','/api/kg/kindergarten');
+    if(kg && kg.data){
+      var d = kg.data;
+      var setVal = function(id, val){ var el=document.getElementById(id); if(el&&val!=null) el.value=val; };
+      setVal('kg-name', d.name);
+      setVal('kg-director', d.director);
+      setVal('kg-phone', d.phone);
+      setVal('kg-addr', d.address);
+    }
     // 반/원생 목록 로드
     var r = await Promise.all([
       api('GET','/api/kg/classrooms'),
@@ -2548,7 +2552,7 @@ async function loadSettingsData(){
     ]);
     if(r[0]&&r[0].data&&typeof renderClassroomsList==='function') renderClassroomsList(r[0].data);
     if(r[1]&&r[1].data&&typeof renderStudents==='function') renderStudents(r[1].data);
-    // 방송 설정 로드
+    // 방송 설정
     var bs = await api('GET','/api/kg/broadcast-settings');
     if(bs&&bs.data&&typeof renderBroadcastSettings==='function') renderBroadcastSettings(bs.data);
   }catch(e){ console.warn('settings load error:', e); }
