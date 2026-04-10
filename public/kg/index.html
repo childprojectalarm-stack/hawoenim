@@ -2524,26 +2524,6 @@ function doLogout() {
   showToast('로그아웃되었습니다', '👋');
 }
 
-// ── 토큰 유효성 확인 후 자동 복원 ──
-(async function checkSession() {
-  const token = Token.get();
-  const saved = localStorage.getItem('kg_user');
-  if (!token || !saved) return;
-
-  try {
-    // 헬스체크 겸 토큰 검증
-    const data = await api('GET', '/api/health');
-    if (data) {
-      const user = JSON.parse(saved);
-      applyUserInfo(user);
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app-wrap').classList.add('visible');
-      loadDashboardData();
-    }
-  } catch {
-    Token.remove();
-  }
-})();
 
 // ── 대시보드 초기 데이터 로드 ──
 
