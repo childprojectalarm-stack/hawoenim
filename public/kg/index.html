@@ -1810,367 +1810,13 @@ tbody td {
     </div>
   </div>
 
-  <!-- ========== 예약 관리 ========== -->
-  <div class="content" id="page-reservations">
-    <div class="section-header">
-      <div class="section-title"><span class="dot"></span>오늘 예약 목록</div>
-    </div>
-    <div class="table-wrap">
-      <div class="table-toolbar">
-        <input class="search-input" placeholder="원아 이름 검색..." oninput="filterTable(this.value)">
-        <select class="filter-select" onchange="filterStatus(this.value)">
-          <option value="all">전체 상태</option>
-          <option value="pending">대기 중</option>
-          <option value="announced">방송됨</option>
-          <option value="done">완료</option>
-          <option value="cancelled">취소</option>
-        </select>
-        <select class="filter-select">
-          <option>전체 교실</option>
-          <option>🌻 해바라기반</option>
-          <option>🌈 무지개반</option>
-          <option>⭐ 별빛반</option>
-          <option>🌼 민들레반</option>
-        </select>
-      </div>
-      <table id="reservation-table">
-        <thead>
-          <tr>
-            <th>원아</th>
-            <th>교실</th>
-            <th>하원 시간</th>
-            <th>방송 예정</th>
-            <th>학부모</th>
-            <th>상태</th>
-            <th>액션</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr data-status="done">
-            <td><div class="td-name"><div class="child-ava">🧒</div><div><div class="td-child-name">이서연</div><div class="td-class">만 4세</div></div></div></td>
-            <td style="color:var(--text)">🌼 민들레반</td>
-            <td><span class="time-badge">13:00</span></td>
-            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">12:50</td>
-            <td style="color:var(--text-sub)">이지수 학부모</td>
-            <td><span class="status-pill s-done">완료</span></td>
-            <td><button class="btn-announce" disabled>방송완료</button></td>
-          </tr>
-          <tr data-status="done">
-            <td><div class="td-name"><div class="child-ava">👦</div><div><div class="td-child-name">최준호</div><div class="td-class">만 5세</div></div></div></td>
-            <td style="color:var(--text)">⭐ 별빛반</td>
-            <td><span class="time-badge">13:30</span></td>
-            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">13:20</td>
-            <td style="color:var(--text-sub)">최현우 학부모</td>
-            <td><span class="status-pill s-done">완료</span></td>
-            <td><button class="btn-announce" disabled>방송완료</button></td>
-          </tr>
-          <tr data-status="done">
-            <td><div class="td-name"><div class="child-ava">🧒</div><div><div class="td-child-name">박하준</div><div class="td-class">만 5세</div></div></div></td>
-            <td style="color:var(--text)">🌻 해바라기반</td>
-            <td><span class="time-badge">14:00</span></td>
-            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">13:50</td>
-            <td style="color:var(--text-sub)">박민서 학부모</td>
-            <td><span class="status-pill s-done">완료</span></td>
-            <td><button class="btn-announce" disabled>방송완료</button></td>
-          </tr>
-          <tr data-status="pending">
-            <td><div class="td-name"><div class="child-ava">👦</div><div><div class="td-child-name">김민준</div><div class="td-class">만 5세</div></div></div></td>
-            <td style="color:var(--text)">🌻 해바라기반</td>
-            <td><span class="time-badge">14:30</span></td>
-            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">14:20</td>
-            <td style="color:var(--text-sub)">김수연 학부모</td>
-            <td><span class="status-pill s-pending">대기 중</span></td>
-            <td><div style="display:flex;gap:5px;">
-              <button class="btn-announce" onclick="triggerAnnounce(this, '김민준', '해바라기반')">📢 방송</button>
-              <button class="btn-stop" onclick="openStopModal(this, '김민준', '해바라기반', '14:30')">🚫 중지</button>
-            </div></td>
-          </tr>
-          <tr data-status="pending">
-            <td><div class="td-name"><div class="child-ava">👧</div><div><div class="td-child-name">윤소율</div><div class="td-class">만 4세</div></div></div></td>
-            <td style="color:var(--text)">🌈 무지개반</td>
-            <td><span class="time-badge">15:00</span></td>
-            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">14:50</td>
-            <td style="color:var(--text-sub)">윤태양 학부모</td>
-            <td><span class="status-pill s-pending">대기 중</span></td>
-            <td><div style="display:flex;gap:5px;">
-              <button class="btn-announce" onclick="triggerAnnounce(this, '윤소율', '무지개반')">📢 방송</button>
-              <button class="btn-stop" onclick="openStopModal(this, '윤소율', '무지개반', '15:00')">🚫 중지</button>
-            </div></td>
-          </tr>
-          <tr data-status="pending">
-            <td><div class="td-name"><div class="child-ava">👧</div><div><div class="td-child-name">정다은</div><div class="td-class">만 5세</div></div></div></td>
-            <td style="color:var(--text)">⭐ 별빛반</td>
-            <td><span class="time-badge">15:30</span></td>
-            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">15:20</td>
-            <td style="color:var(--text-sub)">정은희 학부모</td>
-            <td><span class="status-pill s-pending">대기 중</span></td>
-            <td><div style="display:flex;gap:5px;">
-              <button class="btn-announce" onclick="triggerAnnounce(this, '정다은', '별빛반')">📢 방송</button>
-              <button class="btn-stop" onclick="openStopModal(this, '정다은', '별빛반', '15:30')">🚫 중지</button>
-            </div></td>
-          </tr>
-          <tr data-status="pending">
-            <td><div class="td-name"><div class="child-ava">👦</div><div><div class="td-child-name">한지우</div><div class="td-class">만 4세</div></div></div></td>
-            <td style="color:var(--text)">🌼 민들레반</td>
-            <td><span class="time-badge">16:00</span></td>
-            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">15:50</td>
-            <td style="color:var(--text-sub)">한승민 학부모</td>
-            <td><span class="status-pill s-pending">대기 중</span></td>
-            <td><div style="display:flex;gap:5px;">
-              <button class="btn-announce" onclick="triggerAnnounce(this, '한지우', '민들레반')">📢 방송</button>
-              <button class="btn-stop" onclick="openStopModal(this, '한지우', '민들레반', '16:00')">🚫 중지</button>
-            </div></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+  
 
-  <!-- ========== 수동 방송 ========== -->
-  <div class="content" id="page-broadcast">
-    <div class="two-col" style="align-items:start;">
+  
 
-      <div>
-        <div class="section-header">
-          <div class="section-title"><span class="dot"></span>수동 방송 설정</div>
-        </div>
-        <div class="broadcast-panel">
-          <div class="broadcast-form">
-            <div class="form-row">
-              <div class="form-group">
-                <div class="form-label">원아 선택</div>
-                <select class="form-select" id="bc-child" onchange="updatePreview()">
-                  <option value="">원아를 선택하세요</option>
-                  <option>김민준 (해바라기반)</option>
-                  <option>윤소율 (무지개반)</option>
-                  <option>정다은 (별빛반)</option>
-                  <option>한지우 (민들레반)</option>
-                  <option>이서연 (민들레반)</option>
-                  <option>최준호 (별빛반)</option>
-                  <option>박하준 (해바라기반)</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <div class="form-label">대상 교실</div>
-                <select class="form-select" id="bc-class" onchange="updatePreview()">
-                  <option>🌻 해바라기반</option>
-                  <option>🌈 무지개반</option>
-                  <option>⭐ 별빛반</option>
-                  <option>🌼 민들레반</option>
-                  <option>📢 전체 방송</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-group">
-              <div class="form-label">방송 멘트</div>
-              <input class="form-input" id="bc-msg" value="하원 준비해 주세요" oninput="updatePreview()">
-            </div>
-            <div class="form-group">
-              <div class="form-label">미리보기</div>
-              <div class="preview-box">
-                <div class="preview-icon">📢</div>
-                <div id="bc-preview">원아를 선택하면 방송 내용이 미리보기에 표시됩니다.</div>
-              </div>
-            </div>
-            <button class="btn-broadcast" onclick="sendBroadcast()">
-              📢 지금 방송하기
-            </button>
-          </div>
-        </div>
-      </div>
+  
 
-      <div>
-        <div class="section-header">
-          <div class="section-title"><span class="dot"></span>방송 로그</div>
-        </div>
-        <div class="table-wrap" style="padding: 8px 16px;">
-          <div class="log-list" id="broadcast-log">
-            <div class="log-item">
-              <div class="log-dot" style="background:var(--green);margin-top:5px;flex-shrink:0;width:8px;height:8px;border-radius:50%;"></div>
-              <div class="log-time">13:50</div>
-              <div class="log-info">
-                <div class="log-title">박하준 하원 준비 방송</div>
-                <div class="log-sub">🌻 해바라기반 · 자동</div>
-              </div>
-            </div>
-            <div class="log-item">
-              <div class="log-dot" style="background:var(--green);margin-top:5px;flex-shrink:0;width:8px;height:8px;border-radius:50%;"></div>
-              <div class="log-time">13:20</div>
-              <div class="log-info">
-                <div class="log-title">최준호 하원 준비 방송</div>
-                <div class="log-sub">⭐ 별빛반 · 자동</div>
-              </div>
-            </div>
-            <div class="log-item">
-              <div class="log-dot" style="background:var(--green);margin-top:5px;flex-shrink:0;width:8px;height:8px;border-radius:50%;"></div>
-              <div class="log-time">12:50</div>
-              <div class="log-info">
-                <div class="log-title">이서연 하원 준비 방송</div>
-                <div class="log-sub">🌼 민들레반 · 자동</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style="margin-top:16px;">
-          <div class="section-header" style="margin-bottom:12px;">
-            <div class="section-title"><span class="dot"></span>오늘 방송 통계</div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center;">
-              <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--green)" id="stat-done">3</div>
-              <div style="font-size:11px;color:var(--text-hint);margin-top:4px;">완료</div>
-            </div>
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center;">
-              <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--amber)" id="stat-pending">4</div>
-              <div style="font-size:11px;color:var(--text-hint);margin-top:4px;">대기</div>
-            </div>
-            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center;">
-              <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--primary)" id="stat-manual">0</div>
-              <div style="font-size:11px;color:var(--text-hint);margin-top:4px;">수동</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ========== 교실 현황 ========== -->
-  <div class="content" id="page-classrooms">
-    <div class="section-header">
-      <div class="section-title"><span class="dot"></span>교실별 하원 현황</div>
-    </div>
-    <div class="classroom-big-grid">
-
-      <div class="cls-big-card">
-        <div class="cls-big-header">
-          <div class="cls-big-name">🌻 해바라기반</div>
-          <span class="status-pill s-pending">2명 대기</span>
-        </div>
-        <div class="cls-big-list">
-          <div class="cls-child-row">
-            <div class="cls-child-ava">🧒</div>
-            <div class="cls-child-name">박하준</div>
-            <span class="status-pill s-done" style="font-size:10px;padding:2px 7px;">완료</span>
-            <div class="cls-child-time">14:00</div>
-          </div>
-          <div class="cls-child-row">
-            <div class="cls-child-ava">👦</div>
-            <div class="cls-child-name">김민준</div>
-            <span class="status-pill s-pending" style="font-size:10px;padding:2px 7px;">대기</span>
-            <div class="cls-child-time">14:30</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="cls-big-card">
-        <div class="cls-big-header">
-          <div class="cls-big-name">🌈 무지개반</div>
-          <span class="status-pill s-pending">1명 대기</span>
-        </div>
-        <div class="cls-big-list">
-          <div class="cls-child-row">
-            <div class="cls-child-ava">👧</div>
-            <div class="cls-child-name">윤소율</div>
-            <span class="status-pill s-pending" style="font-size:10px;padding:2px 7px;">대기</span>
-            <div class="cls-child-time">15:00</div>
-          </div>
-          <div class="cls-empty">나머지 4명 하원 예약 없음</div>
-        </div>
-      </div>
-
-      <div class="cls-big-card">
-        <div class="cls-big-header">
-          <div class="cls-big-name">⭐ 별빛반</div>
-          <span class="status-pill s-pending">2명 대기</span>
-        </div>
-        <div class="cls-big-list">
-          <div class="cls-child-row">
-            <div class="cls-child-ava">👦</div>
-            <div class="cls-child-name">최준호</div>
-            <span class="status-pill s-done" style="font-size:10px;padding:2px 7px;">완료</span>
-            <div class="cls-child-time">13:30</div>
-          </div>
-          <div class="cls-child-row">
-            <div class="cls-child-ava">👧</div>
-            <div class="cls-child-name">정다은</div>
-            <span class="status-pill s-pending" style="font-size:10px;padding:2px 7px;">대기</span>
-            <div class="cls-child-time">15:30</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="cls-big-card">
-        <div class="cls-big-header">
-          <div class="cls-big-name">🌼 민들레반</div>
-          <span class="status-pill s-pending">1명 대기</span>
-        </div>
-        <div class="cls-big-list">
-          <div class="cls-child-row">
-            <div class="cls-child-ava">👧</div>
-            <div class="cls-child-name">이서연</div>
-            <span class="status-pill s-done" style="font-size:10px;padding:2px 7px;">완료</span>
-            <div class="cls-child-time">13:00</div>
-          </div>
-          <div class="cls-child-row">
-            <div class="cls-child-ava">👦</div>
-            <div class="cls-child-name">한지우</div>
-            <span class="status-pill s-pending" style="font-size:10px;padding:2px 7px;">대기</span>
-            <div class="cls-child-time">16:00</div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ========== 방송 로그 ========== -->
-  <div class="content" id="page-log">
-    <div class="section-header">
-      <div class="section-title"><span class="dot"></span>전체 방송 로그</div>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>시간</th>
-            <th>원아</th>
-            <th>교실</th>
-            <th>방송 내용</th>
-            <th>방송 유형</th>
-            <th>결과</th>
-          </tr>
-        </thead>
-        <tbody id="log-tbody">
-          <tr>
-            <td style="font-family:'DM Mono',monospace;color:var(--text-hint)">13:50:02</td>
-            <td><div class="td-name"><div class="child-ava">🧒</div><div><div class="td-child-name">박하준</div></div></div></td>
-            <td style="color:var(--text)">🌻 해바라기반</td>
-            <td style="color:var(--text)">박하준 하원 준비해 주세요</td>
-            <td><span class="status-pill" style="background:var(--green-pale);color:var(--green)">자동</span></td>
-            <td><span class="status-pill s-done">성공</span></td>
-          </tr>
-          <tr>
-            <td style="font-family:'DM Mono',monospace;color:var(--text-hint)">13:20:01</td>
-            <td><div class="td-name"><div class="child-ava">👦</div><div><div class="td-child-name">최준호</div></div></div></td>
-            <td style="color:var(--text)">⭐ 별빛반</td>
-            <td style="color:var(--text)">최준호 하원 준비해 주세요</td>
-            <td><span class="status-pill" style="background:var(--green-pale);color:var(--green)">자동</span></td>
-            <td><span class="status-pill s-done">성공</span></td>
-          </tr>
-          <tr>
-            <td style="font-family:'DM Mono',monospace;color:var(--text-hint)">12:50:04</td>
-            <td><div class="td-name"><div class="child-ava">👧</div><div><div class="td-child-name">이서연</div></div></div></td>
-            <td style="color:var(--text)">🌼 민들레반</td>
-            <td style="color:var(--text)">이서연 하원 준비해 주세요</td>
-            <td><span class="status-pill" style="background:var(--green-pale);color:var(--green)">자동</span></td>
-            <td><span class="status-pill s-done">성공</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+  
 
 </main>
 
@@ -2190,7 +1836,47 @@ tbody td {
       <!-- 우측 본문 -->
       <div class="settings-body">
 
-        
+        <!-- ① 유치원 정보 -->
+        <div class="stab-panel active" id="stab-kindergarten">
+          <div class="settings-section">
+            <div class="settings-section-title">유치원 기본 정보</div>
+            <div class="modal-form" style="max-width:480px;">
+              <div class="form-group">
+                <div class="form-label">유치원 이름</div>
+                <input class="form-input" id="kg-name" value="햇살 유치원" oninput="updateKgPreview()">
+              </div>
+              <div class="form-group">
+                <div class="form-label">원장 이름</div>
+                <input class="form-input" id="kg-director" value="김영희 원장">
+              </div>
+              <div class="form-group">
+                <div class="form-label">전화번호</div>
+                <input class="form-input" id="kg-phone" value="051-123-4567">
+              </div>
+              <div class="form-group">
+                <div class="form-label">주소</div>
+                <input class="form-input" id="kg-addr" value="부산시 해운대구 햇살로 123">
+              </div>
+              <button class="btn-save" style="align-self:flex-start;padding:0 24px;" onclick="saveKgInfo()">저장</button>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section-title">현재 등록된 유치원</div>
+            <div class="item-list" id="kg-list">
+              <div class="item-card">
+                <div class="item-card-icon">🏫</div>
+                <div class="item-card-info">
+                  <div class="item-card-name">햇살 유치원</div>
+                  <div class="item-card-sub">부산시 해운대구 · 051-123-4567 · 4개 반</div>
+                </div>
+                <div class="item-card-actions">
+                  <button class="btn-sm btn-sm-primary" onclick="editKg(this)">수정</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- ② 반 관리 -->
         <div class="stab-panel" id="stab-classrooms-mgmt">
@@ -2853,11 +2539,10 @@ async function loadBroadcastLogs(){
 }
 async function loadSettingsData(){
   try{
-    var results=await Promise.all([api('GET','/api/kg/info'),api('GET','/api/kg/classrooms'),api('GET','/api/kg/students')]);
-    var kg=results[0],cls=results[1],stu=results[2];
-    if(kg&&kg.data&&typeof renderKgInfo==='function') renderKgInfo(kg.data);
-    if(cls&&cls.data&&typeof renderClassroomsList==='function') renderClassroomsList(cls.data);
-    if(stu&&stu.data&&typeof renderStudents==='function') renderStudents(stu.data);
+    var r=await Promise.all([api('GET','/api/kg/info'),api('GET','/api/kg/classrooms'),api('GET','/api/kg/students')]);
+    if(r[0]&&r[0].data&&typeof renderKgInfo==='function') renderKgInfo(r[0].data);
+    if(r[1]&&r[1].data&&typeof renderClassroomsList==='function') renderClassroomsList(r[1].data);
+    if(r[2]&&r[2].data&&typeof renderStudents==='function') renderStudents(r[2].data);
   }catch(e){}
 }
 async function loadDashboardData() {
@@ -2991,32 +2676,16 @@ const pageTitles = {
 };
 
 function showPage(id) {
-  // 모든 .content에서 active 제거
   document.querySelectorAll('.content').forEach(function(el){ el.classList.remove('active'); });
-  // 모든 nav-item active 제거
-  document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
-  // 대시보드 계열 (main 안 페이지들): page-dashboard만 active, 내부 해당 페이지도 active
-  var mainPages = ['dashboard','reservations','broadcast','classrooms','log'];
-  if(mainPages.indexOf(id) >= 0) {
-    document.getElementById('page-dashboard').classList.add('active');
-    if(id !== 'dashboard') {
-      var target = document.getElementById('page-' + id);
-      if(target) target.classList.add('active');
-    }
-  } else {
-    // settings 등 독립 페이지
-    var target = document.getElementById('page-' + id);
-    if(target) target.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  var target = document.getElementById('page-' + id);
+  if(target) target.classList.add('active');
+  if(typeof pageTitles !== 'undefined' && pageTitles[id]) {
+    document.getElementById('page-title').textContent = pageTitles[id];
   }
-  // 타이틀
-  if(typeof pageTitles !== 'undefined') {
-    document.getElementById('page-title').textContent = pageTitles[id] || id;
-  }
-  // nav active
   document.querySelectorAll('.nav-item').forEach(function(n){
-    if(n.getAttribute('onclick') && n.getAttribute('onclick').indexOf("'" + id + "'") >= 0) {
-      n.classList.add('active');
-    }
+    var oc = n.getAttribute('onclick')||'';
+    if(oc.indexOf("'"+id+"'")>=0) n.classList.add('active');
   });
   // 데이터 로딩
   if(id==='dashboard'||id==='reservations') setTimeout(loadDashboardData, 50);
@@ -3679,6 +3348,364 @@ function showToast(title, icon = '✅', sub = '') {
   }, 3000);
 }
 </script>
-</div><!-- /app-wrap -->
+</div>
+<!-- ========== 예약 관리 ========== -->
+  <div class="content" id="page-reservations">
+    <div class="section-header">
+      <div class="section-title"><span class="dot"></span>오늘 예약 목록</div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <input class="search-input" placeholder="원아 이름 검색..." oninput="filterTable(this.value)">
+        <select class="filter-select" onchange="filterStatus(this.value)">
+          <option value="all">전체 상태</option>
+          <option value="pending">대기 중</option>
+          <option value="announced">방송됨</option>
+          <option value="done">완료</option>
+          <option value="cancelled">취소</option>
+        </select>
+        <select class="filter-select">
+          <option>전체 교실</option>
+          <option>🌻 해바라기반</option>
+          <option>🌈 무지개반</option>
+          <option>⭐ 별빛반</option>
+          <option>🌼 민들레반</option>
+        </select>
+      </div>
+      <table id="reservation-table">
+        <thead>
+          <tr>
+            <th>원아</th>
+            <th>교실</th>
+            <th>하원 시간</th>
+            <th>방송 예정</th>
+            <th>학부모</th>
+            <th>상태</th>
+            <th>액션</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-status="done">
+            <td><div class="td-name"><div class="child-ava">🧒</div><div><div class="td-child-name">이서연</div><div class="td-class">만 4세</div></div></div></td>
+            <td style="color:var(--text)">🌼 민들레반</td>
+            <td><span class="time-badge">13:00</span></td>
+            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">12:50</td>
+            <td style="color:var(--text-sub)">이지수 학부모</td>
+            <td><span class="status-pill s-done">완료</span></td>
+            <td><button class="btn-announce" disabled>방송완료</button></td>
+          </tr>
+          <tr data-status="done">
+            <td><div class="td-name"><div class="child-ava">👦</div><div><div class="td-child-name">최준호</div><div class="td-class">만 5세</div></div></div></td>
+            <td style="color:var(--text)">⭐ 별빛반</td>
+            <td><span class="time-badge">13:30</span></td>
+            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">13:20</td>
+            <td style="color:var(--text-sub)">최현우 학부모</td>
+            <td><span class="status-pill s-done">완료</span></td>
+            <td><button class="btn-announce" disabled>방송완료</button></td>
+          </tr>
+          <tr data-status="done">
+            <td><div class="td-name"><div class="child-ava">🧒</div><div><div class="td-child-name">박하준</div><div class="td-class">만 5세</div></div></div></td>
+            <td style="color:var(--text)">🌻 해바라기반</td>
+            <td><span class="time-badge">14:00</span></td>
+            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">13:50</td>
+            <td style="color:var(--text-sub)">박민서 학부모</td>
+            <td><span class="status-pill s-done">완료</span></td>
+            <td><button class="btn-announce" disabled>방송완료</button></td>
+          </tr>
+          <tr data-status="pending">
+            <td><div class="td-name"><div class="child-ava">👦</div><div><div class="td-child-name">김민준</div><div class="td-class">만 5세</div></div></div></td>
+            <td style="color:var(--text)">🌻 해바라기반</td>
+            <td><span class="time-badge">14:30</span></td>
+            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">14:20</td>
+            <td style="color:var(--text-sub)">김수연 학부모</td>
+            <td><span class="status-pill s-pending">대기 중</span></td>
+            <td><div style="display:flex;gap:5px;">
+              <button class="btn-announce" onclick="triggerAnnounce(this, '김민준', '해바라기반')">📢 방송</button>
+              <button class="btn-stop" onclick="openStopModal(this, '김민준', '해바라기반', '14:30')">🚫 중지</button>
+            </div></td>
+          </tr>
+          <tr data-status="pending">
+            <td><div class="td-name"><div class="child-ava">👧</div><div><div class="td-child-name">윤소율</div><div class="td-class">만 4세</div></div></div></td>
+            <td style="color:var(--text)">🌈 무지개반</td>
+            <td><span class="time-badge">15:00</span></td>
+            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">14:50</td>
+            <td style="color:var(--text-sub)">윤태양 학부모</td>
+            <td><span class="status-pill s-pending">대기 중</span></td>
+            <td><div style="display:flex;gap:5px;">
+              <button class="btn-announce" onclick="triggerAnnounce(this, '윤소율', '무지개반')">📢 방송</button>
+              <button class="btn-stop" onclick="openStopModal(this, '윤소율', '무지개반', '15:00')">🚫 중지</button>
+            </div></td>
+          </tr>
+          <tr data-status="pending">
+            <td><div class="td-name"><div class="child-ava">👧</div><div><div class="td-child-name">정다은</div><div class="td-class">만 5세</div></div></div></td>
+            <td style="color:var(--text)">⭐ 별빛반</td>
+            <td><span class="time-badge">15:30</span></td>
+            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">15:20</td>
+            <td style="color:var(--text-sub)">정은희 학부모</td>
+            <td><span class="status-pill s-pending">대기 중</span></td>
+            <td><div style="display:flex;gap:5px;">
+              <button class="btn-announce" onclick="triggerAnnounce(this, '정다은', '별빛반')">📢 방송</button>
+              <button class="btn-stop" onclick="openStopModal(this, '정다은', '별빛반', '15:30')">🚫 중지</button>
+            </div></td>
+          </tr>
+          <tr data-status="pending">
+            <td><div class="td-name"><div class="child-ava">👦</div><div><div class="td-child-name">한지우</div><div class="td-class">만 4세</div></div></div></td>
+            <td style="color:var(--text)">🌼 민들레반</td>
+            <td><span class="time-badge">16:00</span></td>
+            <td style="color:var(--text-hint);font-family:'DM Mono',monospace;font-size:12px;">15:50</td>
+            <td style="color:var(--text-sub)">한승민 학부모</td>
+            <td><span class="status-pill s-pending">대기 중</span></td>
+            <td><div style="display:flex;gap:5px;">
+              <button class="btn-announce" onclick="triggerAnnounce(this, '한지우', '민들레반')">📢 방송</button>
+              <button class="btn-stop" onclick="openStopModal(this, '한지우', '민들레반', '16:00')">🚫 중지</button>
+            </div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<!-- ========== 수동 방송 ========== -->
+  <div class="content" id="page-broadcast">
+    <div class="two-col" style="align-items:start;">
+
+      <div>
+        <div class="section-header">
+          <div class="section-title"><span class="dot"></span>수동 방송 설정</div>
+        </div>
+        <div class="broadcast-panel">
+          <div class="broadcast-form">
+            <div class="form-row">
+              <div class="form-group">
+                <div class="form-label">원아 선택</div>
+                <select class="form-select" id="bc-child" onchange="updatePreview()">
+                  <option value="">원아를 선택하세요</option>
+                  <option>김민준 (해바라기반)</option>
+                  <option>윤소율 (무지개반)</option>
+                  <option>정다은 (별빛반)</option>
+                  <option>한지우 (민들레반)</option>
+                  <option>이서연 (민들레반)</option>
+                  <option>최준호 (별빛반)</option>
+                  <option>박하준 (해바라기반)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <div class="form-label">대상 교실</div>
+                <select class="form-select" id="bc-class" onchange="updatePreview()">
+                  <option>🌻 해바라기반</option>
+                  <option>🌈 무지개반</option>
+                  <option>⭐ 별빛반</option>
+                  <option>🌼 민들레반</option>
+                  <option>📢 전체 방송</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="form-label">방송 멘트</div>
+              <input class="form-input" id="bc-msg" value="하원 준비해 주세요" oninput="updatePreview()">
+            </div>
+            <div class="form-group">
+              <div class="form-label">미리보기</div>
+              <div class="preview-box">
+                <div class="preview-icon">📢</div>
+                <div id="bc-preview">원아를 선택하면 방송 내용이 미리보기에 표시됩니다.</div>
+              </div>
+            </div>
+            <button class="btn-broadcast" onclick="sendBroadcast()">
+              📢 지금 방송하기
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-header">
+          <div class="section-title"><span class="dot"></span>방송 로그</div>
+        </div>
+        <div class="table-wrap" style="padding: 8px 16px;">
+          <div class="log-list" id="broadcast-log">
+            <div class="log-item">
+              <div class="log-dot" style="background:var(--green);margin-top:5px;flex-shrink:0;width:8px;height:8px;border-radius:50%;"></div>
+              <div class="log-time">13:50</div>
+              <div class="log-info">
+                <div class="log-title">박하준 하원 준비 방송</div>
+                <div class="log-sub">🌻 해바라기반 · 자동</div>
+              </div>
+            </div>
+            <div class="log-item">
+              <div class="log-dot" style="background:var(--green);margin-top:5px;flex-shrink:0;width:8px;height:8px;border-radius:50%;"></div>
+              <div class="log-time">13:20</div>
+              <div class="log-info">
+                <div class="log-title">최준호 하원 준비 방송</div>
+                <div class="log-sub">⭐ 별빛반 · 자동</div>
+              </div>
+            </div>
+            <div class="log-item">
+              <div class="log-dot" style="background:var(--green);margin-top:5px;flex-shrink:0;width:8px;height:8px;border-radius:50%;"></div>
+              <div class="log-time">12:50</div>
+              <div class="log-info">
+                <div class="log-title">이서연 하원 준비 방송</div>
+                <div class="log-sub">🌼 민들레반 · 자동</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <div class="section-header" style="margin-bottom:12px;">
+            <div class="section-title"><span class="dot"></span>오늘 방송 통계</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center;">
+              <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--green)" id="stat-done">3</div>
+              <div style="font-size:11px;color:var(--text-hint);margin-top:4px;">완료</div>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center;">
+              <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--amber)" id="stat-pending">4</div>
+              <div style="font-size:11px;color:var(--text-hint);margin-top:4px;">대기</div>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center;">
+              <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--primary)" id="stat-manual">0</div>
+              <div style="font-size:11px;color:var(--text-hint);margin-top:4px;">수동</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+<!-- ========== 교실 현황 ========== -->
+  <div class="content" id="page-classrooms">
+    <div class="section-header">
+      <div class="section-title"><span class="dot"></span>교실별 하원 현황</div>
+    </div>
+    <div class="classroom-big-grid">
+
+      <div class="cls-big-card">
+        <div class="cls-big-header">
+          <div class="cls-big-name">🌻 해바라기반</div>
+          <span class="status-pill s-pending">2명 대기</span>
+        </div>
+        <div class="cls-big-list">
+          <div class="cls-child-row">
+            <div class="cls-child-ava">🧒</div>
+            <div class="cls-child-name">박하준</div>
+            <span class="status-pill s-done" style="font-size:10px;padding:2px 7px;">완료</span>
+            <div class="cls-child-time">14:00</div>
+          </div>
+          <div class="cls-child-row">
+            <div class="cls-child-ava">👦</div>
+            <div class="cls-child-name">김민준</div>
+            <span class="status-pill s-pending" style="font-size:10px;padding:2px 7px;">대기</span>
+            <div class="cls-child-time">14:30</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cls-big-card">
+        <div class="cls-big-header">
+          <div class="cls-big-name">🌈 무지개반</div>
+          <span class="status-pill s-pending">1명 대기</span>
+        </div>
+        <div class="cls-big-list">
+          <div class="cls-child-row">
+            <div class="cls-child-ava">👧</div>
+            <div class="cls-child-name">윤소율</div>
+            <span class="status-pill s-pending" style="font-size:10px;padding:2px 7px;">대기</span>
+            <div class="cls-child-time">15:00</div>
+          </div>
+          <div class="cls-empty">나머지 4명 하원 예약 없음</div>
+        </div>
+      </div>
+
+      <div class="cls-big-card">
+        <div class="cls-big-header">
+          <div class="cls-big-name">⭐ 별빛반</div>
+          <span class="status-pill s-pending">2명 대기</span>
+        </div>
+        <div class="cls-big-list">
+          <div class="cls-child-row">
+            <div class="cls-child-ava">👦</div>
+            <div class="cls-child-name">최준호</div>
+            <span class="status-pill s-done" style="font-size:10px;padding:2px 7px;">완료</span>
+            <div class="cls-child-time">13:30</div>
+          </div>
+          <div class="cls-child-row">
+            <div class="cls-child-ava">👧</div>
+            <div class="cls-child-name">정다은</div>
+            <span class="status-pill s-pending" style="font-size:10px;padding:2px 7px;">대기</span>
+            <div class="cls-child-time">15:30</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cls-big-card">
+        <div class="cls-big-header">
+          <div class="cls-big-name">🌼 민들레반</div>
+          <span class="status-pill s-pending">1명 대기</span>
+        </div>
+        <div class="cls-big-list">
+          <div class="cls-child-row">
+            <div class="cls-child-ava">👧</div>
+            <div class="cls-child-name">이서연</div>
+            <span class="status-pill s-done" style="font-size:10px;padding:2px 7px;">완료</span>
+            <div class="cls-child-time">13:00</div>
+          </div>
+          <div class="cls-child-row">
+            <div class="cls-child-ava">👦</div>
+            <div class="cls-child-name">한지우</div>
+            <span class="status-pill s-pending" style="font-size:10px;padding:2px 7px;">대기</span>
+            <div class="cls-child-time">16:00</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+<!-- ========== 방송 로그 ========== -->
+  <div class="content" id="page-log">
+    <div class="section-header">
+      <div class="section-title"><span class="dot"></span>전체 방송 로그</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>시간</th>
+            <th>원아</th>
+            <th>교실</th>
+            <th>방송 내용</th>
+            <th>방송 유형</th>
+            <th>결과</th>
+          </tr>
+        </thead>
+        <tbody id="log-tbody">
+          <tr>
+            <td style="font-family:'DM Mono',monospace;color:var(--text-hint)">13:50:02</td>
+            <td><div class="td-name"><div class="child-ava">🧒</div><div><div class="td-child-name">박하준</div></div></div></td>
+            <td style="color:var(--text)">🌻 해바라기반</td>
+            <td style="color:var(--text)">박하준 하원 준비해 주세요</td>
+            <td><span class="status-pill" style="background:var(--green-pale);color:var(--green)">자동</span></td>
+            <td><span class="status-pill s-done">성공</span></td>
+          </tr>
+          <tr>
+            <td style="font-family:'DM Mono',monospace;color:var(--text-hint)">13:20:01</td>
+            <td><div class="td-name"><div class="child-ava">👦</div><div><div class="td-child-name">최준호</div></div></div></td>
+            <td style="color:var(--text)">⭐ 별빛반</td>
+            <td style="color:var(--text)">최준호 하원 준비해 주세요</td>
+            <td><span class="status-pill" style="background:var(--green-pale);color:var(--green)">자동</span></td>
+            <td><span class="status-pill s-done">성공</span></td>
+          </tr>
+          <tr>
+            <td style="font-family:'DM Mono',monospace;color:var(--text-hint)">12:50:04</td>
+            <td><div class="td-name"><div class="child-ava">👧</div><div><div class="td-child-name">이서연</div></div></div></td>
+            <td style="color:var(--text)">🌼 민들레반</td>
+            <td style="color:var(--text)">이서연 하원 준비해 주세요</td>
+            <td><span class="status-pill" style="background:var(--green-pale);color:var(--green)">자동</span></td>
+            <td><span class="status-pill s-done">성공</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div><!-- /app-wrap -->
 </body>
 </html>
