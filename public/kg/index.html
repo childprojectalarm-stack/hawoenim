@@ -2536,13 +2536,16 @@ async function loadBroadcastLogs(){
 async function loadSettingsData(){
   try{
     // kg_user에서 유치원 정보 가져오기
-    var user = Token.getUser ? Token.getUser() : JSON.parse(localStorage.getItem('kg_user')||'{}');
-    var kgName = user.kindergarten_name || '';
-    // 유치원 정보 입력 필드 채우기
-    var nameEl = document.getElementById('settings-kg-name') || document.querySelector('[name="kg_name"], [id*="kg-name"], [id*="kindergarten-name"]');
+    var user = JSON.parse(localStorage.getItem('kg_user')||'{}');
+    var kgName = user.kindergartenName || user.kindergarten_name || (user.kindergarten&&user.kindergarten.name) || '';
+    // 유치원 정보 탭 필드 채우기
+    var nameEl = document.getElementById('kg-name');
     if(nameEl && kgName) nameEl.value = kgName;
     // 반/원생 목록 로드
-    var r = await Promise.all([api('GET','/api/kg/classrooms'), api('GET','/api/kg/students')]);
+    var r = await Promise.all([
+      api('GET','/api/kg/classrooms'),
+      api('GET','/api/kg/students')
+    ]);
     if(r[0]&&r[0].data&&typeof renderClassroomsList==='function') renderClassroomsList(r[0].data);
     if(r[1]&&r[1].data&&typeof renderStudents==='function') renderStudents(r[1].data);
     // 방송 설정 로드
