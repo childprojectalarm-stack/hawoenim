@@ -2884,11 +2884,38 @@ function doLogout() {
 })();
 
 // ── 대시보드 초기 데이터 로드 ──
+
+// 페이지별 개별 데이터 로딩 함수
+async function loadClassroomsPage() {
+  try {
+    const data = await api('GET', '/api/kg/classrooms');
+    if (data && data.data && typeof renderClassrooms === 'function') renderClassrooms(data.data);
+  } catch(e) { console.warn('교실 로딩 오류:', e); }
+}
+async function loadBroadcastLogsPage() {
+  try {
+    const data = await api('GET', '/api/kg/broadcast-logs');
+    if (data && data.data && typeof renderBroadcastLogs === 'function') renderBroadcastLogs(data.data);
+  } catch(e) { console.warn('방송로그 로딩 오류:', e); }
+}
+async function loadSettingsPage() {
+  try {
+    const [kg, cls, stu] = await Promise.all([
+      api('GET', '/api/kg/info'),
+      api('GET', '/api/kg/classrooms'),
+      api('GET', '/api/kg/students'),
+    ]);
+    if (kg && kg.data && typeof renderKgInfo === 'function') renderKgInfo(kg.data);
+    if (cls && cls.data && typeof renderClassroomsList === 'function') renderClassroomsList(cls.data);
+    if (stu && stu.data && typeof renderStudents === 'function') renderStudents(stu.data);
+  } catch(e) { console.warn('설정 로딩 오류:', e); }
+}
+
 async function loadDashboardData() {
   try {
     const today = new Date().toISOString().slice(0,10);
     const [resData, logData] = await Promise.all([
-      api('GET', `/api/reservations?date=${today}`),
+      api('GET', `/api/kg/reservations?date=${today}`),
       api('GET', '/api/kg/reservations/logs'),
     ]);
     if (resData?.data) renderReservationTable(resData.data);
@@ -3018,6 +3045,10 @@ function showPage(id) {
   document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
+  if (id==='reservations'||id==='dashboard') setTimeout(loadDashboardData,100);
+  if (id==='classrooms') setTimeout(loadClassroomsPage,100);
+  if (id==='log') setTimeout(loadBroadcastLogsPage,100);
+  if (id==='settings') setTimeout(loadSettingsPage,100);
   document.getElementById('page-title').textContent = pageTitles[id];
   // 해당 nav 활성화
   const navs = document.querySelectorAll('.nav-item');
