@@ -2190,47 +2190,7 @@ tbody td {
       <!-- 우측 본문 -->
       <div class="settings-body">
 
-        <!-- ① 유치원 정보 -->
-        <div class="stab-panel active" id="stab-kindergarten">
-          <div class="settings-section">
-            <div class="settings-section-title">유치원 기본 정보</div>
-            <div class="modal-form" style="max-width:480px;">
-              <div class="form-group">
-                <div class="form-label">유치원 이름</div>
-                <input class="form-input" id="kg-name" value="햇살 유치원" oninput="updateKgPreview()">
-              </div>
-              <div class="form-group">
-                <div class="form-label">원장 이름</div>
-                <input class="form-input" id="kg-director" value="김영희 원장">
-              </div>
-              <div class="form-group">
-                <div class="form-label">전화번호</div>
-                <input class="form-input" id="kg-phone" value="051-123-4567">
-              </div>
-              <div class="form-group">
-                <div class="form-label">주소</div>
-                <input class="form-input" id="kg-addr" value="부산시 해운대구 햇살로 123">
-              </div>
-              <button class="btn-save" style="align-self:flex-start;padding:0 24px;" onclick="saveKgInfo()">저장</button>
-            </div>
-          </div>
-
-          <div class="settings-section">
-            <div class="settings-section-title">현재 등록된 유치원</div>
-            <div class="item-list" id="kg-list">
-              <div class="item-card">
-                <div class="item-card-icon">🏫</div>
-                <div class="item-card-info">
-                  <div class="item-card-name">햇살 유치원</div>
-                  <div class="item-card-sub">부산시 해운대구 · 051-123-4567 · 4개 반</div>
-                </div>
-                <div class="item-card-actions">
-                  <button class="btn-sm btn-sm-primary" onclick="editKg(this)">수정</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        
 
         <!-- ② 반 관리 -->
         <div class="stab-panel" id="stab-classrooms-mgmt">
@@ -2886,14 +2846,15 @@ function doLogout() {
 // ── 대시보드 초기 데이터 로드 ──
 
 async function loadClassroomsData(){
-  try{ const d=await api('GET','/api/kg/classrooms'); if(d&&d.data&&typeof renderClassrooms==='function') renderClassrooms(d.data); }catch(e){}
+  try{ var d=await api('GET','/api/kg/classrooms'); if(d&&d.data&&typeof renderClassrooms==='function') renderClassrooms(d.data); }catch(e){}
 }
 async function loadBroadcastLogs(){
-  try{ const d=await api('GET','/api/kg/broadcast-logs'); if(d&&d.data&&typeof renderBroadcastLogs==='function') renderBroadcastLogs(d.data); }catch(e){}
+  try{ var d=await api('GET','/api/kg/broadcast-logs'); if(d&&d.data&&typeof renderBroadcastLogs==='function') renderBroadcastLogs(d.data); }catch(e){}
 }
 async function loadSettingsData(){
   try{
-    const [kg,cls,stu]=await Promise.all([api('GET','/api/kg/info'),api('GET','/api/kg/classrooms'),api('GET','/api/kg/students')]);
+    var results=await Promise.all([api('GET','/api/kg/info'),api('GET','/api/kg/classrooms'),api('GET','/api/kg/students')]);
+    var kg=results[0],cls=results[1],stu=results[2];
     if(kg&&kg.data&&typeof renderKgInfo==='function') renderKgInfo(kg.data);
     if(cls&&cls.data&&typeof renderClassroomsList==='function') renderClassroomsList(cls.data);
     if(stu&&stu.data&&typeof renderStudents==='function') renderStudents(stu.data);
@@ -3030,28 +2991,38 @@ const pageTitles = {
 };
 
 function showPage(id) {
-  // 모든 페이지가 page-dashboard 안에 있으므로 page-dashboard는 항상 visible 유지
-  // 내부 content들의 active만 토글
-  document.querySelectorAll('#page-dashboard .content').forEach(c => c.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  // page-dashboard 자체는 항상 active
-  document.getElementById('page-dashboard').classList.add('active');
-  // 해당 페이지 active
-  const target = document.getElementById('page-' + id);
-  if(target) target.classList.add('active');
-  // 데이터 로딩
-  if(id==='dashboard'||id==='reservations') setTimeout(loadDashboardData,50);
-  if(id==='classrooms') setTimeout(function(){if(typeof loadClassroomsData==='function')loadClassroomsData();},50);
-  if(id==='log') setTimeout(function(){if(typeof loadBroadcastLogs==='function')loadBroadcastLogs();},50);
-  if(id==='settings') setTimeout(function(){if(typeof loadSettingsData==='function')loadSettingsData();},50);
-  document.getElementById('page-title').textContent = pageTitles[id];
-  // 해당 nav 활성화
-  const navs = document.querySelectorAll('.nav-item');
-  navs.forEach(n => {
-    if (n.textContent.trim().startsWith(pageTitles[id]?.charAt(0)) || n.onclick?.toString().includes(id)) {
+  // 모든 .content에서 active 제거
+  document.querySelectorAll('.content').forEach(function(el){ el.classList.remove('active'); });
+  // 모든 nav-item active 제거
+  document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+  // 대시보드 계열 (main 안 페이지들): page-dashboard만 active, 내부 해당 페이지도 active
+  var mainPages = ['dashboard','reservations','broadcast','classrooms','log'];
+  if(mainPages.indexOf(id) >= 0) {
+    document.getElementById('page-dashboard').classList.add('active');
+    if(id !== 'dashboard') {
+      var target = document.getElementById('page-' + id);
+      if(target) target.classList.add('active');
+    }
+  } else {
+    // settings 등 독립 페이지
+    var target = document.getElementById('page-' + id);
+    if(target) target.classList.add('active');
+  }
+  // 타이틀
+  if(typeof pageTitles !== 'undefined') {
+    document.getElementById('page-title').textContent = pageTitles[id] || id;
+  }
+  // nav active
+  document.querySelectorAll('.nav-item').forEach(function(n){
+    if(n.getAttribute('onclick') && n.getAttribute('onclick').indexOf("'" + id + "'") >= 0) {
       n.classList.add('active');
     }
   });
+  // 데이터 로딩
+  if(id==='dashboard'||id==='reservations') setTimeout(loadDashboardData, 50);
+  if(id==='classrooms') setTimeout(function(){ if(typeof loadClassroomsData==='function') loadClassroomsData(); }, 50);
+  if(id==='log') setTimeout(function(){ if(typeof loadBroadcastLogs==='function') loadBroadcastLogs(); }, 50);
+  if(id==='settings') setTimeout(function(){ if(typeof loadSettingsData==='function') loadSettingsData(); }, 50);
 }
 
 // nav-item active 정확히 설정
