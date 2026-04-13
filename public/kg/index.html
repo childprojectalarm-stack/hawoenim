@@ -2480,6 +2480,13 @@ async function doLogin() {
     Token.set(data.token);
     if (document.getElementById('l-remember').checked) {
       localStorage.setItem('kg_user', JSON.stringify(data.user));
+      // JWT 토큰에서 kindergarten_id 보정
+      try {
+        var _payload = JSON.parse(atob(data.token.split('.')[1]));
+        var _user = JSON.parse(localStorage.getItem('kg_user') || '{}');
+        _user.kindergarten_id = _payload.kindergarten_id;
+        localStorage.setItem('kg_user', JSON.stringify(_user));
+      } catch(e) {}
     }
 
     btn.innerHTML = '<span>✅</span> 로그인 성공';
@@ -2490,6 +2497,9 @@ async function doLogin() {
     setTimeout(() => {
       screen.style.display = 'none';
       document.getElementById('app-wrap').classList.add('visible');
+      // 유치원 전환 시 전역 캐시 초기화
+      window.classrooms = [];
+      window.students = [];
       loadDashboardData();
     }, 420);
 
@@ -2531,13 +2541,19 @@ async function loadSettingsData(){
       setVal('kg-phone', d.phone);
       setVal('kg-addr', d.address);
     }
-    // 반/원생 목록 로드
+    // 반/원생 목록 - 항상 초기화 후 로드
+    var clsList = document.getElementById('cls-list');
+    var stuList = document.getElementById('stu-list');
+    if(clsList) clsList.innerHTML = '';
+    if(stuList) stuList.innerHTML = '';
+
     var r = await Promise.all([
       api('GET','/api/kg/classrooms'),
       api('GET','/api/kg/students')
     ]);
-    if(r[0]&&r[0].data&&typeof renderClassroomsList==='function') renderClassroomsList(r[0].data);
-    if(r[1]&&r[1].data&&typeof renderStudents==='function') renderStudents(r[1].data);
+    // 전역 변수 갱신
+    if(r[0]&&r[0].data){ window.classrooms = r[0].data; if(typeof renderClassroomsList==='function') renderClassroomsList(r[0].data); }
+    if(r[1]&&r[1].data){ window.students = r[1].data; if(typeof renderStudents==='function') renderStudents(); }
     // 방송 설정
     var bs = await api('GET','/api/kg/broadcast-settings');
     if(bs&&bs.data&&typeof renderBroadcastSettings==='function') renderBroadcastSettings(bs.data);
