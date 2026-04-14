@@ -2531,33 +2531,27 @@ async function loadBroadcastLogs(){
 }
 async function loadSettingsData(){
   try{
-    // 유치원 정보 API에서 가져오기
-    var kg = await api('GET','/api/kg/kindergarten');
-    if(kg && kg.data){
-      var d = kg.data;
-      var setVal = function(id, val){ var el=document.getElementById(id); if(el&&val!=null) el.value=val; };
-      setVal('kg-name', d.name);
-      setVal('kg-director', d.director);
-      setVal('kg-phone', d.phone);
-      setVal('kg-addr', d.address);
+    const clsList=document.getElementById('cls-list');
+    const stuList=document.getElementById('stu-list');
+    if(clsList) clsList.innerHTML='';
+    if(stuList) stuList.innerHTML='';
+    const kg=await api('GET','/api/kg/kindergarten');
+    if(kg?.data){
+      const d=kg.data;
+      const sv=(id,val)=>{const el=document.getElementById(id);if(el&&val!=null)el.value=val;};
+      sv('kg-name',d.name); sv('kg-director',d.director);
+      sv('kg-phone',d.phone); sv('kg-addr',d.address);
     }
-    // 반/원생 목록 - 항상 초기화 후 로드
-    var clsList = document.getElementById('cls-list');
-    var stuList = document.getElementById('stu-list');
-    if(clsList) clsList.innerHTML = '';
-    if(stuList) stuList.innerHTML = '';
-
-    var r = await Promise.all([
-      api('GET','/api/kg/classrooms'),
-      api('GET','/api/kg/students')
-    ]);
-    // 전역 변수 갱신
-    if(r[0]&&r[0].data){ window.classrooms = r[0].data; if(typeof renderClassroomsList==='function') renderClassroomsList(r[0].data); }
-    if(r[1]&&r[1].data){ window.students = r[1].data; if(typeof renderStudents==='function') renderStudents(); }
-    // 방송 설정
-    var bs = await api('GET','/api/kg/broadcast-settings');
-    if(bs&&bs.data&&typeof renderBroadcastSettings==='function') renderBroadcastSettings(bs.data);
-  }catch(e){ console.warn('settings load error:', e); }
+    const cls=await api('GET','/api/kg/classrooms');
+    if(cls?.data){ classrooms=cls.data; if(typeof renderClassroomsList==='function') renderClassroomsList(classrooms); }
+    const stu=await api('GET','/api/kg/students');
+    if(stu?.data){
+      students=stu.data.map(s=>({id:s.id,name:s.name,cls:s.classroom_name,clsEmoji:s.classroom_emoji,age:s.age!=null?'만 '+s.age+'세':'',emoji:s.emoji||'🧒',family:[]}));
+      renderStudents();
+    }
+    const bs=await api('GET','/api/kg/broadcast-settings');
+    if(bs?.data&&typeof renderBroadcastSettings==='function') renderBroadcastSettings(bs.data);
+  }catch(e){console.warn('설정 로드 오류:',e.message);}
 }
 async function loadDashboardData() {
   try {
@@ -2912,32 +2906,7 @@ function removeItem(btn) {
 }
 
 // ── 원생 데이터 ──
-let students = [
-  { id:1, name:'김민준', cls:'해바라기반', age:'만 5세', emoji:'👦', family:[
-    {name:'김수연', rel:'모(어머니)', phone:'010-1234-5678', notify:'예약 알림 수신'},
-    {name:'김태현', rel:'부(아버지)', phone:'010-9876-5432', notify:'방송 완료 알림만'},
-  ]},
-  { id:2, name:'박하준', cls:'해바라기반', age:'만 5세', emoji:'🧒', family:[
-    {name:'박민서', rel:'모(어머니)', phone:'010-2222-3333', notify:'예약 알림 수신'},
-  ]},
-  { id:3, name:'이서연', cls:'민들레반', age:'만 4세', emoji:'👧', family:[
-    {name:'이지수', rel:'모(어머니)', phone:'010-4444-5555', notify:'예약 알림 수신'},
-    {name:'이재훈', rel:'부(아버지)', phone:'010-6666-7777', notify:'알림 비활성화'},
-  ]},
-  { id:4, name:'윤소율', cls:'무지개반', age:'만 4세', emoji:'👧', family:[
-    {name:'윤태양', rel:'부(아버지)', phone:'010-8888-9999', notify:'예약 알림 수신'},
-  ]},
-  { id:5, name:'최준호', cls:'별빛반', age:'만 5세', emoji:'👦', family:[
-    {name:'최현우', rel:'부(아버지)', phone:'010-1111-2222', notify:'예약 알림 수신'},
-    {name:'김미경', rel:'모(어머니)', phone:'010-3333-4444', notify:'예약 알림 수신'},
-  ]},
-  { id:6, name:'정다은', cls:'별빛반', age:'만 5세', emoji:'👧', family:[
-    {name:'정은희', rel:'모(어머니)', phone:'010-5555-6666', notify:'예약 알림 수신'},
-  ]},
-  { id:7, name:'한지우', cls:'민들레반', age:'만 4세', emoji:'👦', family:[
-    {name:'한승민', rel:'부(아버지)', phone:'010-7777-8888', notify:'예약 알림 수신'},
-  ]},
-];
+let students = []
 let nextStudentId = 8;
 let currentStudentId = null;
 
