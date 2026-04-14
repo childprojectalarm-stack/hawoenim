@@ -71,7 +71,7 @@ router.delete('/classrooms/:id', (req, res) => {
   db.prepare('DELETE FROM broadcast_logs WHERE kindergarten_id=? AND classroom_name=(SELECT name FROM classrooms WHERE id=?)').run(kgId, req.params.id);
   db.prepare('DELETE FROM classrooms WHERE id=? AND kindergarten_id=?').run(req.params.id, kgId);
   res.json({ success: true });
-}));
+});
 
 // ── 원생 ─────────────────────────────────────────────────────
 router.get('/students', (req, res) => {
