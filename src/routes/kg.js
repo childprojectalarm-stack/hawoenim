@@ -57,9 +57,21 @@ router.put('/classrooms/:id', (req, res) => {
 
 router.delete('/classrooms/:id', (req, res) => {
   const kgId = getKgId(req);
+  // 권한 확인
+  const cls = db.prepare('SELECT id FROM classrooms WHERE id=? AND kindergarten_id=?').get(req.params.id, kgId);
+  if (!cls) return res.status(403).json({ success: false, message: '접근 권한이 없습니다.' });
+  // cascade 삭제: 가족→예약→원생→방송설정→반
+  const students = db.prepare('SELECT id FROM students WHERE classroom_id=?').all(req.params.id);
+  students.forEach(s => {
+    db.prepare('DELETE FROM family_members WHERE student_id=?').run(s.id);
+    db.prepare('DELETE FROM reservations WHERE student_id=?').run(s.id);
+  });
+  db.prepare('DELETE FROM students WHERE classroom_id=?').run(req.params.id);
+  db.prepare('DELETE FROM broadcast_settings WHERE classroom_id=?').run(req.params.id);
+  db.prepare('DELETE FROM broadcast_logs WHERE kindergarten_id=? AND classroom_name=(SELECT name FROM classrooms WHERE id=?)').run(kgId, req.params.id);
   db.prepare('DELETE FROM classrooms WHERE id=? AND kindergarten_id=?').run(req.params.id, kgId);
   res.json({ success: true });
-});
+}));
 
 // ── 원생 ─────────────────────────────────────────────────────
 router.get('/students', (req, res) => {
