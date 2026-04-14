@@ -2556,14 +2556,24 @@ async function loadSettingsData(){
 async function loadDashboardData() {
   try {
     const today = new Date().toISOString().slice(0,10);
-    const [resData, logData] = await Promise.all([
+    const [resData, logData, clsData, stuData] = await Promise.all([
       api('GET', `/api/kg/reservations?date=${today}`),
       api('GET', '/api/kg/reservations/logs'),
+      api('GET', '/api/kg/classrooms'),
+      api('GET', '/api/kg/students'),
     ]);
+    // 전역 캐시 갱신 (유치원 전환 시 이전 데이터 표시 방지)
+    classrooms = clsData?.data || [];
+    students = (stuData?.data || []).map(s=>({
+      id:s.id, name:s.name, cls:s.classroom_name,
+      clsEmoji:s.classroom_emoji,
+      age:s.age!=null?'만 '+s.age+'세':'',
+      emoji:s.emoji||'🧒', family:[]
+    }));
     if (resData?.data) renderReservationTable(resData.data);
     if (logData?.data) renderBroadcastLogs(logData.data);
   } catch (e) {
-    console.warn('대시보드 데이터 로드 실패:', e.message);
+    console.warn('대시보드 데이터 로드 오류:', e.message);
   }
 }
 
