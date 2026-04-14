@@ -1571,7 +1571,7 @@ tbody td {
       </button>
       <button class="nav-item" onclick="showPage('reservations')">
         <span class="icon">📋</span> 예약 관리
-        <span class="nav-badge" id="nav-badge">7</span>
+        <span class="nav-badge" id="nav-badge">0</span>
       </button>
       <button class="nav-item" onclick="showPage('broadcast')">
         <span class="icon">📢</span> 수동 방송
@@ -1634,27 +1634,27 @@ tbody td {
     <div class="stats-grid">
       <div class="stat-card c-blue">
         <div class="stat-icon">📅</div>
-        <div class="stat-num">7</div>
+        <div class="stat-num" id="stat-today-res">0</div>
         <div class="stat-label">오늘 예약</div>
-        <div class="stat-sub">전일 대비 +2</div>
+        <div class="stat-sub"><span id="stat-today-sub"></span></div>
       </div>
       <div class="stat-card c-green">
         <div class="stat-icon">✅</div>
-        <div class="stat-num">3</div>
+        <div class="stat-num" id="stat-announced">0</div>
         <div class="stat-label">방송 완료</div>
-        <div class="stat-sub">오늘 처리됨</div>
+        <div class="stat-sub"><span id="stat-ann-sub"></span></div>
       </div>
       <div class="stat-card c-amber">
         <div class="stat-icon">⏳</div>
-        <div class="stat-num">4</div>
+        <div class="stat-num" id="stat-pending">0</div>
         <div class="stat-label">대기 중</div>
-        <div class="stat-sub">오후 예약 대기</div>
+        <div class="stat-sub"><span id="stat-pend-sub"></span></div>
       </div>
       <div class="stat-card c-red">
         <div class="stat-icon">🧒</div>
-        <div class="stat-num">23</div>
+        <div class="stat-num" id="stat-students">0</div>
         <div class="stat-label">원아 수</div>
-        <div class="stat-sub">4개 반 운영 중</div>
+        <div class="stat-sub"><span id="stat-stu-sub"></span></div>
       </div>
     </div>
 
@@ -1845,43 +1845,7 @@ tbody td {
               <div class="broadcast-setting-row">
                 <div>
                   <div class="bsr-label">🌻 해바라기반</div>
-                  <div class="bsr-sub" id="bsr-sub-cls1">기본값 적용 중</div>
-                </div>
-                <div class="bsr-control">
-                  <button class="bsr-btn" onclick="adjustBsr('cls1',-1)">−</button>
-                  <div class="bsr-val" id="bsr-cls1">10</div>
-                  <span style="font-size:12px;color:var(--text-hint)">분 전</span>
-                  <button class="bsr-btn" onclick="adjustBsr('cls1',1)">+</button>
-                </div>
-              </div>
-              <div class="broadcast-setting-row">
-                <div>
-                  <div class="bsr-label">🌈 무지개반</div>
-                  <div class="bsr-sub" id="bsr-sub-cls2">기본값 적용 중</div>
-                </div>
-                <div class="bsr-control">
-                  <button class="bsr-btn" onclick="adjustBsr('cls2',-1)">−</button>
-                  <div class="bsr-val" id="bsr-cls2">10</div>
-                  <span style="font-size:12px;color:var(--text-hint)">분 전</span>
-                  <button class="bsr-btn" onclick="adjustBsr('cls2',1)">+</button>
-                </div>
-              </div>
-              <div class="broadcast-setting-row">
-                <div>
-                  <div class="bsr-label">⭐ 별빛반</div>
-                  <div class="bsr-sub" id="bsr-sub-cls3">기본값 적용 중</div>
-                </div>
-                <div class="bsr-control">
-                  <button class="bsr-btn" onclick="adjustBsr('cls3',-1)">−</button>
-                  <div class="bsr-val" id="bsr-cls3">10</div>
-                  <span style="font-size:12px;color:var(--text-hint)">분 전</span>
-                  <button class="bsr-btn" onclick="adjustBsr('cls3',1)">+</button>
-                </div>
-              </div>
-              <div class="broadcast-setting-row">
-                <div>
-                  <div class="bsr-label">🌼 민들레반</div>
-                  <div class="bsr-sub" id="bsr-sub-cls4">기본값 적용 중</div>
+                  <div id="bsr-cls-panels"></div>
                 </div>
                 <div class="bsr-control">
                   <button class="bsr-btn" onclick="adjustBsr('cls4',-1)">−</button>
@@ -2383,6 +2347,35 @@ async function loadClassroomsData(){
 async function loadBroadcastLogs(){
   try{ var d=await api('GET','/api/kg/broadcast-logs'); if(d&&d.data&&typeof renderBroadcastLogs==='function') renderBroadcastLogs(d.data); }catch(e){}
 }
+function renderBroadcastSettings(data) {
+  const clsList = (data && data.classrooms) ? data.classrooms : (classrooms||[]);
+  const settings = (data && data.settings) ? data.settings : [];
+  const defaultMent = (data && data.defaultMent) || '{반} {이름} 학부모님, 하원 준비해 주세요';
+  const noticeMins = (data && data.noticeMins) || 10;
+  const mentEl = document.getElementById('ment-default');
+  if(mentEl) mentEl.value = defaultMent;
+  const container = document.getElementById('bsr-cls-panels');
+  if(!container) return;
+  if(clsList.length === 0) {
+    container.innerHTML = '<div style="color:var(--text-hint);font-size:13px;padding:8px 0;">등록된 반이 없습니다.</div>';
+    return;
+  }
+  container.innerHTML = clsList.map((cls, i) => {
+    const key = 'cls'+(i+1);
+    const s = settings.find(x=>x.classroom_id===cls.id) || {};
+    const mins = s.notice_minutes || noticeMins;
+    return '<div class="bsr-cls-row">'
+      + '<div class="bsr-cls-name">'+(cls.emoji||'🏫')+' '+cls.name+'</div>'
+      + '<div id="bsr-sub-'+key+'" class="bsr-sub">'+(s.notice_minutes ? '개별 설정 중' : '기본 설정 사용')+'</div>'
+      + '<div class="bsr-control">'
+      + '<button class="bsr-btn" onclick="adjustBsr(\'' + key + '\',-1)">−</button>'
+      + '<div class="bsr-val" id="bsr-'+key+'">'+mins+'</div>'
+      + '<button class="bsr-btn" onclick="adjustBsr(\'' + key + '\',1)">+</button>'
+      + '<span style="font-size:11px;color:var(--text-hint)">분 전</span>'
+      + '</div></div>';
+  }).join('');
+}
+
 async function loadSettingsData(){
   try{
     const clsList=document.getElementById('cls-list');
@@ -2410,13 +2403,14 @@ async function loadSettingsData(){
 async function loadDashboardData() {
   try {
     const today = new Date().toISOString().slice(0,10);
-    const [resData, logData, clsData, stuData] = await Promise.all([
+    const [resData, logData, clsData, stuData, dashData] = await Promise.all([
       api('GET', `/api/kg/reservations?date=${today}`),
       api('GET', '/api/kg/reservations/logs'),
       api('GET', '/api/kg/classrooms'),
       api('GET', '/api/kg/students'),
+      api('GET', '/api/kg/dashboard'),
     ]);
-    // 전역 캐시 갱신 (유치원 전환 시 이전 데이터 표시 방지)
+    // 전역 캐시 갱신
     classrooms = clsData?.data || [];
     students = (stuData?.data || []).map(s=>({
       id:s.id, name:s.name, cls:s.classroom_name,
@@ -2424,8 +2418,21 @@ async function loadDashboardData() {
       age:s.age!=null?'만 '+s.age+'세':'',
       emoji:s.emoji||'🧒', family:[]
     }));
-    if (resData?.data) renderReservationTable(resData.data);
-    if (logData?.data) renderBroadcastLogs(logData.data);
+    // stat-card 숫자 업데이트
+    if(dashData?.data) {
+      const d = dashData.data;
+      const sv = (id,val)=>{ const el=document.getElementById(id); if(el) el.textContent=val; };
+      sv('stat-today-res', d.todayRes||0);
+      sv('stat-announced',  d.announced||0);
+      sv('stat-pending',    (d.todayRes||0)-(d.announced||0));
+      sv('stat-students',   d.students||0);
+      sv('nav-badge',       d.todayRes||0);
+      // 서브텍스트도 갱신
+      const ssv = (id,val)=>{ const el=document.getElementById(id); if(el) el.textContent=val; };
+      ssv('stat-stu-sub', d.classrooms ? d.classrooms+'개 반 운영 중' : '');
+    }
+    if(resData?.data) renderReservationTable(resData.data);
+    if(logData?.data) renderBroadcastLogs(logData.data);
   } catch (e) {
     console.warn('대시보드 데이터 로드 오류:', e.message);
   }
