@@ -1823,40 +1823,7 @@ tbody td {
         <div class="stab-panel" id="stab-broadcast-cfg">
           <div class="settings-section">
             <div class="settings-section-title">하원 방송 시간 설정</div>
-            <p style="font-size:13px;color:var(--text-hint);margin-bottom:16px;">예약 시간보다 몇 분 전에 교실 방송을 내보낼지 설정합니다.</p>
-
-            <div class="broadcast-setting-row">
-              <div>
-                <div class="bsr-label">기본 방송 시간</div>
-                <div class="bsr-sub">전체 반에 적용되는 기본값</div>
-              </div>
-              <div class="bsr-control">
-                <button class="bsr-btn" onclick="adjustBsr('default',-1)">−</button>
-                <div class="bsr-val" id="bsr-default">10</div>
-                <span style="font-size:12px;color:var(--text-hint)">분 전</span>
-                <button class="bsr-btn" onclick="adjustBsr('default',1)">+</button>
-              </div>
-            </div>
-
-            <div style="margin: 20px 0 10px;">
-              <div class="settings-section-title" style="margin-bottom:12px;">반별 개별 설정</div>
-              <p style="font-size:12px;color:var(--text-hint);margin-bottom:12px;">설정하지 않은 반은 기본값이 적용됩니다.</p>
-
-              <div class="broadcast-setting-row">
-                <div>
-                  <div class="bsr-label">🌻 해바라기반</div>
-                  <div id="bsr-cls-panels"></div>
-                </div>
-                <div class="bsr-control">
-                  <button class="bsr-btn" onclick="adjustBsr('cls4',-1)">−</button>
-                  <div class="bsr-val" id="bsr-cls4">10</div>
-                  <span style="font-size:12px;color:var(--text-hint)">분 전</span>
-                  <button class="bsr-btn" onclick="adjustBsr('cls4',1)">+</button>
-                </div>
-              </div>
-            </div>
-
-            <button class="btn-save" style="margin-top:8px;" onclick="saveBroadcastSettings()">설정 저장</button>
+            <div id="bsr-cls-panels"></div>
           </div>
 
           <!-- 방송 멘트 설정 -->
