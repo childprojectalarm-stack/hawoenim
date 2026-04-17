@@ -1892,67 +1892,7 @@ tbody td {
                 <!-- 해바라기반 -->
                 <div class="cls-ment-row" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px;">
                   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-                    <div style="font-size:13px;font-weight:600;color:var(--text);">🌻 해바라기반</div>
-                    <div style="display:flex;gap:6px;align-items:center;">
-                      <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-hint);cursor:pointer;">
-                        <input type="checkbox" id="ment-use-cls1" onchange="toggleClsMent('cls1')" style="accent-color:var(--primary);">
-                        개별 설정
-                      </label>
-                    </div>
-                  </div>
-                  <input class="form-input" id="ment-cls1" placeholder="기본 멘트 사용 중" disabled style="width:100%;margin-bottom:8px;opacity:0.45;" oninput="refreshMentPreviews()">
-                  <div class="preview-box" id="ment-cls1-preview" style="opacity:0.45;">
-                    <span style="font-size:16px;">📢</span>
-                    <span id="ment-cls1-preview-text" style="font-size:13px;color:var(--text-sub);">기본 멘트가 적용됩니다</span>
-                  </div>
-                </div>
-
-                <!-- 무지개반 -->
-                <div class="cls-ment-row" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px;">
-                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-                    <div style="font-size:13px;font-weight:600;color:var(--text);">🌈 무지개반</div>
-                    <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-hint);cursor:pointer;">
-                      <input type="checkbox" id="ment-use-cls2" onchange="toggleClsMent('cls2')" style="accent-color:var(--primary);">
-                      개별 설정
-                    </label>
-                  </div>
-                  <input class="form-input" id="ment-cls2" placeholder="기본 멘트 사용 중" disabled style="width:100%;margin-bottom:8px;opacity:0.45;" oninput="refreshMentPreviews()">
-                  <div class="preview-box" id="ment-cls2-preview" style="opacity:0.45;">
-                    <span style="font-size:16px;">📢</span>
-                    <span id="ment-cls2-preview-text" style="font-size:13px;color:var(--text-sub);">기본 멘트가 적용됩니다</span>
-                  </div>
-                </div>
-
-                <!-- 별빛반 -->
-                <div class="cls-ment-row" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px;">
-                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-                    <div style="font-size:13px;font-weight:600;color:var(--text);">⭐ 별빛반</div>
-                    <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-hint);cursor:pointer;">
-                      <input type="checkbox" id="ment-use-cls3" onchange="toggleClsMent('cls3')" style="accent-color:var(--primary);">
-                      개별 설정
-                    </label>
-                  </div>
-                  <input class="form-input" id="ment-cls3" placeholder="기본 멘트 사용 중" disabled style="width:100%;margin-bottom:8px;opacity:0.45;" oninput="refreshMentPreviews()">
-                  <div class="preview-box" id="ment-cls3-preview" style="opacity:0.45;">
-                    <span style="font-size:16px;">📢</span>
-                    <span id="ment-cls3-preview-text" style="font-size:13px;color:var(--text-sub);">기본 멘트가 적용됩니다</span>
-                  </div>
-                </div>
-
-                <!-- 민들레반 -->
-                <div class="cls-ment-row" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px;">
-                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-                    <div style="font-size:13px;font-weight:600;color:var(--text);">🌼 민들레반</div>
-                    <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-hint);cursor:pointer;">
-                      <input type="checkbox" id="ment-use-cls4" onchange="toggleClsMent('cls4')" style="accent-color:var(--primary);">
-                      개별 설정
-                    </label>
-                  </div>
-                  <input class="form-input" id="ment-cls4" placeholder="기본 멘트 사용 중" disabled style="width:100%;margin-bottom:8px;opacity:0.45;" oninput="refreshMentPreviews()">
-                  <div class="preview-box" id="ment-cls4-preview" style="opacity:0.45;">
-                    <span style="font-size:16px;">📢</span>
-                    <span id="ment-cls4-preview-text" style="font-size:13px;color:var(--text-sub);">기본 멘트가 적용됩니다</span>
-                  </div>
+                    <div id="ment-cls-panels"></div>
                 </div>
               </div>
             </div>
@@ -2351,29 +2291,59 @@ function renderBroadcastSettings(data) {
   const clsList = (data && data.classrooms) ? data.classrooms : (classrooms||[]);
   const settings = (data && data.settings) ? data.settings : [];
   const defaultMent = (data && data.defaultMent) || '{반} {이름} 학부모님, 하원 준비해 주세요';
-  const noticeMins = (data && data.noticeMins) || 10;
+  const noticeMins  = (data && data.noticeMins) || 10;
+
+  // 기본 멘트
   const mentEl = document.getElementById('ment-default');
   if(mentEl) mentEl.value = defaultMent;
-  const container = document.getElementById('bsr-cls-panels');
-  if(!container) return;
-  if(clsList.length === 0) {
-    container.innerHTML = '<div style="color:var(--text-hint);font-size:13px;padding:8px 0;">등록된 반이 없습니다.</div>';
-    return;
+
+  // 반별 개별 알림음 패널 (bsr-cls-panels)
+  const bsrContainer = document.getElementById('bsr-cls-panels');
+  if(bsrContainer) {
+    if(clsList.length === 0) {
+      bsrContainer.innerHTML = '<div style="color:var(--text-hint);font-size:13px;padding:8px 0;">등록된 반이 없습니다.</div>';
+    } else {
+      bsrContainer.innerHTML = clsList.map((cls, i) => {
+        const key = 'cls'+(i+1);
+        const s = settings.find(x=>x.classroom_id===cls.id) || {};
+        const mins = s.notice_minutes || noticeMins;
+        return '<div class="bsr-cls-row">'
+          +'<div class="bsr-cls-name">'+(cls.emoji||'🏫')+' '+cls.name+'</div>'
+          +'<div id="bsr-sub-'+key+'" class="bsr-sub">'+(s.notice_minutes?'개별 설정 중':'기본 설정 사용')+'</div>'
+          +'<div class="bsr-control">'
+          +'<button class="bsr-btn" onclick="adjustBsr(\'' + key + '\',-1)">−</button>'
+          +'<div class="bsr-val" id="bsr-'+key+'">'+mins+'</div>'
+          +'<button class="bsr-btn" onclick="adjustBsr(\'' + key + '\',1)">+</button>'
+          +'<span style="font-size:11px;color:var(--text-hint)">분 전</span>'
+          +'</div></div>';
+      }).join('');
+    }
   }
-  container.innerHTML = clsList.map((cls, i) => {
-    const key = 'cls'+(i+1);
-    const s = settings.find(x=>x.classroom_id===cls.id) || {};
-    const mins = s.notice_minutes || noticeMins;
-    return '<div class="bsr-cls-row">'
-      + '<div class="bsr-cls-name">'+(cls.emoji||'🏫')+' '+cls.name+'</div>'
-      + '<div id="bsr-sub-'+key+'" class="bsr-sub">'+(s.notice_minutes ? '개별 설정 중' : '기본 설정 사용')+'</div>'
-      + '<div class="bsr-control">'
-      + '<button class="bsr-btn" onclick="adjustBsr(\'' + key + '\',-1)">−</button>'
-      + '<div class="bsr-val" id="bsr-'+key+'">'+mins+'</div>'
-      + '<button class="bsr-btn" onclick="adjustBsr(\'' + key + '\',1)">+</button>'
-      + '<span style="font-size:11px;color:var(--text-hint)">분 전</span>'
-      + '</div></div>';
-  }).join('');
+
+  // 반별 개별 멘트 패널 (ment-cls-panels)
+  const mentContainer = document.getElementById('ment-cls-panels');
+  if(mentContainer) {
+    if(clsList.length === 0) {
+      mentContainer.innerHTML = '<div style="color:var(--text-hint);font-size:13px;padding:8px 0;">등록된 반이 없습니다.</div>';
+    } else {
+      mentContainer.innerHTML = clsList.map((cls, i) => {
+        const key = 'cls'+(i+1);
+        const s = settings.find(x=>x.classroom_id===cls.id) || {};
+        const ment = s.default_ment || '';
+        const checked = !!s.default_ment;
+        return '<div style="justify-content:space-between;margin-bottom:8px;">'
+          +'<div style="font-size:13px;font-weight:600;color:var(--text);">'+(cls.emoji||'🏫')+' '+cls.name+'</div>'
+          +'<div style="display:flex;gap:6px;align-items:center;">'
+          +'<label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-hint);cursor:pointer;">'
+          +'<input type="checkbox" id="ment-use-'+key+'" onchange="toggleClsMent(\'' + key + '\')" style="accent-color:var(--primary);"'+(checked?' checked':'')+'>'
+          +'개별 설정'
+          +'</label>'
+          +'</div>'
+          +'<input class="form-input" id="ment-'+key+'" placeholder="기본 멘트 사용 중" value="'+ment+'" '+(checked?'':'disabled ')+'style="margin-top:4px;">'
+          +'</div>';
+      }).join('');
+    }
+  }
 }
 
 async function loadSettingsData(){
