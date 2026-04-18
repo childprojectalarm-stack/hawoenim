@@ -2749,35 +2749,45 @@ function renderClassroomsList(clsList) {
   });
 }
 
+function deleteStudent(id) {
+  if (!confirm('원생을 삭제하시겠습니까?')) return;
+  api('DELETE', '/api/kg/students/' + id).then(res => {
+    if (!res || !res.success) { showToast(res?.message||'삭제 실패', '❌'); return; }
+    students = students.filter(s => s.id !== id);
+    renderStudents();
+    showToast('원생이 삭제되었습니다', '✅');
+  });
+}
+
 function renderStudents() {
-  const filter = document.getElementById('stu-cls-filter').value;
+  const filterVal = document.getElementById('stu-cls-filter').value;
   const list = document.getElementById('stu-list');
-  const filtered = filter === 'all' ? students : students.filter(s => s.cls === filter);
+  if (!list) return;
+  // filterVal이 비어있으면 전체, 있으면 classroom id로 매핑해서 반 이름으로 필터
+  const filterCls = filterVal
+    ? (classrooms.find(c => String(c.id) === String(filterVal))?.name || '')
+    : '';
+  const filtered = filterCls
+    ? students.filter(s => s.cls === filterCls)
+    : students;
   if (filtered.length === 0) {
-    list.innerHTML = '<div class="empty-hint">등록된 원생이 없습니다. 위에서 원생을 추가해주세요.</div>';
+    list.innerHTML = '<div class="empty-hint">등록된 원생이 없습니다</div>';
     return;
   }
-  list.innerHTML = filtered.map(s => `
-    <div class="item-card" id="stu-card-${s.id}">
-      <div class="item-card-icon">${s.emoji}</div>
-      <div class="item-card-info">
-        <div class="item-card-name">${s.name}</div>
-        <div class="item-card-sub">${s.cls} · ${s.age} · 가족 ${s.family.length}명</div>
-      </div>
-      <div class="item-card-actions">
-        <button class="btn-sm btn-sm-green" onclick="toggleFamilyPanel(${s.id})">가족관리</button>
-        <button class="btn-sm btn-sm-red" onclick="removeStudent(${s.id})">삭제</button>
-      </div>
-    </div>
-    <div class="expand-panel" id="family-panel-${s.id}">
-      <div class="expand-title">가족 목록</div>
-      <div id="family-list-${s.id}">
-        ${s.family.map((f,fi) => familyCardHTML(s.id, fi, f)).join('')}
-      </div>
-      ${s.family.length === 0 ? '<div class="empty-hint" style="margin-bottom:10px;">등록된 가족이 없습니다</div>' : ''}
-      <button class="btn-sm btn-sm-primary" style="margin-top:8px;height:32px;padding:0 14px;font-size:12px;" onclick="openAddFamilyModal(${s.id})">+ 가족 추가</button>
-    </div>
-  `).join('');
+  list.innerHTML = filtered.map(s => {
+    const clsLabel = s.clsEmoji ? s.clsEmoji+' '+s.cls : s.cls;
+    return '<div class="item-card" data-id="'+s.id+'">'
+      +'<div class="item-card-icon">'+s.emoji+'</div>'
+      +'<div class="item-card-info">'
+      +'<div class="item-card-name">'+s.name+'</div>'
+      +'<div class="item-card-sub">'+(clsLabel||'')+(s.age?' · '+s.age:'')+'</div>'
+      +'</div>'
+      +'<div class="item-card-actions">'
+      +'<button class="btn-sm btn-sm-primary" onclick="openAddFamilyModal('+s.id+')">가족추가</button>'
+      +'<button class="btn-sm btn-sm-red" onclick="deleteStudent('+s.id+')">삭제</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
 }
 
 function familyCardHTML(stuId, fi, f) {
