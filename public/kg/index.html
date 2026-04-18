@@ -1972,15 +1972,15 @@ tbody td {
           <div class="form-group">
             <div class="form-label">소속 반</div>
             <select class="form-select" id="new-stu-cls">
+              <option value="">반 선택</option>
             </select>
           </div>
           <div class="form-group">
             <div class="form-label">나이</div>
             <select class="form-select" id="new-stu-age">
-              <option>만 3세</option>
-              <option>만 4세</option>
-              <option>만 5세</option>
-              <option>만 6세</option>
+              <option value="5">만 5세</option>
+              <option value="6">만 6세</option>
+              <option value="7">만 7세</option>
             </select>
           </div>
         </div>
@@ -2718,6 +2718,40 @@ let students = []
 let nextStudentId = 8;
 let currentStudentId = null;
 
+function renderClassroomsList(clsList) {
+  const listEl = document.getElementById('cls-list');
+  if(listEl) {
+    listEl.innerHTML = '';
+    (clsList||[]).forEach(cls => {
+      const card = document.createElement('div');
+      card.className = 'item-card';
+      card.dataset.id = cls.id;
+      card.innerHTML = '<div class="item-card-icon">'+(cls.emoji||'🏫')+'</div>'
+        +'<div class="item-card-info">'
+        +'<div class="item-card-name">'+(cls.emoji||'🏫')+' '+cls.name+'</div>'
+        +'<div class="item-card-sub">담임: '+(cls.teacher||'미지정')+'</div>'
+        +'</div>'
+        +'<div class="item-card-actions">'
+        +'<button class="btn-sm btn-sm-red" onclick="deleteClassroom('+cls.id+')">삭제</button>'
+        +'</div>';
+      listEl.appendChild(card);
+    });
+  }
+  ['new-stu-cls','stu-cls-filter'].forEach(selId => {
+    const sel = document.getElementById(selId);
+    if(!sel) return;
+    sel.innerHTML = selId==='new-stu-cls'
+      ? '<option value="">반 선택</option>'
+      : '<option value="">전체 반</option>';
+    (clsList||[]).forEach(cls => {
+      const opt = document.createElement('option');
+      opt.value = cls.id;
+      opt.textContent = (cls.emoji||'🏫')+' '+cls.name;
+      sel.appendChild(opt);
+    });
+  });
+}
+
 function renderStudents() {
   const filter = document.getElementById('stu-cls-filter').value;
   const list = document.getElementById('stu-list');
@@ -2795,19 +2829,31 @@ function filterStudentsByCls(cls) {
 // ── 원생 추가 모달 ──
 function openAddStudentModal() {
   document.getElementById('new-stu-name').value = '';
+  renderClassroomsList(classrooms);
   document.getElementById('modal-add-student').classList.add('show');
 }
 
 function addStudent() {
   const name = document.getElementById('new-stu-name').value.trim();
-  const cls  = document.getElementById('new-stu-cls').value.replace(/^[^\s]+ /, '');
-  const age  = document.getElementById('new-stu-age').value;
+  const clsSel = document.getElementById('new-stu-cls');
+  const classroomId = parseInt(clsSel.value);
+  const age = parseInt(document.getElementById('new-stu-age').value);
   if (!name) { showToast('원생 이름을 입력해주세요', '⚠️'); return; }
+  if (!classroomId) { showToast('소속 반을 선택해주세요', '⚠️'); return; }
+  const cls = classrooms.find(c => c.id === classroomId);
+  const clsName = cls ? cls.name : '';
+  const clsEmoji = cls ? (cls.emoji||'🏫') : '';
   const emojis = ['🧒','👦','👧'];
-  students.push({ id: nextStudentId++, name, cls: cls.replace(/^[🌻🌈⭐🌼] /, '').trim(), age, emoji: emojis[Math.floor(Math.random()*3)], family:[] });
-  closeModal('modal-add-student');
-  renderStudents();
-  showToast(`${name} 원생이 등록되었습니다`, '✅', cls);
+  api('POST', '/api/kg/students', { name, classroom_id: classroomId, age }).then(res => {
+    if (res && res.success) {
+      students.push({ id: res.id||nextStudentId++, name, cls: clsName, clsEmoji, age: age ? '만 '+age+'세' : '', emoji: emojis[Math.floor(Math.random()*3)], family:[] });
+      closeModal('modal-add-student');
+      renderStudents();
+      showToast(name + ' 원생이 등록되었습니다', '✅', clsEmoji+' '+clsName);
+    } else {
+      showToast((res && res.message)||'원생 추가 실패', '❌');
+    }
+  });
 }
 
 // ── 가족 추가 모달 ──
