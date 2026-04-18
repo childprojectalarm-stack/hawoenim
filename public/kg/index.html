@@ -2493,7 +2493,21 @@ const pageTitles = {
   settings: '환경 설정'
 };
 
-function fillBroadcastSelects() {
+async function fillBroadcastSelects() {
+  // 데이터 없으면 API에서 로드
+  if (!classrooms || classrooms.length === 0) {
+    const [clsRes, stuRes] = await Promise.all([
+      api('GET', '/api/kg/classrooms'),
+      api('GET', '/api/kg/students'),
+    ]);
+    if (clsRes?.data) classrooms = clsRes.data;
+    if (stuRes?.data) students = stuRes.data.map(s=>({
+      id:s.id, name:s.name, cls:s.classroom_name,
+      clsEmoji:s.classroom_emoji,
+      age:s.age!=null?'만 '+s.age+'세':'',
+      emoji:s.emoji||'🧒', family:[]
+    }));
+  }
   // 대상 교실 select 채우기
   const bcClass = document.getElementById('bc-class');
   if (bcClass) {
@@ -2505,7 +2519,6 @@ function fillBroadcastSelects() {
       bcClass.appendChild(opt);
     });
   }
-  // 원아 select 채우기
   filterBcChildren();
 }
 
