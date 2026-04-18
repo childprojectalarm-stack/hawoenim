@@ -1708,7 +1708,7 @@ tbody td {
         <button class="stab" onclick="showStab('classrooms-mgmt')"><span class="sicon">🏠</span>반 관리</button>
         <button class="stab" onclick="showStab('students')"><span class="sicon">🧒</span>원생 관리</button>
         <button class="stab" onclick="showStab('broadcast-cfg')"><span class="sicon">📢</span>방송 설정</button>
-        <button class="stab" onclick="showStab('account')"><span class="sicon">🔑</span>계정 관리</button>
+        
       </div>
 
       <!-- 우측 본문 -->
@@ -2429,18 +2429,21 @@ const pageTitles = {
 };
 
 async function fillBroadcastSelects() {
-  // 항상 최신 데이터 로드
-  const [clsRes, stuRes] = await Promise.all([
-    api('GET', '/api/kg/classrooms'),
-    api('GET', '/api/kg/students'),
-  ]);
-  if (clsRes?.data) classrooms = clsRes.data;
-  if (stuRes?.data) students = stuRes.data.map(s=>({
-    id:s.id, name:s.name, cls:s.classroom_name,
-    clsEmoji:s.classroom_emoji,
-    age:s.age!=null?'만 '+s.age+'세':'',
-    emoji:s.emoji||'🧒', family:[]
-  }));
+  // 항상 최신 데이터 API에서 로드
+  try {
+    const [clsRes, stuRes] = await Promise.all([
+      api('GET', '/api/kg/classrooms'),
+      api('GET', '/api/kg/students'),
+    ]);
+    if (clsRes?.data) classrooms = clsRes.data;
+    if (stuRes?.data) students = stuRes.data.map(s=>({
+      id:s.id, name:s.name, cls:s.classroom_name,
+      clsEmoji:s.classroom_emoji,
+      age:s.age!=null?'만 '+s.age+'세':'',
+      emoji:s.emoji||'🧒', family:[]
+    }));
+  } catch(e) { console.warn('방송 데이터 로드 오류', e); }
+
   // 대상 교실 select 채우기
   const bcClass = document.getElementById('bc-class');
   if (bcClass) {
@@ -2448,7 +2451,7 @@ async function fillBroadcastSelects() {
     (classrooms||[]).forEach(cls=>{
       const opt = document.createElement('option');
       opt.value = cls.id;
-      opt.textContent = (cls.emoji||'🏫')+' '+cls.name;
+      opt.textContent = (cls.emoji||'🏫') + ' ' + cls.name;
       bcClass.appendChild(opt);
     });
   }
@@ -2463,13 +2466,13 @@ function filterBcChildren() {
   const clsId = bcClass ? parseInt(bcClass.value)||0 : 0;
   const clsName = clsId ? ((classrooms||[]).find(c=>c.id===clsId)?.name||'') : '';
   const list = clsName
-    ? (students||[]).filter(s=>s.cls===clsName)
+    ? (students||[]).filter(s => s.cls === clsName)
     : (students||[]);
   bcChild.innerHTML = '<option value="">원아를 선택하세요</option>';
   list.forEach(s=>{
     const opt = document.createElement('option');
     opt.value = s.id;
-    opt.textContent = (s.emoji||'🧒')+' '+s.name+(s.cls?' ('+s.cls+')':'');
+    opt.textContent = (s.emoji||'🧒') + ' ' + s.name + (s.cls ? ' ('+s.cls+')' : '');
     bcChild.appendChild(opt);
   });
 }
