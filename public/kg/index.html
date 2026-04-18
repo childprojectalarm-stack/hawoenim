@@ -1971,9 +1971,8 @@ tbody td {
         <div class="form-row">
           <div class="form-group">
             <div class="form-label">소속 반</div>
-            <select class="form-select" id="new-stu-cls">
-              <option value="">반 선택</option>
-            </select>
+            <div class="form-input" id="new-stu-cls-display" style="background:var(--surface2);color:var(--text-hint);cursor:default;">반 미선택</div>
+            <input type="hidden" id="new-stu-cls" value="">
           </div>
           <div class="form-group">
             <div class="form-label">나이</div>
@@ -2327,11 +2326,14 @@ async function loadSettingsData(){
       sv('kg-phone',d.phone); sv('kg-addr',d.address);
     }
     const cls=await api('GET','/api/kg/classrooms');
-    if(cls?.data){ classrooms=cls.data; if(typeof renderClassroomsList==='function') renderClassroomsList(classrooms); }
+    if(cls?.data){
+      classrooms=cls.data;
+      if(typeof renderClassroomsList==='function') renderClassroomsList(classrooms);
+    }
     const stu=await api('GET','/api/kg/students');
     if(stu?.data){
       students=stu.data.map(s=>({id:s.id,name:s.name,cls:s.classroom_name,clsEmoji:s.classroom_emoji,age:s.age!=null?'만 '+s.age+'세':'',emoji:s.emoji||'🧒',family:[]}));
-      renderStudents();
+      if(typeof renderStudents==='function') renderStudents();
     }
     const bs=await api('GET','/api/kg/broadcast-settings');
     if(bs?.data&&typeof renderBroadcastSettings==='function') renderBroadcastSettings(bs.data);
@@ -2824,12 +2826,21 @@ function filterStudentsByCls(cls) {
 // ── 원생 추가 모달 ──
 function openAddStudentModal() {
   document.getElementById('new-stu-name').value = '';
-  renderClassroomsList(classrooms);
-  // 원생관리에서 선택된 반이 있으면 자동 설정
+  // stu-cls-filter에서 선택된 반을 hidden input과 display에 설정
   const filter = document.getElementById('stu-cls-filter');
+  const hiddenCls = document.getElementById('new-stu-cls');
+  const displayCls = document.getElementById('new-stu-cls-display');
   if (filter && filter.value) {
-    const clsSel = document.getElementById('new-stu-cls');
-    if (clsSel) clsSel.value = filter.value;
+    const selCls = classrooms.find(c => String(c.id) === String(filter.value));
+    if (selCls && hiddenCls && displayCls) {
+      hiddenCls.value = selCls.id;
+      displayCls.textContent = (selCls.emoji||'🏫') + ' ' + selCls.name;
+      displayCls.style.color = 'var(--text)';
+    }
+  } else if (hiddenCls && displayCls) {
+    hiddenCls.value = '';
+    displayCls.textContent = '반 미선택';
+    displayCls.style.color = 'var(--text-hint)';
   }
   document.getElementById('modal-add-student').classList.add('show');
 }
