@@ -2493,6 +2493,42 @@ const pageTitles = {
   settings: '환경 설정'
 };
 
+function fillBroadcastSelects() {
+  // 대상 교실 select 채우기
+  const bcClass = document.getElementById('bc-class');
+  if (bcClass) {
+    bcClass.innerHTML = '<option value="">전체 교실</option>';
+    (classrooms || []).forEach(cls => {
+      const opt = document.createElement('option');
+      opt.value = cls.id;
+      opt.textContent = (cls.emoji || '🏫') + ' ' + cls.name;
+      bcClass.appendChild(opt);
+    });
+  }
+  // 원아 select 채우기
+  filterBcChildren();
+}
+
+function filterBcChildren() {
+  const bcClass = document.getElementById('bc-class');
+  const bcChild = document.getElementById('bc-child');
+  if (!bcChild) return;
+  const filterClsId = bcClass ? parseInt(bcClass.value) : 0;
+  const filterCls = filterClsId
+    ? (classrooms || []).find(c => c.id === filterClsId)?.name || ''
+    : '';
+  const filtered = filterCls
+    ? (students || []).filter(s => s.cls === filterCls)
+    : (students || []);
+  bcChild.innerHTML = '<option value="">원아를 선택하세요</option>';
+  filtered.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.emoji + ' ' + s.name + (s.cls ? ' (' + s.cls + ')' : '');
+    bcChild.appendChild(opt);
+  });
+}
+
 function showPage(id) {
   document.querySelectorAll('.content').forEach(function(el){ el.classList.remove('active'); });
   document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
@@ -2504,6 +2540,7 @@ function showPage(id) {
   if(id==='classrooms') setTimeout(function(){if(typeof loadClassroomsData==='function')loadClassroomsData();},50);
   if(id==='log') setTimeout(function(){if(typeof loadBroadcastLogs==='function')loadBroadcastLogs();},50);
   if(id==='settings') setTimeout(function(){if(typeof loadSettingsData==='function')loadSettingsData();},50);
+  if (name === 'broadcast') fillBroadcastSelects();
 }
 
 // nav-item active 정확히 설정
