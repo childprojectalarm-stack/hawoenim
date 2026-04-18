@@ -2673,35 +2673,30 @@ function saveKgInfo() {
 }
 
 // ── 반 추가 ──
+function deleteClassroom(id) {
+  api('DELETE', '/api/kg/classrooms/' + id).then(res => {
+    if (!res || !res.success) { showToast(res?.message||'반 삭제 실패', '❌'); return; }
+    classrooms = classrooms.filter(c => c.id !== id);
+    renderClassroomsList(classrooms);
+    showToast('반이 삭제되었습니다', '✅');
+  });
+}
+
 function addClass() {
-  const name = document.getElementById('cls-name-input').value.trim();
-  const emoji = document.getElementById('cls-emoji-input').value.trim() || '🏫';
+  const name    = document.getElementById('cls-name-input').value.trim();
+  const emoji   = document.getElementById('cls-emoji-input').value.trim() || '🏫';
   const teacher = document.getElementById('cls-teacher-input').value.trim();
   if (!name) { showToast('반 이름을 입력해주세요', '⚠️'); return; }
-  const list = document.getElementById('cls-list');
-  const card = document.createElement('div');
-  card.className = 'item-card';
-  card.dataset.cls = name;
-  card.innerHTML = `
-    <div class="item-card-icon">${emoji}</div>
-    <div class="item-card-info">
-      <div class="item-card-name">${emoji} ${name}</div>
-      <div class="item-card-sub">담임: ${teacher || '미지정'} · 원생 0명</div>
-    </div>
-    <div class="item-card-actions">
-      <button class="btn-sm btn-sm-primary" onclick="showPage('settings')">원생보기</button>
-      <button class="btn-sm btn-sm-red" onclick="removeItem(this)">삭제</button>
-    </div>`;
-  list.appendChild(card);
-  // 원생 선택 셀렉트에도 추가
-  const sel = document.getElementById('stu-cls-filter');
-  const opt = document.createElement('option');
-  opt.value = name; opt.textContent = `${emoji} ${name}`;
-  sel.appendChild(opt);
-  document.getElementById('cls-name-input').value = '';
-  document.getElementById('cls-emoji-input').value = '';
-  document.getElementById('cls-teacher-input').value = '';
-  showToast(`${emoji} ${name} 등록 완료`, '✅');
+  api('POST', '/api/kg/classrooms', { name, emoji, teacher }).then(res => {
+    if (!res || !res.success) { showToast(res?.message||'반 추가 실패', '❌'); return; }
+    const newCls = { id: res.id, name, emoji, teacher };
+    classrooms.push(newCls);
+    renderClassroomsList(classrooms);
+    document.getElementById('cls-name-input').value = '';
+    document.getElementById('cls-emoji-input').value = '';
+    document.getElementById('cls-teacher-input').value = '';
+    showToast(emoji + ' ' + name + ' 등록 완료', '✅');
+  });
 }
 
 // ── 항목 삭제 ──
@@ -2830,6 +2825,12 @@ function filterStudentsByCls(cls) {
 function openAddStudentModal() {
   document.getElementById('new-stu-name').value = '';
   renderClassroomsList(classrooms);
+  // 원생관리에서 선택된 반이 있으면 자동 설정
+  const filter = document.getElementById('stu-cls-filter');
+  if (filter && filter.value) {
+    const clsSel = document.getElementById('new-stu-cls');
+    if (clsSel) clsSel.value = filter.value;
+  }
   document.getElementById('modal-add-student').classList.add('show');
 }
 
