@@ -2796,7 +2796,7 @@ function toggleFamilyView(stuId, btn) {
           +'<span style="font-size:11px;color:var(--text-hint);">'+(relMap[m.relation]||m.relation||'가족')+'</span>'
           +'<span style="font-weight:600;">'+m.name+'</span>'
           +'<span style="color:var(--text-hint);">'+m.phone+'</span>'
-          +'<span style="font-size:11px;padding:2px 6px;background:var(--primary);color:#fff;border-radius:4px;">'+(m.notify==='always'?'항상알림':m.notify==='reserve'?'예약시알림':'알림끔')+'</span>'
+          +'<span style="font-size:11px;padding:2px 6px;background:var(--primary);color:#fff;border-radius:4px;">'+(m.notify_type||m.notify||'예약 알림 수신')+'</span>'
           +'<button onclick="deleteFamilyMember('+m.id+','+stuId+')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:12px;">✕</button>'
           +'</div>'
         ).join('')
@@ -2822,7 +2822,7 @@ function deleteFamilyMember(famId, stuId) {
           +'<span style="font-size:11px;color:var(--text-hint);">'+(relMap[m.relation]||m.relation||'가족')+'</span>'
           +'<span style="font-weight:600;">'+m.name+'</span>'
           +'<span style="color:var(--text-hint);">'+m.phone+'</span>'
-          +'<span style="font-size:11px;padding:2px 6px;background:var(--primary);color:#fff;border-radius:4px;">'+(m.notify==='always'?'항상알림':m.notify==='reserve'?'예약시알림':'알림끔')+'</span>'
+          +'<span style="font-size:11px;padding:2px 6px;background:var(--primary);color:#fff;border-radius:4px;">'+(m.notify_type||m.notify||'예약 알림 수신')+'</span>'
           +'<button onclick="deleteFamilyMember('+m.id+','+stuId+')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:12px;">✕</button>'
           +'</div>'
         ).join('')+'</div>';
