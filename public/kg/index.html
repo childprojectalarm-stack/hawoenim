@@ -2868,7 +2868,7 @@ function renderStudents() {
       +'<button class="btn-sm btn-sm-primary" onclick="openAddFamilyModal('+s.id+')">가족추가</button>'
       +'<button class="btn-sm btn-sm-red" onclick="deleteStudent('+s.id+')">삭제</button>'
       +'</div>'
-      +'<div id="family-panel-'+s.id+'" style="display:none;width:100%;margin-top:8px;padding:8px 12px;background:var(--surface2);border-radius:8px;font-size:13px;"></div>'
+      +'<div id="family-panel-'+s.id+'" style="display:none;width:100%;flex-basis:100%;order:99;margin-top:8px;padding:8px 12px;background:var(--surface2);border-radius:8px;font-size:13px;"></div>'
       +'</div>';
   }).join('');
 }
@@ -2977,15 +2977,27 @@ function addFamilyMember() {
   const phone  = document.getElementById('fam-phone').value.trim();
   const notify = document.getElementById('fam-notify').value;
   if (!name || !phone) { showToast('이름과 연락처를 입력해주세요', '⚠️'); return; }
-  const stu = students.find(s => s.id === currentStudentId);
-  stu.family.push({ name, rel, phone, notify });
-  closeModal('modal-add-family');
-  renderStudents();
-  setTimeout(() => {
+  api('POST', '/api/kg/family', {
+    student_id: currentStudentId,
+    name, relation: rel, phone, notify
+  }).then(res => {
+    if (!res || !res.success) { showToast(res?.message || '가족 추가 실패', '❌'); return; }
+    // 로컬 students 배열도 갱신
+    const stu = students.find(s => s.id === currentStudentId);
+    if (stu) {
+      if (!stu.family) stu.family = [];
+      stu.family.push({ id: res.id, name, relation: rel, phone, notify });
+    }
+    closeModal('modal-add-family');
+    showToast(name + ' 가족이 등록되었습니다', '✅');
+    // 가족 패널이 열려있으면 새로고침
     const panel = document.getElementById('family-panel-' + currentStudentId);
-    if (panel) panel.classList.add('open');
-  }, 50);
-  showToast(`${name} 가족 등록 완료`, '✅', `${stu.name}의 ${rel}`);
+    if (panel && panel.style.display !== 'none') {
+      const btn = document.querySelector('[data-id="' + currentStudentId + '"] .btn-sm-primary');
+      toggleFamilyView(currentStudentId, btn);
+      toggleFamilyView(currentStudentId, btn);
+    }
+  });
 }
 
 function closeModal(id) {
