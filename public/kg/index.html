@@ -2770,6 +2770,67 @@ function renderClassroomsList(clsList) {
   });
 }
 
+function toggleFamilyView(stuId, btn) {
+  const panel = document.getElementById('family-panel-'+stuId);
+  if (!panel) return;
+  if (panel.style.display !== 'none') {
+    panel.style.display = 'none';
+    btn.textContent = '👨‍👩‍👧 가족보기';
+    return;
+  }
+  // 로딩
+  panel.style.display = 'block';
+  panel.innerHTML = '<span style="color:var(--text-hint)">로딩 중...</span>';
+  btn.textContent = '👨‍👩‍👧 가족닫기';
+  api('GET', '/api/kg/students/'+stuId+'/family').then(res=>{
+    if (!res || !res.success) { panel.innerHTML = '<span style="color:var(--red)">로드 실패</span>'; return; }
+    const members = res.data || [];
+    if (members.length === 0) {
+      panel.innerHTML = '<span style="color:var(--text-hint)">등록된 가족이 없습니다</span>';
+      return;
+    }
+    const relMap = {mom:'어머니',dad:'아버지',grand:'조부모',other:'기타'};
+    panel.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:8px;">'
+      + members.map(m =>
+          '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--surface);border-radius:6px;border:1px solid var(--border);">'
+          +'<span style="font-size:11px;color:var(--text-hint);">'+(relMap[m.relation]||m.relation||'가족')+'</span>'
+          +'<span style="font-weight:600;">'+m.name+'</span>'
+          +'<span style="color:var(--text-hint);">'+m.phone+'</span>'
+          +'<span style="font-size:11px;padding:2px 6px;background:var(--primary);color:#fff;border-radius:4px;">'+(m.notify==='always'?'항상알림':m.notify==='reserve'?'예약시알림':'알림끔')+'</span>'
+          +'<button onclick="deleteFamilyMember('+m.id+','+stuId+')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:12px;">✕</button>'
+          +'</div>'
+        ).join('')
+      +'</div>';
+  });
+}
+
+function deleteFamilyMember(famId, stuId) {
+  if (!confirm('가족 정보를 삭제하시겠습니까?')) return;
+  api('DELETE', '/api/kg/family/'+famId).then(res=>{
+    if (!res || !res.success) { showToast(res?.message||'삭제 실패','❌'); return; }
+    showToast('삭제됐습니다','✅');
+    // 패널 새로고침
+    const btn = document.querySelector('[data-id="'+stuId+'"] .btn-sm-primary');
+    const panel = document.getElementById('family-panel-'+stuId);
+    if(panel && panel.style.display !== 'none') {
+      api('GET','/api/kg/students/'+stuId+'/family').then(res2=>{
+        const members = res2?.data||[];
+        if(members.length===0){panel.innerHTML='<span style="color:var(--text-hint)">등록된 가족이 없습니다</span>';return;}
+        const relMap={mom:'어머니',dad:'아버지',grand:'조부모',other:'기타'};
+        panel.innerHTML='<div style="display:flex;flex-wrap:wrap;gap:8px;">'+members.map(m=>
+          '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--surface);border-radius:6px;border:1px solid var(--border);">'
+          +'<span style="font-size:11px;color:var(--text-hint);">'+(relMap[m.relation]||m.relation||'가족')+'</span>'
+          +'<span style="font-weight:600;">'+m.name+'</span>'
+          +'<span style="color:var(--text-hint);">'+m.phone+'</span>'
+          +'<span style="font-size:11px;padding:2px 6px;background:var(--primary);color:#fff;border-radius:4px;">'+(m.notify==='always'?'항상알림':m.notify==='reserve'?'예약시알림':'알림끔')+'</span>'
+          +'<button onclick="deleteFamilyMember('+m.id+','+stuId+')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:12px;">✕</button>'
+          +'</div>'
+        ).join('')+'</div>';
+      });
+    }
+  });
+}
+
 function deleteStudent(id) {
   if (!confirm('원생을 삭제하시겠습니까?')) return;
   api('DELETE', '/api/kg/students/' + id).then(res => {
@@ -2784,7 +2845,6 @@ function renderStudents() {
   const filterVal = document.getElementById('stu-cls-filter').value;
   const list = document.getElementById('stu-list');
   if (!list) return;
-  // filterVal이 비어있으면 전체, 있으면 classroom id로 매핑해서 반 이름으로 필터
   const filterCls = filterVal
     ? (classrooms.find(c => String(c.id) === String(filterVal))?.name || '')
     : '';
@@ -2804,9 +2864,11 @@ function renderStudents() {
       +'<div class="item-card-sub">'+(clsLabel||'')+(s.age?' · '+s.age:'')+'</div>'
       +'</div>'
       +'<div class="item-card-actions">'
+      +'<button class="btn-sm btn-sm-primary" onclick="toggleFamilyView('+s.id+', this)">👨‍👩‍👧 가족보기</button>'
       +'<button class="btn-sm btn-sm-primary" onclick="openAddFamilyModal('+s.id+')">가족추가</button>'
       +'<button class="btn-sm btn-sm-red" onclick="deleteStudent('+s.id+')">삭제</button>'
       +'</div>'
+      +'<div id="family-panel-'+s.id+'" style="display:none;width:100%;margin-top:8px;padding:8px 12px;background:var(--surface2);border-radius:8px;font-size:13px;"></div>'
       +'</div>';
   }).join('');
 }
