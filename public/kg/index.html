@@ -2481,14 +2481,23 @@ async function showPage(id) {
   document.querySelectorAll('.content').forEach(function(el){ el.classList.remove('active'); });
   document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
   var target = document.getElementById('page-'+id);
-  if(target) target.classList.add('active');
-  if(typeof pageTitles!=='undefined'&&pageTitles[id]) document.getElementById('page-title').textContent=pageTitles[id];
-  document.querySelectorAll('.nav-item').forEach(function(n){ if((n.getAttribute('onclick')||'').indexOf("'"+id+"'")>=0) n.classList.add('active'); });
-  if(id==='dashboard'||id==='reservations') setTimeout(loadDashboardData,50);
-  if(id==='classrooms') setTimeout(function(){if(typeof loadClassroomsData==='function')loadClassroomsData();},50);
-  if(id==='log') setTimeout(function(){if(typeof loadBroadcastLogs==='function')loadBroadcastLogs();},50);
-  if(id==='settings') setTimeout(function(){if(typeof loadSettingsData==='function')loadSettingsData();},50);
-  if (name === 'broadcast') await fillBroadcastSelects();
+  if (target) target.classList.add('active');
+  var navBtn = document.querySelector('[onclick*="showPage(\'' + id + '\')"]');
+  if (navBtn) navBtn.classList.add('active');
+  document.getElementById('page-title').textContent = {
+    'dashboard':'대시보드','reservations':'예약 관리',
+    'broadcast':'수동 방송','classrooms':'교실 현황',
+    'log':'방송 로그','settings':'환경 설정'
+  }[id] || id;
+  if (id === 'settings') {
+    if (typeof loadSettingsData === 'function') loadSettingsData();
+  }
+  if (id === 'dashboard') {
+    if (typeof loadDashboardData === 'function') loadDashboardData();
+  }
+  if (id === 'broadcast') {
+    await fillBroadcastSelects();
+  }
 }
 
 // nav-item active 정확히 설정
