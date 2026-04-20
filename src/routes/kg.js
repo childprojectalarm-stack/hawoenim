@@ -105,6 +105,14 @@ router.put('/students/:id', (req, res) => {
   res.json({ success: true });
 });
 
+router.get('/students/:id/family', (req, res) => {
+  const kgId = getKgId(req);
+  const stu = db.prepare('SELECT s.id FROM students s JOIN classrooms c ON c.id=s.classroom_id WHERE s.id=? AND c.kindergarten_id=?').get(req.params.id, kgId);
+  if (!stu) return res.status(403).json({ success: false, message: '접근 권한이 없습니다.' });
+  const members = db.prepare('SELECT * FROM family_members WHERE student_id=? ORDER BY id').all(req.params.id);
+  res.json({ success: true, data: members });
+});
+
 router.delete('/students/:id', (req, res) => {
   const kgId = getKgId(req);
   const stu = db.prepare('SELECT s.id FROM students s JOIN classrooms c ON c.id=s.classroom_id WHERE s.id=? AND c.kindergarten_id=?').get(req.params.id, kgId);
