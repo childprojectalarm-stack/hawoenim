@@ -2566,17 +2566,18 @@ function reSchedule(btn, name, cls) {
 
 // ── 수동 방송 미리보기 ──
 function updatePreview() {
-  const child = document.getElementById('bc-child').value;
-  const msg = document.getElementById('bc-msg').value;
-  const cls = document.getElementById('bc-class').value;
-  if (!child) {
-    document.getElementById('bc-preview').textContent = '원아를 선택하면 방송 내용이 미리보기에 표시됩니다.';
-    return;
+  const child = document.getElementById('bc-child');
+  const msg   = document.getElementById('bc-msg');
+  const prev  = document.getElementById('bc-preview');
+  if (!prev) return;
+  const childOpt = child ? child.options[child.selectedIndex] : null;
+  const childName = childOpt && childOpt.value ? childOpt.text.replace(/^[^\s]+\s/, '').replace(/\s*\(.*\)/, '') : '';
+  const msgText = msg ? msg.value : '';
+  if (childName) {
+    prev.textContent = msgText.replace(/{이름}/g, childName).replace(/{반}/g, '') || childName + ' 하원 준비해 주세요';
+  } else {
+    prev.textContent = '원아를 선택하면 방송 내용이 미리보기에 표시됩니다.';
   }
-  const name = child.split(' ')[0];
-  document.getElementById('bc-preview').innerHTML =
-    `<strong style="color:var(--text)">"${name} ${msg}"</strong><br>
-     <span style="font-size:11px;color:var(--text-hint)">▶ ${cls} 스피커로 송출</span>`;
 }
 
 let manualCount = 0;
@@ -3263,7 +3264,7 @@ function showToast(title, icon = '✅', sub = '') {
             <div class="form-row">
               <div class="form-group">
                 <div class="form-label">대상 교실</div>
-                <select class="form-select" id="bc-class" onchange="updatePreview()"></select>
+                <select class="form-select" id="bc-class" onchange="filterBcChildren()"></select>
               </div>
               <div class="form-group">
                 <div class="form-label">원아 선택</div>
