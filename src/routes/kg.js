@@ -141,6 +141,15 @@ router.put('/family/:id', (req, res) => {
   res.json({ success: true });
 });
 
+router.post('/family', (req, res) => {
+  const kgId = getKgId(req);
+  const { student_id, name, relation, phone, notify } = req.body;
+  const stu = db.prepare('SELECT s.id FROM students s JOIN classrooms c ON c.id=s.classroom_id WHERE s.id=? AND c.kindergarten_id=?').get(student_id, kgId);
+  if (!stu) return res.status(403).json({ success: false, message: '접근 권한이 없습니다.' });
+  const result = db.prepare('INSERT INTO family_members (student_id, name, relation, phone, notify) VALUES (?,?,?,?,?)').run(student_id, name, relation||'other', phone, notify||'always');
+  res.json({ success: true, id: result.lastInsertRowid });
+});
+
 router.delete('/family/:id', (req, res) => {
   db.prepare('DELETE FROM family_members WHERE id=?').run(req.params.id);
   res.json({ success: true });
