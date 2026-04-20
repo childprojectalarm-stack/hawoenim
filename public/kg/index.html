@@ -2469,10 +2469,17 @@ function filterBcChildren() {
     ? (students||[]).filter(s => s.cls === clsName)
     : (students||[]);
   bcChild.innerHTML = '<option value="">원아를 선택하세요</option>';
+  if (list.length === 0 && clsName) {
+    const opt = document.createElement('option');
+    opt.disabled = true;
+    opt.textContent = '등록된 원아가 없습니다';
+    bcChild.appendChild(opt);
+    return;
+  }
   list.forEach(s=>{
     const opt = document.createElement('option');
     opt.value = s.id;
-    opt.textContent = (s.emoji||'🧒') + ' ' + s.name + (s.cls ? ' ('+s.cls+')' : '');
+    opt.textContent = (s.emoji||'🧒')+' '+s.name+(s.cls?' ('+s.cls+')':'');
     bcChild.appendChild(opt);
   });
 }
