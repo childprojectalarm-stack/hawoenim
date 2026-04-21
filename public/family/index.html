@@ -198,7 +198,7 @@ document.getElementById('fp').addEventListener('keydown',function(e){if(e.key===
 document.getElementById('fn').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 
 async function doLogin(){
-  var ph=document.getElementById('fp').value.trim(),nm=document.getElementById('fn').value.trim();
+  var ph=document.getElementById('fp').value.trim().replace(/[^0-9]/g,''),nm=document.getElementById('fn').value.trim();
   var eb=document.getElementById('eb'),btn=document.getElementById('lbtn');
   eb.classList.remove('show');
   if(!ph){eb.textContent='전화번호를 입력해주세요.';eb.classList.add('show');return;}
