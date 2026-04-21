@@ -256,17 +256,17 @@ function renderRes(r){
   el.innerHTML='<div class="rc"><div class="rtr"><div><div class="rtm">'+r.pickup_time+'</div><div style="font-size:12px;color:var(--sub);margin-top:4px">하원 예정 시간</div></div><span class="rb '+(sc[r.status]||'rb0')+'">'+(sl[r.status]||r.status)+'</span></div><div class="rdr"><span>📅</span><span>'+r.reserve_date+' (오늘)</span></div>'+cb+'</div>';
 }
 
-function buildGrid(tr){
-  var sec=document.getElementById('tss');
-  if(tr&&tr.status!=='cancelled'){sec.style.display='none';return;}
-  sec.style.display='block';
-  var times=['13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00'];
-  var n=new Date(),nm=n.getHours()*60+n.getMinutes();
-  document.getElementById('tgd').innerHTML=times.map(function(t){
-    var p=t.split(':'),h=parseInt(p[0]),m=parseInt(p[1]),past=(h*60+m)<=nm;
-    return '<button class="tb'+(past?' past':'')+'" onclick="selT('"+t+"',this)"'+(past?' disabled':'')+'>'+t+'</button>';
+function buildGrid(times, past) {
+  var el = document.getElementById('tgd');
+  if (!el) return;
+  el.innerHTML = times.map(function(t) {
+    var cls = 'tb' + (past ? ' past' : '');
+    var dis = past ? ' disabled' : '';
+    return '<button class="' + cls + '" data-time="' + t + '"' + dis + '>' + t + '</button>';
   }).join('');
-  sel=null;document.getElementById('rbtn').disabled=true;
+  Array.from(el.querySelectorAll('button:not([disabled])')).forEach(function(btn) {
+    btn.addEventListener('click', function() { selT(this.dataset.time, this); });
+  });
 }
 
 function selT(t,btn){document.querySelectorAll('.tb').forEach(function(b){b.classList.remove('sel');});btn.classList.add('sel');sel=t;document.getElementById('rbtn').disabled=false;}
