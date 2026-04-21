@@ -264,7 +264,7 @@ function buildGrid(tr){
   var n=new Date(),nm=n.getHours()*60+n.getMinutes();
   document.getElementById('tgd').innerHTML=times.map(function(t){
     var p=t.split(':'),h=parseInt(p[0]),m=parseInt(p[1]),past=(h*60+m)<=nm;
-    return '<button class="tb'+(past?' past':'')+'" onclick="selT(''+t+'',this)"'+(past?' disabled':'')+'>'+t+'</button>';
+    return '<button class="tb'+(past?' past':'')+'" onclick="selT('"+t+"',this)"'+(past?' disabled':'')+'>'+t+'</button>';
   }).join('');
   sel=null;document.getElementById('rbtn').disabled=true;
 }
