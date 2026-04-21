@@ -143,12 +143,14 @@ router.put('/family/:id', (req, res) => {
 
 router.post('/family', (req, res) => {
   const kgId = getKgId(req);
-  const { student_id, name, relation, phone, notify } = req.body;
+  const { student_id, name, relation, phone: rawPhone, notify } = req.body;
+  // 전화번호 하이픈/공백 제거 후 저장 (로그인 시 매칭을 위해)
+  const phone = (rawPhone || '').split('-').join('').split(' ').join('');
   const stu = db.prepare('SELECT s.id FROM students s JOIN classrooms c ON c.id=s.classroom_id WHERE s.id=? AND c.kindergarten_id=?').get(student_id, kgId);
   if (!stu) return res.status(403).json({ success: false, message: '접근 권한이 없습니다.' });
   const result = db.prepare('INSERT INTO family_members (student_id, name, relation, phone, notify_type) VALUES (?,?,?,?,?)').run(student_id, name, relation||'other', phone, notify||'예약 알림 수신');
   res.json({ success: true, id: result.lastInsertRowid });
-});
+}););
 
 router.delete('/family/:id', (req, res) => {
   db.prepare('DELETE FROM family_members WHERE id=?').run(req.params.id);
