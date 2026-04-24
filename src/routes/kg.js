@@ -150,7 +150,7 @@ router.post('/family', (req, res) => {
   if (!stu) return res.status(403).json({ success: false, message: '접근 권한이 없습니다.' });
   const result = db.prepare('INSERT INTO family_members (student_id, name, relation, phone, notify_type) VALUES (?,?,?,?,?)').run(student_id, name, relation||'other', phone, notify||'예약 알림 수신');
   res.json({ success: true, id: result.lastInsertRowid });
-}););
+});
 
 router.delete('/family/:id', (req, res) => {
   db.prepare('DELETE FROM family_members WHERE id=?').run(req.params.id);
