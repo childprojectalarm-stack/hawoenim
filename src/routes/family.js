@@ -30,7 +30,13 @@ router.get('/me', auth, familyAuth, (req, res) => {
   const today = new Date().toISOString().slice(0,10);
   const family = db.prepare(`SELECT f.*, s.name as student_name, s.emoji as student_emoji, s.classroom_id, c.name as classroom_name, c.emoji as classroom_emoji, k.name as kindergarten_name FROM family_members f JOIN students s ON s.id=f.student_id JOIN classrooms c ON c.id=s.classroom_id JOIN kindergartens k ON k.id=c.kindergarten_id WHERE f.id=?`).get(req.user.id);
   const todayReservation = db.prepare('SELECT * FROM reservations WHERE student_id=? AND reserve_date=?').get(family.student_id, today);
-  res.json({ success: true, family, todayReservation });
+  // 방송설정에서 하원 가능 시간 조회
+  const bsRow = db.prepare(`SELECT times FROM broadcast_settings WHERE kindergarten_id=? AND (classroom_id=? OR classroom_id IS NULL) ORDER BY classroom_id DESC LIMIT 1`).get(family.kindergarten_id, family.classroom_id);
+  let availableTimes = [];
+  if (bsRow && bsRow.times) {
+    try { availableTimes = JSON.parse(bsRow.times); } catch(e) {}
+  }
+  res.json({ success: true, family, todayReservation, availableTimes });
 });
 
 router.get('/reservations', auth, familyAuth, (req, res) => {
