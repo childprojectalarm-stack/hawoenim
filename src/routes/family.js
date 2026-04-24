@@ -16,9 +16,9 @@ router.post('/login', (req, res) => {
   const phone = rawPhone.replace(/[\s\-]/g, '');
   let family;
   if (student_name) {
-    family = db.prepare(`SELECT f.*, s.name as student_name, s.id as student_id, s.classroom_id, c.name as classroom_name, k.id as kindergarten_id, k.name as kindergarten_name FROM family_members f JOIN students s ON s.id=f.student_id JOIN classrooms c ON c.id=s.classroom_id JOIN kindergartens k ON k.id=c.kindergarten_id WHERE f.phone=? AND s.name=?`).get(phone, student_name);
+    family = db.prepare(`SELECT f.*, s.name as student_name, s.id as student_id, s.classroom_id, c.name as classroom_name, k.id as kindergarten_id, k.name as kindergarten_name FROM family_members f JOIN students s ON s.id=f.student_id JOIN classrooms c ON c.id=s.classroom_id JOIN kindergartens k ON k.id=c.kindergarten_id WHERE REPLACE(REPLACE(f.phone,'-',''),' ','')=? AND s.name=?`).get(phone, student_name);
   } else {
-    family = db.prepare(`SELECT f.*, s.name as student_name, s.id as student_id, s.classroom_id, c.name as classroom_name, k.id as kindergarten_id, k.name as kindergarten_name FROM family_members f JOIN students s ON s.id=f.student_id JOIN classrooms c ON c.id=s.classroom_id JOIN kindergartens k ON k.id=c.kindergarten_id WHERE f.phone=?`).get(phone);
+    family = db.prepare(`SELECT f.*, s.name as student_name, s.id as student_id, s.classroom_id, c.name as classroom_name, k.id as kindergarten_id, k.name as kindergarten_name FROM family_members f JOIN students s ON s.id=f.student_id JOIN classrooms c ON c.id=s.classroom_id JOIN kindergartens k ON k.id=c.kindergarten_id WHERE REPLACE(REPLACE(f.phone,'-',''),' ','')=?`).get(phone);
   }
   if (!family) return res.status(401).json({ success: false, message: '등록되지 않은 전화번호입니다. 유치원에 문의해 주세요.' });
   const jwt = require('jsonwebtoken');
