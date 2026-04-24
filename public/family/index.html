@@ -237,7 +237,7 @@ async function loadHome(){
   var d=await api('GET','/api/family/me');
   if(!d||!d.success)return;
   try{fam=Object.assign({},fam,d.family);localStorage.setItem('fw_f',JSON.stringify(fam));}catch(e){}
-  applyInfo();renderRes(d.todayReservation);buildGrid(d.todayReservation);
+  applyInfo();renderRes(d.todayReservation);buildGrid(d.availableTimes||[],d.todayReservation);
 }
 
 function renderRes(r){
@@ -256,15 +256,21 @@ function renderRes(r){
   el.innerHTML='<div class="rc"><div class="rtr"><div><div class="rtm">'+r.pickup_time+'</div><div style="font-size:12px;color:var(--sub);margin-top:4px">하원 예정 시간</div></div><span class="rb '+(sc[r.status]||'rb0')+'">'+(sl[r.status]||r.status)+'</span></div><div class="rdr"><span>📅</span><span>'+r.reserve_date+' (오늘)</span></div>'+cb+'</div>';
 }
 
-function buildGrid(times, past) {
+function buildGrid(times, todayRes) {
   var el = document.getElementById('tgd');
   if (!el) return;
+  if (!times || times.length === 0) {
+    el.innerHTML = '<div style="color:#aaa;font-size:13px;padding:8px 0;">설정된 하원 시간이 없습니다</div>';
+    return;
+  }
+  var reservedTime = todayRes ? todayRes.pickup_time : null;
   el.innerHTML = times.map(function(t) {
-    var cls = 'tb' + (past ? ' past' : '');
-    var dis = past ? ' disabled' : '';
+    var isPast = (reservedTime === t);
+    var cls = 'tb' + (isPast ? ' active' : '');
+    var dis = '';
     return '<button class="' + cls + '" data-time="' + t + '"' + dis + '>' + t + '</button>';
   }).join('');
-  Array.from(el.querySelectorAll('button:not([disabled])')).forEach(function(btn) {
+  Array.from(el.querySelectorAll('button')).forEach(function(btn) {
     btn.addEventListener('click', function() { selT(this.dataset.time, this); });
   });
 }
