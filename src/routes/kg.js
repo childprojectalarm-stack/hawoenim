@@ -216,15 +216,15 @@ router.get('/broadcast-settings', (req, res) => {
 
 router.put('/broadcast-settings', (req, res) => {
   const kgId = getKgId(req);
-  const { classroom_id, notice_minutes, default_ment } = req.body;
-  const existing = db.prepare('SELECT id FROM broadcast_settings WHERE kindergarten_id=? AND (classroom_id IS ? OR classroom_id=?)').get(kgId, classroom_id || null, classroom_id || null);
+  const { classroom_id, start, end, gap, times } = req.body;
+  const existing = db.prepare('SELECT id FROM broadcast_settings WHERE kindergarten_id=? AND classroom_id=?').get(kgId, classroom_id);
   if (existing) {
-    db.prepare("UPDATE broadcast_settings SET notice_minutes=?,default_ment=?,updated_at=datetime('now','localtime') WHERE id=?").run(notice_minutes, default_ment, existing.id);
+    db.prepare('UPDATE broadcast_settings SET start=?,end=?,gap=?,times=? WHERE kindergarten_id=? AND classroom_id=?').run(start, end, gap, times, kgId, classroom_id);
   } else {
-    db.prepare('INSERT INTO broadcast_settings (kindergarten_id,classroom_id,notice_minutes,default_ment) VALUES (?,?,?,?)').run(kgId, classroom_id || null, notice_minutes, default_ment);
+    db.prepare('INSERT INTO broadcast_settings (kindergarten_id,classroom_id,start,end,gap,times) VALUES (?,?,?,?,?,?)').run(kgId, classroom_id, start, end, gap, times);
   }
   res.json({ success: true });
-});
+}););
 
 // 유치원 정보 조회
 router.get('/kindergarten', (req, res) => {
