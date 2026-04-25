@@ -2189,62 +2189,73 @@ async function loadBroadcastLogs(){
   try{ var d=await api('GET','/api/kg/broadcast-logs'); if(d&&d.data&&typeof renderBroadcastLogs==='function') renderBroadcastLogs(d.data); }catch(e){}
 }
 function renderBroadcastSettings(data) {
-  const clsList = (data && data.classrooms) ? data.classrooms : (classrooms||[]);
-  const settings = (data && data.settings) ? data.settings : [];
-  const defaultMent = (data && data.defaultMent) || '{반} {이름} 학부모님, 하원 준비해 주세요';
-  const noticeMins  = (data && data.noticeMins) || 10;
+  const clsList = data.classrooms || [];
+  const settings = data.settings || {};
 
-  // 기본 멘트
-  const mentEl = document.getElementById('ment-default');
-  if(mentEl) mentEl.value = defaultMent;
-
-  // 반별 개별 알림음 패널 (bsr-cls-panels)
-  const bsrContainer = document.getElementById('bsr-cls-panels');
-  if(bsrContainer) {
-    if(clsList.length === 0) {
-      bsrContainer.innerHTML = '<div style="color:var(--text-hint);font-size:13px;padding:8px 0;">등록된 반이 없습니다.</div>';
+  // 반별 시간 설정 패널 생성
+  const bsrPanel = document.getElementById('bsr-cls-panels');
+  if (bsrPanel) {
+    if (clsList.length === 0) {
+      bsrPanel.innerHTML = '<div class="empty-hint">등록된 반이 없습니다</div>';
     } else {
-      bsrContainer.innerHTML = clsList.map((cls, i) => {
-        const key = 'cls'+(i+1);
-        const s = settings.find(x=>x.classroom_id===cls.id) || {};
-        const mins = s.notice_minutes || noticeMins;
-        return '<div class="bsr-cls-row">'
-          +'<div class="bsr-cls-name">'+(cls.emoji||'🏫')+' '+cls.name+'</div>'
-          +'<div id="bsr-sub-'+key+'" class="bsr-sub">'+(s.notice_minutes?'개별 설정 중':'기본 설정 사용')+'</div>'
-          +'<div class="bsr-control">'
-          +'<button class="bsr-btn" onclick="adjustBsr(\'' + key + '\',-1)">−</button>'
-          +'<div class="bsr-val" id="bsr-'+key+'">'+mins+'</div>'
-          +'<button class="bsr-btn" onclick="adjustBsr(\'' + key + '\',1)">+</button>'
-          +'<span style="font-size:11px;color:var(--text-hint)">분 전</span>'
-          +'</div></div>';
-      }).join('');
-    }
-  }
-
-  // 반별 개별 멘트 패널 (ment-cls-panels)
-  const mentContainer = document.getElementById('ment-cls-panels');
-  if(mentContainer) {
-    if(clsList.length === 0) {
-      mentContainer.innerHTML = '<div style="color:var(--text-hint);font-size:13px;padding:8px 0;">등록된 반이 없습니다.</div>';
-    } else {
-      mentContainer.innerHTML = clsList.map((cls, i) => {
-        const key = 'cls'+(i+1);
-        const s = settings.find(x=>x.classroom_id===cls.id) || {};
-        const ment = s.default_ment || '';
-        const checked = !!s.default_ment;
-        return '<div style="justify-content:space-between;margin-bottom:8px;">'
-          +'<div style="font-size:13px;font-weight:600;color:var(--text);">'+(cls.emoji||'🏫')+' '+cls.name+'</div>'
-          +'<div style="display:flex;gap:6px;align-items:center;">'
-          +'<label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-hint);cursor:pointer;">'
-          +'<input type="checkbox" id="ment-use-'+key+'" onchange="toggleClsMent(\'' + key + '\')" style="accent-color:var(--primary);"'+(checked?' checked':'')+'>'
-          +'개별 설정'
-          +'</label>'
+      bsrPanel.innerHTML = clsList.map(cls => {
+        const s = (settings[cls.id]) || {};
+        const start = s.start || '14:00';
+        const end   = s.end   || '17:00';
+        const gap   = s.gap   || 30;
+        const times = s.times ? JSON.parse(s.times) : [];
+        return '<div class="bsr-cls-row" style="margin-bottom:16px;padding:12px;background:var(--surface2);border-radius:8px;">'
+          +'<div class="bsr-cls-name" style="font-weight:700;margin-bottom:10px;">'+(cls.emoji||'🏫')+' '+cls.name+'</div>'
+          +'<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">'
+          +'<label style="font-size:12px;color:var(--text-hint);">시작</label>'
+          +'<input type="time" id="bs-start-'+cls.id+'" value="'+start+'" style="padding:4px 8px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;">'
+          +'<label style="font-size:12px;color:var(--text-hint);">종료</label>'
+          +'<input type="time" id="bs-end-'+cls.id+'" value="'+end+'" style="padding:4px 8px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;">'
+          +'<label style="font-size:12px;color:var(--text-hint);">간격</label>'
+          +'<select id="bs-gap-'+cls.id+'" style="padding:4px 8px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;">'
+          +'<option value="10"'+(gap==10?' selected':'')+'>10분</option>'
+          +'<option value="15"'+(gap==15?' selected':'')+'>15분</option>'
+          +'<option value="20"'+(gap==20?' selected':'')+'>20분</option>'
+          +'<option value="30"'+(gap==30?' selected':'')+'>30분</option>'
+          +'<option value="60"'+(gap==60?' selected':'')+'>1시간</option>'
+          +'</select>'
+          +'<button class="btn-sm btn-sm-primary" onclick="saveBroadcastTimes('+cls.id+')">저장</button>'
           +'</div>'
-          +'<input class="form-input" id="ment-'+key+'" placeholder="기본 멘트 사용 중" value="'+ment+'" '+(checked?'':'disabled ')+'style="margin-top:4px;">'
+          +'<div id="bs-preview-'+cls.id+'" style="font-size:12px;color:var(--text-hint);">'
+          +(times.length>0 ? '현재: '+times.join(', ') : '저장된 시간 없음')
+          +'</div>'
           +'</div>';
       }).join('');
     }
   }
+}
+
+function saveBroadcastTimes(clsId) {
+  const start = document.getElementById('bs-start-'+clsId)?.value;
+  const end   = document.getElementById('bs-end-'+clsId)?.value;
+  const gap   = parseInt(document.getElementById('bs-gap-'+clsId)?.value) || 30;
+  if (!start || !end) { showToast('시작/종료 시간을 입력하세요','⚠️'); return; }
+
+  // 시간 슬롯 생성
+  const times = [];
+  let [sh,sm] = start.split(':').map(Number);
+  const [eh,em] = end.split(':').map(Number);
+  let cur = sh*60+sm;
+  const endMin = eh*60+em;
+  while(cur <= endMin) {
+    const hh = String(Math.floor(cur/60)).padStart(2,'0');
+    const mm = String(cur%60).padStart(2,'0');
+    times.push(hh+':'+mm);
+    cur += gap;
+  }
+
+  api('PUT','/api/kg/broadcast-settings', {classroom_id: clsId, start, end, gap, times: JSON.stringify(times)})
+  .then(res=>{
+    if(!res||!res.success){showToast(res?.message||'저장 실패','❌');return;}
+    showToast('시간 설정 저장됐습니다 ('+times.length+'개)','✅');
+    const prev = document.getElementById('bs-preview-'+clsId);
+    if(prev) prev.textContent = '현재: '+times.join(', ');
+  });
 }
 
 async function loadSettingsData(){
